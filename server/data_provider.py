@@ -1,7 +1,7 @@
 import re
 import time
 import os
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 import requests
 
@@ -192,3 +192,78 @@ def get_limit_status(symbol: str) -> Dict[str, Any]:
         "is_limit_down": bool(is_down),
         "limit_rate": rate,
     }
+
+
+def get_limit_up_pool(date: Optional[str] = None) -> List[Dict[str, Any]]:
+    base = os.environ.get("THIRD_PARTY_ZTGC_BASE_URL") or "https://api.biyingapi.com/hslt/ztgc"
+    api_key = os.environ.get("THIRD_PARTY_API_KEY")
+    if not api_key:
+        raise ValueError("缺少第三方licence(THIRD_PARTY_API_KEY)")
+    if not date:
+        date = time.strftime("%Y-%m-%d", time.localtime())
+    url = base.rstrip("/") + "/" + date + "/" + api_key
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json, */*;q=0.1",
+        "Connection": "keep-alive",
+        "Referer": "https://api.biyingapi.com/",
+    }
+    resp = requests.get(url, headers=headers, timeout=10)
+    if resp.status_code != 200:
+        raise ValueError("涨停股池接口请求失败")
+    data = resp.json()
+    if not isinstance(data, list):
+        raise ValueError("涨停股池返回格式错误")
+    items: List[Dict[str, Any]] = []
+    for it in data:
+        dm = str(it.get("dm") or "")
+        mc = str(it.get("mc") or "")
+        price = float(it.get("p") or 0.0)
+        zf = float(it.get("zf") or 0.0)
+        cje = float(it.get("cje") or 0.0)
+        lt = float(it.get("lt") or 0.0)
+        zsz = float(it.get("zsz") or 0.0)
+        hs = float(it.get("hs") or 0.0)
+        lbc = int(it.get("lbc") or 0)
+        fbt_raw = str(it.get("fbt") or "")
+        lbt_raw = str(it.get("lbt") or "")
+        def _fmt_hms(s: str) -> str:
+            s = s.strip()
+            if len(s) == 6 and s.isdigit():
+                return f"{s[0:2]}:{s[2:4]}:{s[4:6]}"
+            return s
+        fbt = _fmt_hms(fbt_raw)
+        lbt = _fmt_hms(lbt_raw)
+        zj = float(it.get("zj") or 0.0)
+        zbc = int(it.get("zbc") or 0)
+        tj = str(it.get("tj") or "")
+        items.append({
+            "code": dm,
+            "name": mc,
+            "price": _round_price(price),
+            "change_percent": _round_price(zf),
+            "amount": _round_price(cje),
+            "float_market_cap": _round_price(lt),
+            "total_market_cap": _round_price(zsz),
+            "turnover_rate": _round_price(hs),
+            "consecutive_boards": lbc,
+            "first_board_time": fbt,
+            "last_board_time": lbt,
+            "seal_funds": _round_price(zj),
+            "broken_boards": zbc,
+            "stat": tj,
+        })
+    return items
+
+from .services.quote_service import get_quote as __svc_get_quote
+from .services.limit_service import get_limit_status as __svc_get_limit_status
+from .services.pool_service import get_limit_up_pool as __svc_get_limit_up_pool
+
+def get_quote(symbol: str) -> Dict[str, Any]:
+    return __svc_get_quote(symbol)
+
+def get_limit_status(symbol: str) -> Dict[str, Any]:
+    return __svc_get_limit_status(symbol)
+
+def get_limit_up_pool(date: Optional[str] = None) -> List[Dict[str, Any]]:
+    return __svc_get_limit_up_pool(date)

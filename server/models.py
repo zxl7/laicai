@@ -28,3 +28,19 @@ class LimitStatusResponse(BaseModel):
 class ErrorResponse(BaseModel):
     error: str
 
+
+class LimitUpItem(BaseModel):
+    code: str
+    name: str
+    price: float
+    change_percent: float
+    amount: float
+    float_market_cap: float
+    total_market_cap: float
+    turnover_rate: float
+    consecutive_boards: int
+    first_board_time: str
+    last_board_time: str
+    seal_funds: float
+    broken_boards: int
+    stat: str

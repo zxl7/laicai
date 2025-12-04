@@ -52,14 +52,27 @@ export THIRD_PARTY_API_KEY="<你的 token>"
 
 ## 目录结构与代码位置
 - FastAPI 应用与端点：`server/app.py`
-  - 根路径与端点列表：`server/app.py:22`
+  - 根路径与端点列表：`server/app.py:24`
   - 行情查询：`server/app.py:27`
   - 涨跌停状态：`server/app.py:36`
-  - WebSocket 行情：`server/app.py:45`
-- 数据源与逻辑：`server/data_provider.py`
-  - 第三方 instrument 接入：`server/data_provider.py:112`
-  - 新浪行情解析：`server/data_provider.py:35`
-  - 代码/交易所格式转换：`server/data_provider.py:11`、`server/data_provider.py:33`
+  - 涨停股池：`server/app.py:45`
+  - WebSocket 行情：`server/app.py:54`
+- 适配层（对外统一接口）：`server/data_provider.py`
+  - 委托至业务层：`get_quote`、`get_limit_status`、`get_limit_up_pool`
+- 业务逻辑（services）
+  - 行情：`server/services/quote_service.py`
+  - 涨跌停：`server/services/limit_service.py`
+  - 涨停股池：`server/services/pool_service.py`
+- 公共方法（common）
+  - 代码归一化/交易所转换/价格保留/时间格式化/涨跌停比例：`server/common/utils.py`
+- 启动脚本：`server/start.sh`
+
+## API 文档（Apifox）
+- 打开 Apifox → 导入 OpenAPI → 地址：`http://localhost:8000/openapi.json`
+- 标签与说明：
+  - `pool`：涨停股池 `/limit-up-pool`
+  - `quote`：行情 `/quote`
+  - `status`：涨跌停状态 `/limit-status`
 
 ## 注意事项
 - 若出现 `uvicorn` 不在 PATH，可使用 `python3 -m uvicorn` 或通过 `.venv/bin/uvicorn`
