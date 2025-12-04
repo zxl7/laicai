@@ -12,6 +12,11 @@ python3 -m venv .venv
 .venv/bin/uvicorn server.app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
+或一键启动：
+```
+bash server/start.sh
+```
+
 若不使用虚拟环境，可直接：
 ```
 python3 -m pip install "fastapi==0.95.2" "pydantic==1.10.13" "uvicorn==0.22.0" "starlette==0.27.0" "requests"
