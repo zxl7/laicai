@@ -53,3 +53,22 @@ def format_hms(s: str) -> str:
     if len(s) == 6 and s.isdigit():
         return f"{s[0:2]}:{s[2:4]}:{s[4:6]}"
     return s
+
+
+def read_env_from_file(name: str) -> str:
+    import os
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    server_dir = os.path.dirname(base_dir)
+    env_path = os.path.join(server_dir, ".env")
+    try:
+        if os.path.exists(env_path):
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if line.startswith(name + "="):
+                        return line.split("=", 1)[1].strip()
+    except Exception:
+        pass
+    return ""

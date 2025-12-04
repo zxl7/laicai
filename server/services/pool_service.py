@@ -3,12 +3,24 @@ import requests
 import time
 from typing import Dict, Any, List, Optional
 
-from ..common.utils import round_price, format_hms
+from ..common.utils import round_price, format_hms, read_env_from_file
 
 
 def get_limit_up_pool(date: Optional[str] = None) -> List[Dict[str, Any]]:
     base = os.environ.get("THIRD_PARTY_ZTGC_BASE_URL") or "https://api.biyingapi.com/hslt/ztgc"
-    api_key = os.environ.get("THIRD_PARTY_API_KEY")
+    api_key = os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
+    if not api_key:
+        try:
+            env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
+            if os.path.exists(env_path):
+                with open(env_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line.startswith("THIRD_PARTY_API_KEY="):
+                            api_key = line.split("=", 1)[1].strip()
+                            break
+        except Exception:
+            pass
     if not api_key:
         raise ValueError("缺少第三方licence(THIRD_PARTY_API_KEY)")
     if not date:

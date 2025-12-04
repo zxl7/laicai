@@ -3,13 +3,25 @@ import json
 from typing import Dict, Any
 from urllib.request import Request, urlopen
 
-from ..common.utils import normalize_symbol, round_price, limit_rate, symbol_to_instrument
+from ..common.utils import normalize_symbol, round_price, limit_rate, symbol_to_instrument, read_env_from_file
 from .quote_service import get_quote, get_quote_price
 
 
 def get_limit_status(symbol: str) -> Dict[str, Any]:
     base = os.environ.get("THIRD_PARTY_BASE_URL")
-    api_key = os.environ.get("THIRD_PARTY_API_KEY")
+    api_key = os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
+    if base and ("biyingapi.com" in base or base.rstrip("/").endswith("/hsstock/instrument")) and not api_key:
+        try:
+            env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
+            if os.path.exists(env_path):
+                with open(env_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line.startswith("THIRD_PARTY_API_KEY="):
+                            api_key = line.split("=", 1)[1].strip()
+                            break
+        except Exception:
+            pass
     if base and ("biyingapi.com" in base or base.rstrip("/").endswith("/hsstock/instrument")):
         try:
             instrument = symbol_to_instrument(symbol)
