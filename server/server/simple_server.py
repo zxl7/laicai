@@ -1,16 +1,12 @@
-import re
-import time
+import json
 import os
-from typing import Dict, Any, Optional
-
-import requests
-
+import re
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import urlparse, parse_qs
+from urllib.request import Request, urlopen
 
 def _normalize_symbol(symbol: str) -> str:
     s = symbol.strip().lower()
-    m = re.match(r"^(\d{6})\.(sh|sz)$", s)
-    if m:
-        return f"{m.group(2)}{m.group(1)}"
     m = re.match(r"^(sh|sz)\d{6}$", s)
     if m:
         return s
@@ -20,20 +16,6 @@ def _normalize_symbol(symbol: str) -> str:
         prefix = "sh" if code.startswith("6") or code.startswith("9") else "sz"
         return f"{prefix}{code}"
     raise ValueError("symbol格式不正确")
-
-
-def _round_price(v: float) -> float:
-    return float(f"{v:.2f}")
-
-
-def _limit_rate(code: str, name: str) -> float:
-    n = name.upper()
-    if n.startswith("*ST") or n.startswith("ST"):
-        return 0.05
-    if code.startswith("300") or code.startswith("301") or code.startswith("688"):
-        return 0.20
-    return 0.10
-
 
 def _symbol_to_instrument(symbol: str) -> str:
     s = symbol.strip().lower()
@@ -52,12 +34,29 @@ def _symbol_to_instrument(symbol: str) -> str:
         return f"{m.group(1)}.{m.group(2).upper()}"
     raise ValueError("symbol格式不正确")
 
+def _round_price(v: float) -> float:
+    return float(f"{v:.2f}")
 
-def _fetch_sina(sym: str) -> Dict[str, Any]:
-    resp = requests.get("http://hq.sinajs.cn/list=" + sym, timeout=5, headers={"Referer": "https://finance.sina.com.cn/"})
-    if resp.status_code != 200:
-        raise ValueError("行情接口请求失败")
-    txt = resp.text
+def _limit_rate(code: str, name: str) -> float:
+    n = name.upper()
+    if n.startswith("*ST") or n.startswith("ST"):
+        return 0.05
+    if code.startswith("300") or code.startswith("301") or code.startswith("688"):
+        return 0.20
+    return 0.10
+
+def _fetch_sina(sym: str) -> dict:
+    url = "http://hq.sinajs.cn/list=" + sym
+    req = Request(url, headers={
+        "Referer": "https://finance.sina.com.cn/",
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "text/plain, */*;q=0.1",
+        "Connection": "keep-alive",
+    })
+    with urlopen(req, timeout=5) as resp:
+        if resp.status != 200:
+            raise ValueError("行情接口请求失败")
+        txt = resp.read().decode("utf-8", errors="ignore")
     m = re.search(r'"([^"]*)"\s*;', txt)
     if not m:
         raise ValueError("未获取到行情数据")
@@ -87,68 +86,64 @@ def _fetch_sina(sym: str) -> Dict[str, Any]:
         "time": dt,
     }
 
-def _fetch_third_party(symbol: str) -> Optional[Dict[str, Any]]:
+def _fetch_third_party(symbol: str) -> dict:
     base = os.environ.get("THIRD_PARTY_BASE_URL")
     api_key = os.environ.get("THIRD_PARTY_API_KEY")
     if not base:
-        return None
+        return _fetch_sina(_normalize_symbol(symbol))
     if "biyingapi.com" in base or base.rstrip("/").endswith("/hsstock/instrument"):
-        return None
-    params = {"symbol": symbol}
+        return _fetch_sina(_normalize_symbol(symbol))
+    qs = f"symbol={symbol}"
     if api_key:
-        params["api_key"] = api_key
-    url = base.rstrip("/") + "/quote"
-    resp = requests.get(url, params=params, timeout=10)
-    if resp.status_code != 200:
-        return None
-    data = resp.json()
+        qs += f"&api_key={api_key}"
+    url = base.rstrip("/") + "/quote?" + qs
+    req = Request(url)
+    with urlopen(req, timeout=10) as resp:
+        if resp.status != 200:
+            raise ValueError("第三方接口请求失败")
+        data = json.loads(resp.read().decode("utf-8", errors="ignore"))
     if not isinstance(data, dict):
-        return None
+        raise ValueError("第三方接口返回格式错误")
     required = ["code", "name", "price", "prev_close", "open", "high", "low", "time"]
-    if not all(k in data for k in required):
-        return None
-    price = float(data["price"]) if data["price"] is not None else 0.0
-    prev_close = float(data["prev_close"]) if data["prev_close"] is not None else price
-    change_amount = price - prev_close
-    change_percent = (change_amount / prev_close * 100) if prev_close else 0.0
-    return {
-        "code": str(data["code"]),
-        "name": str(data["name"]),
-        "price": _round_price(price),
-        "change_percent": _round_price(change_percent),
-        "change_amount": _round_price(change_amount),
-        "open": _round_price(float(data["open"])) if data["open"] is not None else _round_price(price),
-        "high": _round_price(float(data["high"])) if data["high"] is not None else _round_price(price),
-        "low": _round_price(float(data["low"])) if data["low"] is not None else _round_price(price),
-        "prev_close": _round_price(prev_close),
-        "time": str(data["time"]),
-    }
+    if all(k in data for k in required):
+        price = float(data["price"]) if data["price"] is not None else 0.0
+        prev_close = float(data["prev_close"]) if data["prev_close"] is not None else price
+        change_amount = price - prev_close
+        change_percent = (change_amount / prev_close * 100) if prev_close else 0.0
+        return {
+            "code": str(data["code"]),
+            "name": str(data["name"]),
+            "price": _round_price(price),
+            "change_percent": _round_price(change_percent),
+            "change_amount": _round_price(change_amount),
+            "open": _round_price(float(data["open"])) if data["open"] is not None else _round_price(price),
+            "high": _round_price(float(data["high"])) if data["high"] is not None else _round_price(price),
+            "low": _round_price(float(data["low"])) if data["low"] is not None else _round_price(price),
+            "prev_close": _round_price(prev_close),
+            "time": str(data["time"]),
+        }
+    return _fetch_sina(_normalize_symbol(symbol))
 
-def get_quote(symbol: str) -> Dict[str, Any]:
-    sym = _normalize_symbol(symbol)
-    third = _fetch_third_party(symbol)
-    if third is not None:
-        return third
-    return _fetch_sina(sym)
+def get_quote(symbol: str) -> dict:
+    return _fetch_third_party(symbol)
 
-
-def get_limit_status(symbol: str) -> Dict[str, Any]:
+def get_limit_status(symbol: str) -> dict:
     base = os.environ.get("THIRD_PARTY_BASE_URL")
     api_key = os.environ.get("THIRD_PARTY_API_KEY")
     if base and ("biyingapi.com" in base or base.rstrip("/").endswith("/hsstock/instrument")):
         try:
             instrument = _symbol_to_instrument(symbol)
             url = base.rstrip("/") + "/" + instrument + ("/" + api_key if api_key else "")
-            headers = {
+            req = Request(url, headers={
                 "User-Agent": "Mozilla/5.0",
                 "Accept": "application/json, */*;q=0.1",
                 "Connection": "keep-alive",
                 "Referer": "https://api.biyingapi.com/",
-            }
-            resp = requests.get(url, headers=headers, timeout=10)
-            if resp.status_code != 200:
-                raise ValueError("第三方接口请求失败")
-            data = resp.json()
+            })
+            with urlopen(req, timeout=10) as resp:
+                if resp.status != 200:
+                    raise ValueError("第三方接口请求失败")
+                data = json.loads(resp.read().decode("utf-8", errors="ignore"))
             if not isinstance(data, dict):
                 raise ValueError("第三方接口返回格式错误")
             code_tp = str(data.get("ii") or "")
@@ -192,3 +187,55 @@ def get_limit_status(symbol: str) -> Dict[str, Any]:
         "is_limit_down": bool(is_down),
         "limit_rate": rate,
     }
+
+class Handler(BaseHTTPRequestHandler):
+    def _json(self, status: int, payload: dict):
+        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):
+        url = urlparse(self.path)
+        if url.path == "/":
+            self._json(200, {"service": "laicai-stock", "endpoints": ["/quote", "/limit-status"]})
+            return
+        if url.path == "/quote":
+            params = parse_qs(url.query)
+            symbol = params.get("symbol", [None])[0]
+            if not symbol:
+                self._json(400, {"error": "缺少symbol参数"})
+                return
+            try:
+                data = get_quote(symbol)
+                self._json(200, data)
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if url.path == "/limit-status":
+            params = parse_qs(url.query)
+            symbol = params.get("symbol", [None])[0]
+            if not symbol:
+                self._json(400, {"error": "缺少symbol参数"})
+                return
+            try:
+                data = get_limit_status(symbol)
+                self._json(200, data)
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        self._json(404, {"error": "Not Found"})
+
+def main():
+    port = int(os.environ.get("PORT", "8000"))
+    server = HTTPServer(("0.0.0.0", port), Handler)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+
+if __name__ == "__main__":
+    main()

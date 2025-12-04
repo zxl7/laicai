@@ -1,26 +1,38 @@
-export interface MarketSentimentData {
-  timestamp: string;
-  sentiment: 'increasing' | 'decreasing' | 'oscillating';
-  sentimentScore: number; // 0-100
-  limitUpCount: number;
-  limitDownCount: number;
-  trendDirection: 'up' | 'down' | 'flat';
+export interface MarketSentiment {
+  id: string
+  timestamp: string
+  sentiment_score: number
+  trend_direction: 'up' | 'down' | 'sideways'
+  limit_up_count: number
+  limit_down_count: number
+  created_at: string
 }
 
-export interface SectorSentimentData {
-  sectorCode: string;
-  sectorName: string;
-  limitUpCount: number;
-  limitDownCount: number;
-  sentiment: 'increasing' | 'decreasing' | 'oscillating';
-  trendDirection: 'up' | 'down' | 'flat';
-  isLeading?: boolean; // 主升板块
-  isDeclining?: boolean; // 退潮板块
+export interface Sector {
+  id: string
+  name: string
+  code: string
+  limit_up_stocks: number
+  limit_down_stocks: number
+  trend_direction: 'up' | 'down' | 'sideways'
+  is_rising: boolean
+  is_falling: boolean
+  updated_at: string
 }
 
-export interface SentimentTrendData {
-  timestamp: string;
-  limitUpCount: number;
-  limitDownCount: number;
-  sentimentScore: number;
+export interface SentimentHistory {
+  id: string
+  sentiment_id: string
+  timestamp: string
+  score: number
+  limit_up: number
+  limit_down: number
+}
+
+export interface UserPreference {
+  id: string
+  user_id: string
+  favorite_sectors: string[]
+  alert_settings: Record<string, unknown>
+  updated_at: string
 }

@@ -1,84 +1,87 @@
-import { useState, useEffect } from 'react';
-import { MarketSentimentData, SectorSentimentData, SentimentTrendData } from '../types';
-import { mockApi } from '../utils/mockData';
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
+import { MarketSentiment, Sector } from '../types'
 
-export const useMarketSentiment = () => {
-  const [data, setData] = useState<MarketSentimentData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const result = await mockApi.getMarketSentiment();
-      setData(result);
-      setError(null);
-    } catch (err) {
-      setError('获取市场情绪数据失败');
-    } finally {
-      setLoading(false);
-    }
-  };
+export function useMarketSentiment() {
+  const [sentiment, setSentiment] = useState<MarketSentiment | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 30000); // 每30秒更新一次
-    return () => clearInterval(interval);
-  }, []);
+    fetchMarketSentiment()
+    
+    // 设置实时订阅
+    const subscription = supabase
+      .channel('market_sentiment_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'market_sentiment' }, () => {
+        fetchMarketSentiment()
+      })
+      .subscribe()
 
-  return { data, loading, error, refetch: fetchData };
-};
-
-export const useSectorSentiment = () => {
-  const [data, setData] = useState<SectorSentimentData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const result = await mockApi.getSectorSentiment();
-      setData(result);
-      setError(null);
-    } catch (err) {
-      setError('获取板块情绪数据失败');
-    } finally {
-      setLoading(false);
+    return () => {
+      subscription.unsubscribe()
     }
-  };
+  }, [])
+
+  const fetchMarketSentiment = async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('market_sentiment')
+        .select('*')
+        .order('timestamp', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (error) throw error
+      setSentiment(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch market sentiment')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { sentiment, loading, error }
+}
+
+export function useSectors() {
+  const [sectors, setSectors] = useState<Sector[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 60000); // 每分钟更新一次
-    return () => clearInterval(interval);
-  }, []);
+    fetchSectors()
+    
+    // 设置实时订阅
+    const subscription = supabase
+      .channel('sectors_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sectors' }, () => {
+        fetchSectors()
+      })
+      .subscribe()
 
-  return { data, loading, error, refetch: fetchData };
-};
-
-export const useTrendData = () => {
-  const [data, setData] = useState<SentimentTrendData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const result = await mockApi.getTrendData();
-      setData(result);
-      setError(null);
-    } catch (err) {
-      setError('获取趋势数据失败');
-    } finally {
-      setLoading(false);
+    return () => {
+      subscription.unsubscribe()
     }
-  };
+  }, [])
 
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 120000); // 每2分钟更新一次
-    return () => clearInterval(interval);
-  }, []);
+  const fetchSectors = async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('sectors')
+        .select('*')
+        .order('updated_at', { ascending: false })
 
-  return { data, loading, error, refetch: fetchData };
-};
+      if (error) throw error
+      setSectors(data || [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch sectors')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { sectors, loading, error }
+}

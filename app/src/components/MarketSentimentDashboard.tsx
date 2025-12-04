@@ -1,120 +1,84 @@
-import React from 'react';
-import { Card, Row, Col, Statistic } from 'antd';
-import { ArrowUpOutlined, ArrowDownOutlined, MinusOutlined } from '@ant-design/icons';
-import { MarketSentimentData } from '../types';
+import { MarketSentiment } from '../types'
 
 interface MarketSentimentDashboardProps {
-  data: MarketSentimentData | null;
-  loading: boolean;
+  data: MarketSentiment | null
+  loading: boolean
 }
 
-const MarketSentimentDashboard: React.FC<MarketSentimentDashboardProps> = ({ data, loading }) => {
+export function MarketSentimentDashboard({ data, loading }: MarketSentimentDashboardProps) {
   if (loading || !data) {
     return (
-      <Row gutter={16}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <Col span={6} key={i}>
-            <Card className="animate-pulse">
-              <div className="h-20 bg-gray-200 rounded"></div>
-            </Card>
-          </Col>
+          <div key={i} className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700 animate-pulse">
+            <div className="h-8 bg-slate-700 rounded mb-4"></div>
+            <div className="h-12 bg-slate-700 rounded mb-2"></div>
+            <div className="h-4 bg-slate-700 rounded"></div>
+          </div>
         ))}
-      </Row>
-    );
+      </div>
+    )
   }
 
   const getSentimentColor = (sentiment: string) => {
     switch (sentiment) {
-      case 'increasing':
-        return 'text-increase-green-400';
-      case 'decreasing':
-        return 'text-decrease-red-400';
-      case 'oscillating':
-        return 'text-oscillation-gray';
-      default:
-        return 'text-gray-500';
-    }
-  };
-
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
       case 'up':
-        return <ArrowUpOutlined className="text-increase-green-400" />;
+        return 'text-green-500'
       case 'down':
-        return <ArrowDownOutlined className="text-decrease-red-400" />;
-      case 'flat':
-        return <MinusOutlined className="text-oscillation-gray" />;
+        return 'text-red-500'
+      case 'sideways':
+        return 'text-slate-500'
       default:
-        return null;
+        return 'text-slate-500'
     }
-  };
+  }
 
   const getSentimentText = (sentiment: string) => {
     switch (sentiment) {
-      case 'increasing':
-        return '递增';
-      case 'decreasing':
-        return '递减';
-      case 'oscillating':
-        return '震荡';
+      case 'up':
+        return '递增'
+      case 'down':
+        return '递减'
+      case 'sideways':
+        return '震荡'
       default:
-        return '未知';
+        return '未知'
     }
-  };
+  }
 
   return (
-    <Row gutter={16}>
-      <Col span={6}>
-        <Card className="h-full backdrop-blur-sm bg-white/80 shadow-lg border border-white/20 hover:shadow-xl transition-shadow duration-300">
-          <div className="text-center">
-            <div className="text-sm text-gray-600 mb-2">市场情绪</div>
-            <div className={`text-2xl font-bold ${getSentimentColor(data.sentiment)}`}>
-              {getSentimentText(data.sentiment)}
-            </div>
-            <div className="flex justify-center mt-2 text-2xl">
-              {getTrendIcon(data.trendDirection)}
-            </div>
-          </div>
-        </Card>
-      </Col>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+        <div className="text-slate-400 text-sm mb-2">市场情绪</div>
+        <div className={`text-2xl font-bold ${getSentimentColor(data.trend_direction)}`}>
+          {getSentimentText(data.trend_direction)}
+        </div>
+        <div className="text-xs text-slate-500 mt-1">当前状态</div>
+      </div>
       
-      <Col span={6}>
-        <Card className="h-full backdrop-blur-sm bg-white/80 shadow-lg border border-white/20 hover:shadow-xl transition-shadow duration-300">
-          <div className="text-center">
-            <div className="text-sm text-gray-600 mb-2">情绪强度</div>
-            <div className="text-2xl font-bold text-gold">
-              {data.sentimentScore}
-            </div>
-            <div className="text-xs text-gray-500 mt-1">满分100</div>
-          </div>
-        </Card>
-      </Col>
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+        <div className="text-slate-400 text-sm mb-2">情绪强度</div>
+        <div className="text-2xl font-bold text-amber-400">
+          {data.sentiment_score}
+        </div>
+        <div className="text-xs text-slate-500 mt-1">满分100</div>
+      </div>
       
-      <Col span={6}>
-        <Card className="h-full backdrop-blur-sm bg-white/80 shadow-lg border border-white/20 hover:shadow-xl transition-shadow duration-300">
-          <div className="text-center">
-            <div className="text-sm text-gray-600 mb-2">涨停家数</div>
-            <div className="text-2xl font-bold text-increase-green-400">
-              {data.limitUpCount}
-            </div>
-            <div className="text-xs text-gray-500 mt-1">只个股</div>
-          </div>
-        </Card>
-      </Col>
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+        <div className="text-slate-400 text-sm mb-2">涨停家数</div>
+        <div className="text-2xl font-bold text-green-500">
+          {data.limit_up_count}
+        </div>
+        <div className="text-xs text-slate-500 mt-1">只个股</div>
+      </div>
       
-      <Col span={6}>
-        <Card className="h-full backdrop-blur-sm bg-white/80 shadow-lg border border-white/20 hover:shadow-xl transition-shadow duration-300">
-          <div className="text-center">
-            <div className="text-sm text-gray-600 mb-2">跌停家数</div>
-            <div className="text-2xl font-bold text-decrease-red-400">
-              {data.limitDownCount}
-            </div>
-            <div className="text-xs text-gray-500 mt-1">只个股</div>
-          </div>
-        </Card>
-      </Col>
-    </Row>
-  );
-};
-
-export default MarketSentimentDashboard;
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+        <div className="text-slate-400 text-sm mb-2">跌停家数</div>
+        <div className="text-2xl font-bold text-red-500">
+          {data.limit_down_count}
+        </div>
+        <div className="text-xs text-slate-500 mt-1">只个股</div>
+      </div>
+    </div>
+  )
+}
