@@ -57,18 +57,34 @@ def format_hms(s: str) -> str:
 
 def read_env_from_file(name: str) -> str:
     import os
+    # 优先读取进程环境变量
+    val = os.environ.get(name) or os.environ.get(name.upper()) or os.environ.get(name.lower())
+    if val:
+        return val
+    # 候选 .env 文件路径：server/.env、项目根 .env、当前工作目录 .env
     base_dir = os.path.dirname(os.path.abspath(__file__))
     server_dir = os.path.dirname(base_dir)
-    env_path = os.path.join(server_dir, ".env")
+    repo_root = os.path.dirname(server_dir)
+    candidates = [
+        os.path.join(server_dir, ".env"),
+        os.path.join(repo_root, ".env"),
+        os.path.join(os.getcwd(), ".env"),
+    ]
     try:
-        if os.path.exists(env_path):
-            with open(env_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line or line.startswith("#"):
-                        continue
-                    if line.startswith(name + "="):
-                        return line.split("=", 1)[1].strip()
+        for env_path in candidates:
+            if os.path.exists(env_path):
+                with open(env_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line or line.startswith("#"):
+                            continue
+                        if line.startswith(name + "="):
+                            return line.split("=", 1)[1].strip()
+                        # 兼容可能书写为 LICENCE / licence
+                        if name == "THIRD_PARTY_API_KEY" and (
+                            line.startswith("LICENCE=") or line.startswith("licence=")
+                        ):
+                            return line.split("=", 1)[1].strip()
     except Exception:
         pass
     return ""

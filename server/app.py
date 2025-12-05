@@ -1,7 +1,7 @@
 import asyncio
 from typing import Optional, List
 
-from fastapi import FastAPI, Query, WebSocket
+from fastapi import FastAPI, Query, WebSocket, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -153,9 +153,9 @@ def limit_status(symbol: str = Query(..., description="股票代码，如 600000
     description="根据日期返回当天涨停股池，默认当天",
     tags=["pool"],
 )
-def limit_up_pool(date: Optional[str] = Query(None, description="日期，格式yyyy-MM-dd；默认当天"), licence: Optional[str] = Query(None, description="第三方 licence，可覆盖环境变量")):
+def limit_up_pool(date: Optional[str] = Query(None, description="日期，格式yyyy-MM-dd；默认当天"), licence: Optional[str] = Query(None, description="第三方 licence，可覆盖环境变量"), licence_header: Optional[str] = Header(None, description="Header 传递的 licence，可覆盖环境变量", alias="licence")):
     try:
-        items = get_limit_up_pool(date, api_key=licence)
+        items = get_limit_up_pool(date, api_key=licence or licence_header)
         return [LimitUpItem(**x) for x in items]
     except Exception as e:
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
@@ -197,9 +197,9 @@ def limit_up_pool(date: Optional[str] = Query(None, description="日期，格式
     description="根据日期返回当天跌停股池，默认当天",
     tags=["pool"],
 )
-def limit_down_pool(date: Optional[str] = Query(None, description="日期，格式yyyy-MM-dd；默认当天"), licence: Optional[str] = Query(None, description="第三方 licence，可覆盖环境变量")):
+def limit_down_pool(date: Optional[str] = Query(None, description="日期，格式yyyy-MM-dd；默认当天"), licence: Optional[str] = Query(None, description="第三方 licence，可覆盖环境变量"), licence_header: Optional[str] = Header(None, description="Header 传递的 licence，可覆盖环境变量", alias="licence")):
     try:
-        items = get_limit_down_pool(date, api_key=licence)
+        items = get_limit_down_pool(date, api_key=licence or licence_header)
         return [LimitDownItem(**x) for x in items]
     except Exception as e:
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
@@ -240,9 +240,9 @@ def limit_down_pool(date: Optional[str] = Query(None, description="日期，格�
     description="根据日期返回当天炸板股池，默认当天",
     tags=["pool"],
 )
-def break_pool(date: Optional[str] = Query(None, description="日期，格式yyyy-MM-dd；默认当天"), licence: Optional[str] = Query(None, description="第三方 licence，可覆盖环境变量")):
+def break_pool(date: Optional[str] = Query(None, description="日期，格式yyyy-MM-dd；默认当天"), licence: Optional[str] = Query(None, description="第三方 licence，可覆盖环境变量"), licence_header: Optional[str] = Header(None, description="Header 传递的 licence，可覆盖环境变量", alias="licence")):
     try:
-        items = get_break_pool(date, api_key=licence)
+        items = get_break_pool(date, api_key=licence or licence_header)
         return [BreakPoolItem(**x) for x in items]
     except Exception as e:
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
@@ -283,9 +283,9 @@ def break_pool(date: Optional[str] = Query(None, description="日期，格式yyy
     description="根据日期返回当天强势股池，默认当天",
     tags=["pool"],
 )
-def strong_pool(date: Optional[str] = Query(None, description="日期，格式yyyy-MM-dd；默认当天"), licence: Optional[str] = Query(None, description="第三方 licence，可覆盖环境变量")):
+def strong_pool(date: Optional[str] = Query(None, description="日期，格式yyyy-MM-dd；默认当天"), licence: Optional[str] = Query(None, description="第三方 licence，可覆盖环境变量"), licence_header: Optional[str] = Header(None, description="Header 传递的 licence，可覆盖环境变量", alias="licence")):
     try:
-        items = get_strong_pool(date, api_key=licence)
+        items = get_strong_pool(date, api_key=licence or licence_header)
         return [StrongPoolItem(**x) for x in items]
     except Exception as e:
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
@@ -335,9 +335,9 @@ def strong_pool(date: Optional[str] = Query(None, description="日期，格式yy
     description="根据股票代码获取实时交易数据（公开数据源）",
     tags=["realtime"],
 )
-def realtime_public(symbol: str = Query(..., description="股票代码，如 600000 或 sz000001"), licence: Optional[str] = Query(None, description="第三方 licence，可覆盖环境变量")):
+def realtime_public(symbol: str = Query(..., description="股票代码，如 600000 或 sz000001"), licence: Optional[str] = Query(None, description="第三方 licence，可覆盖环境变量"), licence_header: Optional[str] = Header(None, description="Header 传递的 licence，可覆盖环境变量", alias="licence")):
     try:
-        items = get_realtime_public(symbol, api_key=licence)
+        items = get_realtime_public(symbol, api_key=licence or licence_header)
         return [RealTimePublicItem(**x) for x in items]
     except Exception as e:
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
@@ -382,9 +382,9 @@ def realtime_public(symbol: str = Query(..., description="股票代码，如 600
     description="根据股票代码获取实时交易数据（券商数据源）",
     tags=["realtime"],
 )
-def realtime_broker(symbol: str = Query(..., description="股票代码，如 600000 或 sz000001"), licence: Optional[str] = Query(None, description="第三方 licence，可覆盖环境变量")):
+def realtime_broker(symbol: str = Query(..., description="股票代码，如 600000 或 sz000001"), licence: Optional[str] = Query(None, description="第三方 licence，可覆盖环境变量"), licence_header: Optional[str] = Header(None, description="Header 传递的 licence，可覆盖环境变量", alias="licence")):
     try:
-        items = get_realtime_broker(symbol, api_key=licence)
+        items = get_realtime_broker(symbol, api_key=licence or licence_header)
         return [RealTimeBrokerItem(**x) for x in items]
     except Exception as e:
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
@@ -430,10 +430,10 @@ def realtime_broker(symbol: str = Query(..., description="股票代码，如 600
     description="一次性获取不超过20支股票的实时交易数据（公开数据源）",
     tags=["realtime"],
 )
-def realtime_public_batch(symbols: str = Query(..., description="逗号分隔的股票代码列表，如 000001,600000"), licence: Optional[str] = Query(None, description="第三方 licence，可覆盖环境变量")):
+def realtime_public_batch(symbols: str = Query(..., description="逗号分隔的股票代码列表，如 000001,600000"), licence: Optional[str] = Query(None, description="第三方 licence，可覆盖环境变量"), licence_header: Optional[str] = Header(None, description="Header 传递的 licence，可覆盖环境变量", alias="licence")):
     try:
         symbol_list = [s.strip() for s in symbols.split(",") if s.strip()]
-        items = get_realtime_public_batch(symbol_list, api_key=licence)
+        items = get_realtime_public_batch(symbol_list, api_key=licence or licence_header)
         return [RealTimePublicBatchItem(**x) for x in items]
     except Exception as e:
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())

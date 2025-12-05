@@ -265,5 +265,5 @@ def get_quote(symbol: str) -> Dict[str, Any]:
 def get_limit_status(symbol: str) -> Dict[str, Any]:
     return __svc_get_limit_status(symbol)
 
-def get_limit_up_pool(date: Optional[str] = None) -> List[Dict[str, Any]]:
-    return __svc_get_limit_up_pool(date)
+def get_limit_up_pool(date: Optional[str] = None, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
+    return __svc_get_limit_up_pool(date, api_key=api_key)
