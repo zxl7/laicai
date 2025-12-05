@@ -1,6 +1,31 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://jkggoicvyyvrujjgfaxd.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImprZ2dvaWN2eXl2cnVqamdmYXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4NTUyNTksImV4cCI6MjA4MDQzMTI1OX0.SORvrjnI-hhx42zJdD2we1lHUFypsHZaIfftlMncC4Q'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+let client: any
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+if (typeof supabaseUrl === 'string' && supabaseUrl && typeof supabaseAnonKey === 'string' && supabaseAnonKey) {
+  client = createClient(String(supabaseUrl), String(supabaseAnonKey))
+} else {
+  client = {
+    auth: {
+      async getSession() {
+        return { data: { session: null }, error: null }
+      },
+      onAuthStateChange() {
+        return { data: { subscription: { unsubscribe() {} } } }
+      },
+      async signInWithPassword() {
+        return { error: { message: 'Auth disabled' } }
+      },
+      async signUp() {
+        return { error: { message: 'Auth disabled' } }
+      },
+      async signOut() {
+        return { error: null }
+      }
+    }
+  }
+}
+
+export const supabase = client
