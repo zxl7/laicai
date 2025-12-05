@@ -5,7 +5,7 @@ from typing import Dict, Any, List, Optional
 from ..common.utils import normalize_symbol, round_price, read_env_from_file
 
 
-def get_realtime_public(symbol: str) -> List[Dict[str, Any]]:
+def get_realtime_public(symbol: str, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     公开源实时交易数据
     - 入参: 股票代码(支持 600000 / sh600000 / 000547.SZ 等)
@@ -14,7 +14,7 @@ def get_realtime_public(symbol: str) -> List[Dict[str, Any]]:
     - 需环境变量: THIRD_PARTY_API_KEY (licence)
     - 返回: List[dict]，包含 fm/h/hs/lb/l/lt/o/pe/pc/p/sz/cje/ud/v/yc/zf/zs/sjl/zdf60/zdfnc/t
     """
-    api_key = os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
+    api_key = api_key or os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
     if not api_key:
         raise ValueError("缺少第三方licence(THIRD_PARTY_API_KEY)")
     code = normalize_symbol(symbol)[2:]
@@ -60,7 +60,7 @@ def get_realtime_public(symbol: str) -> List[Dict[str, Any]]:
     return items
 
 
-def get_realtime_broker(symbol: str) -> List[Dict[str, Any]]:
+def get_realtime_broker(symbol: str, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     券商源实时交易数据
     - 入参: 股票代码(支持多种格式)
@@ -69,7 +69,7 @@ def get_realtime_broker(symbol: str) -> List[Dict[str, Any]]:
     - 需环境变量: THIRD_PARTY_API_KEY (licence)
     - 返回: List[dict]，包含 p/o/h/l/yc/cje/v/pv/t/ud/pc/zf/pe/tr/pb_ratio/tv
     """
-    api_key = os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
+    api_key = api_key or os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
     if not api_key:
         raise ValueError("缺少第三方licence(THIRD_PARTY_API_KEY)")
     code = normalize_symbol(symbol)[2:]
@@ -110,7 +110,7 @@ def get_realtime_broker(symbol: str) -> List[Dict[str, Any]]:
     return items
 
 
-def get_realtime_public_batch(symbols: List[str]) -> List[Dict[str, Any]]:
+def get_realtime_public_batch(symbols: List[str], api_key: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     公开源批量实时交易数据
     - 入参: 股票代码列表(最多20支)
@@ -119,7 +119,7 @@ def get_realtime_public_batch(symbols: List[str]) -> List[Dict[str, Any]]:
     - 需环境变量: THIRD_PARTY_API_KEY (licence)
     - 返回: List[dict]，字段与公开源单股类似，包含 dm 表示股票代码
     """
-    api_key = os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
+    api_key = api_key or os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
     if not api_key:
         raise ValueError("缺少第三方licence(THIRD_PARTY_API_KEY)")
     codes: List[str] = [normalize_symbol(s)[2:] for s in symbols]
@@ -162,7 +162,7 @@ def get_realtime_public_batch(symbols: List[str]) -> List[Dict[str, Any]]:
     return items
 
 
-def get_limit_down_pool(date: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_limit_down_pool(date: Optional[str] = None, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     跌停股池
     - 入参: 日期(yyyy-MM-dd，默认当天)
@@ -171,7 +171,7 @@ def get_limit_down_pool(date: Optional[str] = None) -> List[Dict[str, Any]]:
     - 返回: List[dict]，包含 dm/mc/p/zf/cje/lt/zsz/pe/hs/lbc/lbt/zj/fba/zbc
     """
     base = os.environ.get("THIRD_PARTY_DTGC_BASE_URL") or "http://api.biyingapi.com/hslt/dtgc"
-    api_key = os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
+    api_key = api_key or os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
     if not api_key:
         raise ValueError("缺少第三方licence(THIRD_PARTY_API_KEY)")
     import time
@@ -211,7 +211,7 @@ def get_limit_down_pool(date: Optional[str] = None) -> List[Dict[str, Any]]:
     return items
 
 
-def get_break_pool(date: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_break_pool(date: Optional[str] = None, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     炸板股池
     - 入参: 日期(yyyy-MM-dd，默认当天)
@@ -220,7 +220,7 @@ def get_break_pool(date: Optional[str] = None) -> List[Dict[str, Any]]:
     - 返回: List[dict]，包含 dm/mc/p/ztp/zf/cje/lt/zsz/zs/hs/tj/fbt/zbc
     """
     base = os.environ.get("THIRD_PARTY_ZBGC_BASE_URL") or "http://api.biyingapi.com/hslt/zbgc"
-    api_key = os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
+    api_key = api_key or os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
     if not api_key:
         raise ValueError("缺少第三方licence(THIRD_PARTY_API_KEY)")
     import time
@@ -259,7 +259,7 @@ def get_break_pool(date: Optional[str] = None) -> List[Dict[str, Any]]:
     return items
 
 
-def get_strong_pool(date: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_strong_pool(date: Optional[str] = None, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     强势股池
     - 入参: 日期(yyyy-MM-dd，默认当天)
@@ -268,7 +268,7 @@ def get_strong_pool(date: Optional[str] = None) -> List[Dict[str, Any]]:
     - 返回: List[dict]，包含 dm/mc/p/ztp/zf/cje/lt/zsz/zs/nh/lb/hs/tj
     """
     base = os.environ.get("THIRD_PARTY_QSGC_BASE_URL") or "http://api.biyingapi.com/hslt/qsgc"
-    api_key = os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
+    api_key = api_key or os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
     if not api_key:
         raise ValueError("缺少第三方licence(THIRD_PARTY_API_KEY)")
     import time
