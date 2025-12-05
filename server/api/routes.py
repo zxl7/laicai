@@ -26,9 +26,11 @@ from services.realtime_service import (
 )
 
 
+# 路由容器：统一注册所有 HTTP 和 WebSocket 接口，供 main.py 挂载
 router = APIRouter()
 
 
+# 根路径：返回服务名称与端点列表，便于前端发现可用接口
 @router.get("/", response_model=dict)
 def root():
     return {"service": "laicai-stock", "endpoints": [
@@ -45,6 +47,8 @@ def root():
     ]}
 
 
+# 行情查询：入参 symbol（支持 600000 / sh600000 / 000547.SZ 等）
+# 返回最新价格、涨跌幅、开高低收、时间等基础行情
 @router.get(
     "/quote",
     response_model=QuoteResponse,
@@ -58,6 +62,8 @@ def quote(symbol: str = Query(..., description="股票代码，如 600000 或 sz
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
 
 
+# 涨跌停状态：入参 symbol，优先 instrument 源；失败回退新浪计算
+# 返回涨停价/跌停价与是否触及、涨跌停幅度
 @router.get(
     "/limit-status",
     response_model=LimitStatusResponse,
@@ -71,6 +77,8 @@ def limit_status(symbol: str = Query(..., description="股票代码，如 600000
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
 
 
+# 涨停股池：入参 date（默认当天）；可传 licence（Query/Header）覆盖环境变量
+# 返回按字段映射后的列表项，字段见 models.LimitUpItem
 @router.get(
     "/limit-up-pool",
     response_model=List[LimitUpItem],
@@ -84,6 +92,7 @@ def limit_up_pool(date: Optional[str] = Query(None, description="日期，格式
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
 
 
+# 跌停股池：入参同上；字段见 models.LimitDownItem
 @router.get(
     "/limit-down-pool",
     response_model=List[LimitDownItem],
@@ -97,6 +106,7 @@ def limit_down_pool(date: Optional[str] = Query(None, description="日期，格�
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
 
 
+# 炸板股池：入参同上；字段见 models.BreakPoolItem
 @router.get(
     "/break-pool",
     response_model=List[BreakPoolItem],
@@ -110,6 +120,7 @@ def break_pool(date: Optional[str] = Query(None, description="日期，格式yyy
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
 
 
+# 强势股池：入参同上；字段见 models.StrongPoolItem
 @router.get(
     "/strong-pool",
     response_model=List[StrongPoolItem],
@@ -123,6 +134,7 @@ def strong_pool(date: Optional[str] = Query(None, description="日期，格式yy
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
 
 
+# 实时交易（公开源）：入参 symbol；可传 licence 覆盖；返回公开源字段集合
 @router.get(
     "/realtime/public",
     response_model=List[RealTimePublicItem],
@@ -136,6 +148,7 @@ def realtime_public(symbol: str = Query(..., description="股票代码，如 600
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
 
 
+# 实时交易（券商源）：入参 symbol；可传 licence 覆盖；返回券商源字段集合
 @router.get(
     "/realtime/broker",
     response_model=List[RealTimeBrokerItem],
@@ -149,6 +162,7 @@ def realtime_broker(symbol: str = Query(..., description="股票代码，如 600
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
 
 
+# 实时交易（公开-多股）：入参 symbols（逗号分隔 ≤20）；可传 licence 覆盖
 @router.get(
     "/realtime/public/batch",
     response_model=List[RealTimePublicBatchItem],
@@ -163,6 +177,7 @@ def realtime_public_batch(symbols: str = Query(..., description="逗号分隔的
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
 
 
+# WebSocket 行情：query 参数 `symbol`；每秒推送一次行情 JSON
 @router.websocket("/ws/quote")
 async def quote_ws(websocket: WebSocket):
     await websocket.accept()
@@ -179,4 +194,3 @@ async def quote_ws(websocket: WebSocket):
     except Exception as e:
         await websocket.send_json({"error": str(e)})
         await websocket.close()
-
