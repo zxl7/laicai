@@ -36,4 +36,4 @@ if [ -n "$RELOAD" ]; then
   ARGS+=("--reload")
 fi
 
-exec "$VENV_DIR/bin/python" -m uvicorn server.app:app "${ARGS[@]}"
+exec "$VENV_DIR/bin/python" -m uvicorn main:app "${ARGS[@]}"

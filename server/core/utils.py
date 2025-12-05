@@ -1,4 +1,5 @@
 import re
+import os
 
 
 def normalize_symbol(symbol: str) -> str:
@@ -56,17 +57,12 @@ def format_hms(s: str) -> str:
 
 
 def read_env_from_file(name: str) -> str:
-    import os
-    # 优先读取进程环境变量
     val = os.environ.get(name) or os.environ.get(name.upper()) or os.environ.get(name.lower())
     if val:
         return val
-    # 候选 .env 文件路径：server/.env、项目根 .env、当前工作目录 .env
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    server_dir = os.path.dirname(base_dir)
-    repo_root = os.path.dirname(server_dir)
+    repo_root = os.path.dirname(base_dir)
     candidates = [
-        os.path.join(server_dir, ".env"),
         os.path.join(repo_root, ".env"),
         os.path.join(os.getcwd(), ".env"),
     ]
@@ -80,7 +76,6 @@ def read_env_from_file(name: str) -> str:
                             continue
                         if line.startswith(name + "="):
                             return line.split("=", 1)[1].strip()
-                        # 兼容可能书写为 LICENCE / licence
                         if name == "THIRD_PARTY_API_KEY" and (
                             line.startswith("LICENCE=") or line.startswith("licence=")
                         ):
@@ -88,3 +83,4 @@ def read_env_from_file(name: str) -> str:
     except Exception:
         pass
     return ""
+

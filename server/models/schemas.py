@@ -22,7 +22,7 @@ class LimitStatusResponse(BaseModel):
     limit_down_price: float = Field(..., description="跌停价（元）")
     is_limit_up: bool = Field(..., description="是否触及涨停")
     is_limit_down: bool = Field(..., description="是否触及跌停")
-    limit_rate: float = Field(..., description="涨跌停幅度（%），如主板10%、科创20%、ST5%")
+    limit_rate: float = Field(..., description="涨跌停幅度（%）")
 
 
 class ErrorResponse(BaseModel):
@@ -152,7 +152,8 @@ class StrongPoolItem(BaseModel):
     lt: float = Field(..., description="流通市值（元）")
     zsz: float = Field(..., description="总市值（元）")
     zs: float = Field(..., description="涨速（%）")
-    nh: int = Field(..., description="是否新高（0：否，1：是）")
+    nh: int = Field(..., description="是否新高（0/1）")
     lb: float = Field(..., description="量比")
     hs: float = Field(..., description="换手率（%）")
     tj: str = Field(..., description="涨停统计（x天/y板）")
+

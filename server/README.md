@@ -1,4 +1,4 @@
-# Laicai 股票分析后台服务
+# Laicai 股票分析后台服务（重构版）
 
 ## 快速开始
 - 创建虚拟环境并安装依赖：
@@ -9,7 +9,7 @@ python3 -m venv .venv
 
 - 启动服务：
 ```
-.venv/bin/uvicorn server.app:app --host 0.0.0.0 --port 8000 --reload
+.venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 或一键启动：
@@ -20,59 +20,62 @@ bash server/start.sh
 若不使用虚拟环境，可直接：
 ```
 python3 -m pip install "fastapi==0.95.2" "pydantic==1.10.13" "uvicorn==0.22.0" "starlette==0.27.0" "requests"
-python3 -m uvicorn server.app:app --host 0.0.0.0 --port 8000
+python3 -m uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+## 目录结构
+```
+server/
+ ├── api/              # API 路由
+ ├── core/             # 核心工具/环境读取
+ ├── models/           # 数据模型
+ ├── services/         # 服务层
+ ├── config.py         # 配置
+ └── main.py           # 应用入口
+└── requirements.txt   # 依赖
+└── .env               # 环境变量（可选）
 ```
 
 ## 第三方数据源配置
-- 通过环境变量启用第三方接口：
+- 环境变量（或 `.env` 文件）
 ```
+export THIRD_PARTY_API_KEY="<你的 licence>"
 export THIRD_PARTY_BASE_URL="https://api.biyingapi.com/hsstock/instrument"
-export THIRD_PARTY_API_KEY="<你的 token>"
+export THIRD_PARTY_SSJY_BASE_URL="http://api.biyingapi.com/hsrl/ssjy"
+export THIRD_PARTY_REALTIME_BASE_URL="https://api.biyingapi.com/hsstock/real/time"
+export THIRD_PARTY_SSJY_MORE_BASE_URL="http://api.biyingapi.com/hsrl/ssjy_more"
+export THIRD_PARTY_ZTGC_BASE_URL="https://api.biyingapi.com/hslt/ztgc"
+export THIRD_PARTY_DTGC_BASE_URL="http://api.biyingapi.com/hslt/dtgc"
+export THIRD_PARTY_ZBGC_BASE_URL="http://api.biyingapi.com/hslt/zbgc"
+export THIRD_PARTY_QSGC_BASE_URL="http://api.biyingapi.com/hslt/qsgc"
 ```
-- 行为：
-  - `limit-status` 会调用上述 instrument 接口，结合最新行情计算涨跌停状态
-  - `quote` 仍使用新浪行情（第三方未提供统一 quote 端点时自动回退）
+- 也可在请求中传入 `licence`（Query 或 Header）覆盖环境变量
 
 ## 接口说明
-- `GET /quote?symbol=...`
-  - 支持 `600000`、`sh600000`、`sz000001`、`000547.SZ`
-  - 返回：`code,name,price,change_percent,change_amount,open,high,low,prev_close,time`
-
-- `GET /limit-status?symbol=...`
-  - 返回：`limit_up_price,limit_down_price,is_limit_up,is_limit_down,limit_rate`
-
-- `WS /ws/quote?symbol=...`
-  - 每秒推送一次行情 JSON
+- `GET /quote?symbol=...` 基础行情（新浪源）
+- `GET /limit-status?symbol=...` 涨跌停状态（支持第三方 instrument 源）
+- `GET /limit-up-pool?date=...&licence=...` 涨停股池（默认当天）
+- `GET /limit-down-pool?date=...&licence=...` 跌停股池（默认当天）
+- `GET /break-pool?date=...&licence=...` 炸板股池（默认当天）
+- `GET /strong-pool?date=...&licence=...` 强势股池（默认当天）
+- `GET /realtime/public?symbol=...&licence=...` 实时交易（公开源）
+- `GET /realtime/broker?symbol=...&licence=...` 实时交易（券商源）
+- `GET /realtime/public/batch?symbols=...&licence=...` 批量实时交易（公开源，≤20支）
+- `WS /ws/quote?symbol=...` WebSocket 每秒推送一次行情 JSON
 
 ## 示例
 - `curl "http://localhost:8000/quote?symbol=600000"`
 - `curl "http://localhost:8000/limit-status?symbol=000547"`
-- `curl "http://localhost:8000/limit-status?symbol=000547.SZ"`
-- `wscat -c "ws://localhost:8000/ws/quote?symbol=sh600000"`
-
-## 目录结构与代码位置
-- FastAPI 应用与端点：`server/app.py`
-  - 根路径与端点列表：`server/app.py:24`
-  - 行情查询：`server/app.py:27`
-  - 涨跌停状态：`server/app.py:36`
-  - 涨停股池：`server/app.py:45`
-  - WebSocket 行情：`server/app.py:54`
-- 适配层（对外统一接口）：`server/data_provider.py`
-  - 委托至业务层：`get_quote`、`get_limit_status`、`get_limit_up_pool`
-- 业务逻辑（services）
-  - 行情：`server/services/quote_service.py`
-  - 涨跌停：`server/services/limit_service.py`
-  - 涨停股池：`server/services/pool_service.py`
-- 公共方法（common）
-  - 代码归一化/交易所转换/价格保留/时间格式化/涨跌停比例：`server/common/utils.py`
-- 启动脚本：`server/start.sh`
+- `curl "http://localhost:8000/realtime/broker?symbol=000547&licence=<LICENCE>"`
+- `curl -H "licence: <LICENCE>" "http://localhost:8000/limit-up-pool?date=2025-12-05"`
 
 ## API 文档（Apifox）
-- 打开 Apifox → 导入 OpenAPI → 地址：`http://localhost:8000/openapi.json`
-- 标签与说明：
-  - `pool`：涨停股池 `/limit-up-pool`
-  - `quote`：行情 `/quote`
-  - `status`：涨跌停状态 `/limit-status`
+- Apifox → 导入 OpenAPI → 地址：`http://localhost:8000/openapi.json`
+- 已包含中文字段描述、示例与 `licence` 参数（Query/Head）
+
+## 迁移说明（清理旧入口与重复逻辑）
+- 旧入口与重复实现已清理：`server/app.py`、`server/simple_server.py`、`server/sentiment_monitor/*`、`server/common/*`、`server/data_provider.py`、`server/models.py`
+- 统一入口为 `main.py`，统一路由位于 `api/routes.py`
 
 ## 注意事项
 - 若出现 `uvicorn` 不在 PATH，可使用 `python3 -m uvicorn` 或通过 `.venv/bin/uvicorn`
