@@ -10,6 +10,9 @@ RELOAD="${RELOAD:-}"
 ENV_FILE="${ENV_FILE:-}"
 APP="${APP:-main:app}"
 FIND_PORT="${FIND_PORT:-}"
+PY_BIN="${PY_BIN:-}"
+RELOAD_INCLUDE="${RELOAD_INCLUDE:-}"
+RELOAD_EXCLUDE="${RELOAD_EXCLUDE:-}"
 
 while [ "${1-}" != "" ]; do
   case "$1" in
@@ -19,6 +22,9 @@ while [ "${1-}" != "" ]; do
     --env) ENV_FILE="$2"; shift 2;;
     --app) APP="$2"; shift 2;;
     --find-port) FIND_PORT=1; shift;;
+    --py) PY_BIN="$2"; shift 2;;
+    --reload-include) RELOAD_INCLUDE="$2"; shift 2;;
+    --reload-exclude) RELOAD_EXCLUDE="$2"; shift 2;;
     *) shift;;
   esac
 done
@@ -52,7 +58,25 @@ fi
 ARGS=("--host" "$HOST" "--port" "$PORT")
 if [ -n "$RELOAD" ]; then
   ARGS+=("--reload")
+  if [ -n "$RELOAD_INCLUDE" ]; then
+    ARGS+=("--reload-include" "$RELOAD_INCLUDE")
+  fi
+  if [ -n "$RELOAD_EXCLUDE" ]; then
+    ARGS+=("--reload-exclude" "$RELOAD_EXCLUDE")
+  else
+    ARGS+=("--reload-exclude" ".venv|__pycache__|.git|*.log")
+  fi
 fi
 
 echo "Launching $APP on http://$HOST:$PORT"
-exec python3 -m uvicorn "$APP" "${ARGS[@]}"
+# choose python interpreter
+if [ -z "$PY_BIN" ]; then
+  if command -v python3.11 >/dev/null 2>&1; then
+    PY_BIN="python3.11"
+  elif [ -x "/usr/local/opt/python@3.11/bin/python3.11" ]; then
+    PY_BIN="/usr/local/opt/python@3.11/bin/python3.11"
+  else
+    PY_BIN="python3"
+  fi
+fi
+exec "$PY_BIN" -m uvicorn "$APP" "${ARGS[@]}"

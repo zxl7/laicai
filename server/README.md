@@ -1,14 +1,14 @@
 # Laicai 股票分析后台服务（重构版）
 
 ## 快速开始
-- 安装依赖：
+- 安装依赖（使用 Python 3.11）：
 ```
-python3 -m pip install -r requirements.txt
+python3.11 -m pip install -r requirements.txt
 ```
 
-- 启动服务：
+- 启动服务（使用 Python 3.11）：
 ```
-python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+python3.11 -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 - 或一键启动脚本：
@@ -16,9 +16,9 @@ python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 bash server/start.sh
 ```
 
-若你没有全局安装 uvicorn，可先执行：
+- 若你没有全局安装 uvicorn，可先执行（使用 Python 3.11）：
 ```
-python3 -m pip install "fastapi==0.95.2" "pydantic==1.10.13" "uvicorn==0.22.0" "starlette==0.27.0" "requests"
+python3.11 -m pip install "fastapi==0.95.2" "pydantic==1.10.13" "uvicorn==0.22.0" "starlette==0.27.0" "requests" "akshare>=1.10.0"
 ```
 
 ## 目录结构
@@ -76,5 +76,7 @@ export THIRD_PARTY_QSGC_BASE_URL="http://api.biyingapi.com/hslt/qsgc"
 - 统一入口为 `main.py`，统一路由位于 `api/routes.py`
 
 ## 注意事项
-- 若出现 `uvicorn` 不在 PATH，可使用 `python3 -m uvicorn`
-- 当前环境为 Python 3.7，已固定兼容版本的 `fastapi/pydantic/starlette/uvicorn`
+- 推荐在本机安装 Python 3.11 并使用 `python3.11` 运行与安装依赖
+- 若出现 `uvicorn` 不在 PATH，可使用 `python3.11 -m uvicorn`
+- 设置 PATH（可选）：将 `python3.11` 加入 PATH，例如：
+  - `echo 'export PATH="/usr/local/opt/python@3.11/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc`
