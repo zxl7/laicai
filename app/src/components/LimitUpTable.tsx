@@ -23,36 +23,26 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
 
   // 打印当前股票池（不进行任何更新）
   useEffect(() => {
-    try {
-      // eslint-disable-next-line no-console
-      console.log('股票池', getCompanyCache())
-    } catch {}
+    console.log('股票池', getCompanyCache())
   }, [data])
 
   const handleFetchDetail = async (item: LimitUpItem) => {
-    try {
-      setCachingCode(item.dm)
-      const profiles = await fetchCompanyProfile(item.dm)
-      const profile = profiles[0]
-      if (!profile) throw new Error('公司简介为空')
-      const payload = {
-        [item.dm]: {
-          code: item.dm,
-          list: item,
-          lastUpdated: new Date().toISOString(),
-          ...profile
-        }
+    setCachingCode(item.dm)
+    const profiles = await fetchCompanyProfile(item.dm)
+    console.log("%c Line:36 🍓 profiles", "color:#e41a6a", profiles);
+    const profile = profiles
+    if (!profile) throw new Error('公司简介为空')
+    const payload = {
+      [item.dm]: {
+        code: item.dm,
+        list: item,
+        lastUpdated: new Date().toISOString(),
+        ...profile
       }
-      updateCompanyCache(payload)
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setCachingCode(null)
     }
-    try {
-      // eslint-disable-next-line no-console
-      console.log('股票池', getCompanyCache())
-    } catch {}
+    updateCompanyCache(payload)
+    setCachingCode(null)
+    console.log('股票池', getCompanyCache())
   }
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden">

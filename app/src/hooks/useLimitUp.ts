@@ -9,16 +9,11 @@ export function useLimitUpList(date?: string) {
   const targetDate = date ?? UNIFIED_DATE
 
   const load = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const list = await fetchLimitUpList(targetDate)
-      setData(list)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '加载失败')
-    } finally {
-      setLoading(false)
-    }
+    setLoading(true)
+    setError(null)
+    const list = await fetchLimitUpList(targetDate)
+    setData(list)
+    setLoading(false)
   }, [targetDate])
 
   useEffect(() => {

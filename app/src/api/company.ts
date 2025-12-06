@@ -9,5 +9,5 @@ export async function fetchCompanyProfile(code: string): Promise<CompanyProfile[
   if (!license) throw new Error('缺少接口Token：请设置 VITE_BIYING_LICENSE 或 URL 参数 ?license')
   const url = `${BASE}/${code}/${license}`
   const data = await get<CompanyProfile[]>(url)
-  return Array.isArray(data) ? data : []
+  return data
 }

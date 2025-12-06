@@ -9,16 +9,11 @@ export function useCompanyProfile(code?: string) {
 
   const load = useCallback(async () => {
     if (!code) return
-    try {
-      setLoading(true)
-      setError(null)
-      const res = await fetchCompanyProfile(code)
-      setData(res)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '加载失败')
-    } finally {
-      setLoading(false)
-    }
+    setLoading(true)
+    setError(null)
+    const res = await fetchCompanyProfile(code)
+    setData(res)
+    setLoading(false)
   }, [code])
 
   useEffect(() => {

@@ -44,13 +44,9 @@ async function main() {
   // Fetch company profiles sequentially to be gentle with the API
   for (const code of Object.keys(store)) {
     const url = `${BASE_COMPANY}/${code}/${LICENSE}`
-    try {
-      const prof = await fetchJson(url)
-      if (Array.isArray(prof) && prof[0]) {
-        store[code].profile = prof[0]
-      }
-    } catch (e) {
-      console.warn('Profile fetch failed for', code, String(e.message || e))
+    const prof = await fetchJson(url)
+    if (Array.isArray(prof) && prof[0]) {
+      store[code].profile = prof[0]
     }
   }
 

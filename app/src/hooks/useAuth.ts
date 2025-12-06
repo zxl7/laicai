@@ -23,61 +23,53 @@ export function useAuth() {
   }, [])
 
   const checkUser = async () => {
-    try {
-      setLoading(true)
-      const { data: { session }, error } = await supabase.auth.getSession()
-      if (error) throw error
+    setLoading(true)
+    const { data: { session }, error } = await supabase.auth.getSession()
+    if (error) {
+      setError(error.message)
+    } else {
       setUser(session?.user ?? null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Authentication error')
-    } finally {
-      setLoading(false)
     }
+    setLoading(false)
   }
 
   const signIn = async (email: string, password: string) => {
-    try {
-      setError(null)
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      if (error) throw error
-      return { error: null }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Login failed'
+    setError(null)
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+    if (error) {
+      const message = error.message
       setError(message)
       return { error: message }
     }
+    return { error: null }
   }
 
   const signUp = async (email: string, password: string) => {
-    try {
-      setError(null)
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      })
-      if (error) throw error
-      return { error: null }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Sign up failed'
+    setError(null)
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    })
+    if (error) {
+      const message = error.message
       setError(message)
       return { error: message }
     }
+    return { error: null }
   }
 
   const signOut = async () => {
-    try {
-      setError(null)
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
-      return { error: null }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Sign out failed'
+    setError(null)
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      const message = error.message
       setError(message)
       return { error: message }
     }
+    return { error: null }
   }
 
   return {
