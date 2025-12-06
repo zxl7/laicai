@@ -1,8 +1,9 @@
-import type { LimitUpItem } from '../api/types'
+import type { LimitUpItem, CompanyProfile } from '../api/types'
 import { formatCurrency, formatPercent } from '../api/utils'
 import { useEffect, useState } from 'react'
 import { fetchCompanyProfile } from '../api/company'
 import { getCompanyCache, updateCompanyCache } from '../services/companyStore'
+import { CompanyProfileCard } from './CompanyProfileCard'
 
 /**
  * 涨停股池表格
@@ -20,6 +21,8 @@ interface Props {
  */
 export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
   const [cachingCode, setCachingCode] = useState<string | null>(null)
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [detailProfile, setDetailProfile] = useState<CompanyProfile | null>(null)
 
   // 打印当前股票池（不进行任何更新）
   useEffect(() => {
@@ -29,18 +32,18 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
   const handleFetchDetail = async (item: LimitUpItem) => {
     setCachingCode(item.dm)
     const profiles = await fetchCompanyProfile(item.dm)
-    console.log("%c Line:36 🍓 profiles", "color:#e41a6a", profiles);
-    const profile = profiles
-    if (!profile) throw new Error('公司简介为空')
+    if (!profiles) throw new Error('公司简介为空')
     const payload = {
       [item.dm]: {
         code: item.dm,
         list: item,
         lastUpdated: new Date().toISOString(),
-        ...profile
+        ...profiles
       }
     }
     updateCompanyCache(payload)
+    // setDetailProfile(profiles)
+    setDetailOpen(true)
     setCachingCode(null)
     console.log('股票池', getCompanyCache())
   }
@@ -122,6 +125,25 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
           </tbody>
         </table>
       </div>
+      {detailOpen && detailProfile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-slate-900 rounded-xl border border-slate-700 w-full max-w-3xl max-h-[80vh] overflow-auto">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+              <div className="text-white font-semibold">公司详情</div>
+              <button
+                onClick={() => { setDetailOpen(false); setDetailProfile(null) }}
+                className="text-slate-300 hover:text-white"
+              >
+                关闭
+              </button>
+            </div>
+          <div className="p-4 space-y-4">
+            <CompanyProfileCard profile={detailProfile} />
+            <pre className="bg-slate-800/60 text-slate-200 text-xs rounded-lg p-3 overflow-auto max-h-[40vh]">{JSON.stringify(detailProfile, null, 2)}</pre>
+          </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

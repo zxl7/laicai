@@ -4,8 +4,7 @@ import path from 'node:path'
 const UNIFIED_DATE = '2025-12-05'
 const ARG_DATE = process.argv[2]
 const TARGET_DATE = ARG_DATE || UNIFIED_DATE
-const BASE_LIMITUP = process.env.VITE_BIYING_API_BASE ?? 'https://api.biyingapi.com/hslt/ztgc'
-const BASE_COMPANY = process.env.VITE_COMPANY_API_BASE ?? 'https://api.biyingapi.com/hscp/gsjj'
+const API_BASE = process.env.VITE_BIYING_API_BASE ?? 'https://api.biyingapi.com'
 const LICENSE = process.env.VITE_BIYING_LICENSE || process.env.BIYING_LICENSE
 
 if (!LICENSE) {
@@ -29,7 +28,7 @@ async function fetchJson(url, attempts = 3, delayMs = 2000) {
 
 async function main() {
   console.log('Building company cache for date', TARGET_DATE)
-  const limitUrl = `${BASE_LIMITUP}/${TARGET_DATE}/${LICENSE}`
+  const limitUrl = `${API_BASE}/hslt/ztgc/${TARGET_DATE}/${LICENSE}`
   const list = await fetchJson(limitUrl)
   const items = Array.isArray(list) ? list : []
   console.log('Limit-up items:', items.length)
@@ -43,7 +42,7 @@ async function main() {
 
   // Fetch company profiles sequentially to be gentle with the API
   for (const code of Object.keys(store)) {
-    const url = `${BASE_COMPANY}/${code}/${LICENSE}`
+    const url = `${API_BASE}/hscp/gsjj/${code}/${LICENSE}`
     const prof = await fetchJson(url)
     if (Array.isArray(prof) && prof[0]) {
       store[code].profile = prof[0]
