@@ -12,39 +12,65 @@ import { getCompanyCache } from "../services/companyStore"
 
 export function Home() {
   const { sentiment, loading, error } = useMarketSentiment()
-  const [selectedDate, setSelectedDate] = useState<string>(UNIFIED_DATE)
-  const { data: limitUpList, loading: luLoading, error: luError, refresh, date } = useLimitUpList(selectedDate)
-  const { data: limitDownList, loading: ldLoading, error: ldError, refresh: refreshDown, date: dateDown } = useLimitDownList(selectedDate)
+  const [dateUp, setDateUp] = useState<string>(UNIFIED_DATE)
+  const [dateDown, setDateDown] = useState<string>(UNIFIED_DATE)
+  const { data: limitUpList, loading: luLoading, error: luError, refresh, date } = useLimitUpList(dateUp)
+  const { data: limitDownList, loading: ldLoading, error: ldError, refresh: refreshDown, date: dateDownResolved } = useLimitDownList(dateDown)
   const today = useMemo(() => UNIFIED_DATE, [])
   const [licenseInput, setLicenseInput] = useState<string>(getStoredLicense() || "")
   const cachedLimitUpList = useMemo(() => {
     const s = getCompanyCache()
     return Object.values(s)
-      .map(rec => rec.list)
+      .map((rec) => rec.list)
       .filter((x): x is NonNullable<typeof x> => !!x)
   }, [])
-  const displayLimitUp = (limitUpList && limitUpList.length > 0) ? limitUpList : cachedLimitUpList
+  const displayLimitUp = limitUpList && limitUpList.length > 0 ? limitUpList : cachedLimitUpList
   const displayLoading = luLoading && displayLimitUp.length === 0
 
-  // 模拟历史数据用于图表显示
-  const mockChartData = [
-    { timestamp: "2024-01-01T09:30:00", limit_up_count: 35, limit_down_count: 18 },
-    { timestamp: "2024-01-01T10:00:00", limit_up_count: 42, limit_down_count: 15 },
-    { timestamp: "2024-01-01T10:30:00", limit_up_count: 38, limit_down_count: 22 },
-    { timestamp: "2024-01-01T11:00:00", limit_up_count: 45, limit_down_count: 12 },
-    { timestamp: "2024-01-01T11:30:00", limit_up_count: 52, limit_down_count: 8 },
-    { timestamp: "2024-01-01T13:00:00", limit_up_count: 48, limit_down_count: 14 },
-    { timestamp: "2024-01-01T13:30:00", limit_up_count: 41, limit_down_count: 19 },
-    { timestamp: "2024-01-01T14:00:00", limit_up_count: 46, limit_down_count: 16 },
-    { timestamp: "2024-01-01T14:30:00", limit_up_count: 39, limit_down_count: 21 },
-    { timestamp: "2024-01-01T15:00:00", limit_up_count: 45, limit_down_count: 12 },
-  ]
+  // 基于涨跌停数据生成真实图表数据（按时间累积）
+  const normalizeTime = (val: string): string => {
+    if (!val && val !== '0') return '-'
+    const v = String(val)
+    const m = v.match(/(\d{1,2}):(\d{1,2}):(\d{1,2})/)
+    if (m) {
+      const [, h, mi, s] = m
+      return `${h.padStart(2, '0')}:${mi.padStart(2, '0')}:${s.padStart(2, '0')}`
+    }
+    if (/^\d{6}$/.test(v)) {
+      const h = v.slice(0, 2)
+      const mi = v.slice(2, 4)
+      const s = v.slice(4, 6)
+      return `${h}:${mi}:${s}`
+    }
+    const d = new Date(v)
+    if (!isNaN(d.getTime())) {
+      const h = `${d.getHours()}`.padStart(2, '0')
+      const mi = `${d.getMinutes()}`.padStart(2, '0')
+      const s = `${d.getSeconds()}`.padStart(2, '0')
+      return `${h}:${mi}:${s}`
+    }
+    return v
+  }
+  const toSec = (t: string): number => {
+    const m = String(t).match(/(\d{2}):(\d{2}):(\d{2})/)
+    if (!m) return -1
+    return Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3])
+  }
+  const chartData = useMemo(() => {
+    const basePoints = ['09:30:00','10:00:00','10:30:00','11:00:00','11:30:00','13:00:00','13:30:00','14:00:00','14:30:00','15:00:00']
+    return basePoints.map(ts => {
+      const tsSec = toSec(ts)
+      const upCount = displayLimitUp.filter(it => toSec(normalizeTime(it.lbt)) <= tsSec).length
+      const downCount = limitDownList.filter(it => toSec(normalizeTime(it.lbt)) <= tsSec).length
+      return { timestamp: ts, limit_up_count: upCount, limit_down_count: downCount }
+    })
+  }, [displayLimitUp, limitDownList])
 
   // 避免因情绪数据错误阻断页面，其它模块继续渲染
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[var(--bg-base)] text-white p-6">
+      <div className="max-w-8xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">市场情绪监控面板</h1>
           <p className="text-slate-400">实时监控A股市场情绪状态和板块变化</p>
@@ -53,21 +79,12 @@ export function Home() {
         {error && <div className="mb-6 bg-red-900/20 border border-red-500/30 rounded-lg p-4 text-red-400">情绪数据加载异常：{error}</div>}
 
         <div className="mb-6 bg-[var(--bg-container-50)] backdrop-blur-sm rounded-xl p-4 border border-[var(--border)]">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
-              <h2 className="text-white font-semibold">涨停股池查询</h2>
-              <p className="text-xs text-slate-400">选择交易日查询涨停列表（2019-11-28 至 今）。</p>
+              <h2 className="text-white font-semibold">查询设置</h2>
+              <p className="text-xs text-slate-400">同时查询涨停/跌停，按日期分别调用接口</p>
             </div>
             <div className="flex items-center gap-3">
-              <input
-                type="date"
-                value={selectedDate}
-                max={today}
-                min={today}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                disabled
-                className="px-3 py-2 bg-[var(--bg-container-60)] border border-[var(--border)] rounded-lg text-white text-sm"
-              />
               <input
                 type="text"
                 placeholder="输入API Token"
@@ -86,13 +103,40 @@ export function Home() {
                 className="px-3 py-2 rounded-md text-sm font-medium bg-[var(--bg-container-60)] hover:bg-slate-600 text-slate-200">
                 保存Token
               </button>
-              
-              <button onClick={refresh} disabled={luLoading} className="px-3 py-2 rounded-md text-sm font-medium bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white">
-                查询
-              </button>
-              <button onClick={refreshDown} disabled={ldLoading} className="px-3 py-2 rounded-md text-sm font-medium bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white">
-                查询跌停
-              </button>
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-sm text-slate-300">涨停日期</div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="date"
+                  value={dateUp}
+                  min="2019-11-28"
+                  max={today}
+                  onChange={(e) => setDateUp(e.target.value)}
+                  className="px-3 py-2 bg-[var(--bg-container-60)] border border-[var(--border)] rounded-lg text-white text-sm"
+                />
+                <button onClick={refresh} disabled={luLoading} className="px-3 py-2 rounded-md text-sm font-medium bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white">
+                  查询
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-sm text-slate-300">跌停日期</div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="date"
+                  value={dateDown}
+                  min="2019-11-28"
+                  max={today}
+                  onChange={(e) => setDateDown(e.target.value)}
+                  className="px-3 py-2 bg-[var(--bg-container-60)] border border-[var(--border)] rounded-lg text-white text-sm"
+                />
+                <button onClick={refreshDown} disabled={ldLoading} className="px-3 py-2 rounded-md text-sm font-medium bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white">
+                  查询
+                </button>
+              </div>
             </div>
           </div>
           {!licenseInput && <div className="mt-3 text-xs text-red-400">未设置Token：请通过URL参数 ?license=... 或在此输入并点击保存</div>}
@@ -103,7 +147,7 @@ export function Home() {
             <SentimentCard sentiment={sentiment} loading={loading} />
           </div>
           <div className="lg:col-span-2">
-            <SentimentTrendChart data={mockChartData} loading={loading} />
+            <SentimentTrendChart data={chartData} loading={loading} />
           </div>
         </div>
 
@@ -146,11 +190,15 @@ export function Home() {
           </div>
         </div>
 
-        <div className="space-y-4">
-          {luError && <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 text-red-400">涨停股池加载异常：{luError}</div>}
-          <LimitUpTable data={displayLimitUp} loading={displayLoading} onRefresh={refresh} date={date} />
-          {ldError && <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 text-red-400">跌停股池加载异常：{ldError}</div>}
-          <LimitDownTable data={limitDownList} loading={ldLoading} onRefresh={refreshDown} date={dateDown} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            {luError && <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 text-red-400">涨停股池加载异常：{luError}</div>}
+            <LimitUpTable data={displayLimitUp} loading={displayLoading} onRefresh={refresh} date={date} />
+          </div>
+          <div className="space-y-4">
+            {ldError && <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 text-red-400">跌停股池加载异常：{ldError}</div>}
+            <LimitDownTable data={limitDownList} loading={ldLoading} onRefresh={refreshDown} date={dateDownResolved} />
+          </div>
         </div>
       </div>
     </div>

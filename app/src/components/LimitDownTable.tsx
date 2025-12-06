@@ -50,6 +50,30 @@ export function LimitDownTable({ data, loading, onRefresh, date }: Props) {
     console.log('股票池-跌停', getCompanyCache())
   }
 
+  const toHHMMSS = (val: string) => {
+    if (!val && val !== '0') return '-'
+    const v = String(val)
+    const m = v.match(/(\d{1,2}):(\d{1,2}):(\d{1,2})/)
+    if (m) {
+      const [, h, mi, s] = m
+      return `${h.padStart(2, '0')}:${mi.padStart(2, '0')}:${s.padStart(2, '0')}`
+    }
+    if (/^\d{6}$/.test(v)) {
+      const h = v.slice(0, 2)
+      const mi = v.slice(2, 4)
+      const s = v.slice(4, 6)
+      return `${h}:${mi}:${s}`
+    }
+    const d = new Date(v)
+    if (!isNaN(d.getTime())) {
+      const h = `${d.getHours()}`.padStart(2, '0')
+      const mi = `${d.getMinutes()}`.padStart(2, '0')
+      const s = `${d.getSeconds()}`.padStart(2, '0')
+      return `${h}:${mi}:${s}`
+    }
+    return v
+  }
+
   const columns: TableColumnsType<LimitDownItem> = [
     { title: '代码', dataIndex: 'dm', key: 'dm', render: (dm: string) => <span className="font-mono text-white">{dm}</span> },
     { title: '名称', dataIndex: 'mc', key: 'mc', render: (mc: string) => <span className="text-slate-200">{mc}</span> },
@@ -63,7 +87,7 @@ export function LimitDownTable({ data, loading, onRefresh, date }: Props) {
     { title: '动态市盈率', dataIndex: 'pe', key: 'pe', render: (v: number) => <span className="text-slate-200">{v != null ? v.toFixed(2) : '-'}</span> },
     { title: '换手率', dataIndex: 'hs', key: 'hs', render: (v: number) => <span className="text-slate-200">{formatPercent(v)}</span> },
     { title: '连续跌停', dataIndex: 'lbc', key: 'lbc', render: (v: number) => <span className={`text-slate-200 ${v >= 3 ? 'text-amber-400' : ''}`}>{v}</span> },
-    { title: '最后封板时间', dataIndex: 'lbt', key: 'lbt', render: (v: string) => <span className="text-slate-200">{v}</span> },
+    { title: '最后封板时间', dataIndex: 'lbt', key: 'lbt', render: (v: string) => <span className="text-slate-200">{toHHMMSS(v)}</span> },
     { title: '封单资金', dataIndex: 'zj', key: 'zj', sorter: (a, b) => a.zj - b.zj, defaultSortOrder: 'ascend', render: (v: number) => <span className="text-slate-200">{formatCurrency(v)}</span> },
     { title: '板上成交额', dataIndex: 'fba', key: 'fba', render: (v: number) => <span className="text-slate-200">{formatCurrency(v)}</span> },
     { title: '开板次数', dataIndex: 'zbc', key: 'zbc', render: (v: number) => <span className="text-slate-200">{v}</span> },
@@ -85,11 +109,7 @@ export function LimitDownTable({ data, loading, onRefresh, date }: Props) {
         </Tooltip>
       )
     } },
-    { title: '详情', key: 'action', fixed: 'right', width: 120, render: (_: unknown, item: LimitDownItem) => (
-      <Button size="small" type="default" onClick={() => handleFetchDetail(item)} disabled={cachingCode === item.dm}>
-        {cachingCode === item.dm ? '查询中…' : '查看详情'}
-      </Button>
-    ) },
+    
   ]
 
   return (
@@ -111,6 +131,10 @@ export function LimitDownTable({ data, loading, onRefresh, date }: Props) {
         scroll={{ x: 'max-content', y: '70vh' }}
         sticky
         locale={{ emptyText: '暂无数据' }}
+        onRow={(record) => ({
+          onClick: () => { if (cachingCode !== record.dm) handleFetchDetail(record) },
+          style: { cursor: cachingCode === record.dm ? 'not-allowed' : 'pointer' }
+        })}
       />
 
       <Modal title="公司详情" open={detailOpen && !!detailProfile} onCancel={() => { setDetailOpen(false); setDetailProfile(null) }} footer={null} width={800}>
@@ -124,4 +148,3 @@ export function LimitDownTable({ data, loading, onRefresh, date }: Props) {
     </div>
   )
 }
-
