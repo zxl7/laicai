@@ -1,5 +1,12 @@
 import type { CompanyProfile, LimitUpItem } from '../api/types'
 import { fetchCompanyProfile } from '../api/company'
+/**
+ * 股票池本地缓存（扁平结构）
+ * 设计目标：
+ * - 仅在前端本地维护公司池数据，不写入后端/文件
+ * - 兼容旧版 `dates` 结构，初始化时自动提取最新数据为扁平 `list`
+ * - 提供读取、补全公司详情、增量更新（list/profile）的能力
+ */
 
 export type CompanyRecord = {
   code: string
@@ -8,11 +15,18 @@ export type CompanyRecord = {
   trades?: unknown
   lastUpdated?: string
 }
-
+/**
+ * 股票池存储结构：键为公司代码，值为该公司最新的聚合数据
+ */
 export type Store = Record<string, CompanyRecord>
 
 const LS_KEY = 'COMPANY_CACHE_V1'
 let inited = false
+/**
+ * 说明：
+ * - LS_KEY 为本地存储键名
+ * - inited 用于避免重复初始化读取
+ */
 
 function readLocal(): Store {
   try {
@@ -22,7 +36,9 @@ function readLocal(): Store {
     return {}
   }
 }
-
+/**
+ * 将股票池写入本地存储（JSON 序列化）
+ */
 function writeLocal(store: Store) {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(store))
@@ -31,40 +47,25 @@ function writeLocal(store: Store) {
 
 export async function initCompanyCache(): Promise<void> {
   if (inited) return
-  const current = readLocal()
   try {
     const res = await fetch('/company-cache.json')
     if (res.ok) {
-      const fileStore = (await res.json()) as any
-      const normalized: Store = {}
-      for (const [code, rec] of Object.entries(fileStore as Record<string, any>)) {
-        const next: CompanyRecord = { code }
-        if (rec.profile) next.profile = rec.profile
-        // 兼容旧结构：从 dates 中提取最新 list
-        if (rec.dates && typeof rec.dates === 'object') {
-          const dates = Object.keys(rec.dates as Record<string, any>)
-          dates.sort()
-          const latest = dates[dates.length - 1]
-          const latestEntry = latest ? rec.dates[latest] : null
-          if (latestEntry && latestEntry.list) next.list = latestEntry.list as LimitUpItem
-        }
-        if (rec.list) next.list = rec.list as LimitUpItem
-        if (rec.trades) next.trades = rec.trades
-        if (rec.lastUpdated) next.lastUpdated = rec.lastUpdated
-        normalized[code] = next
-      }
-      const merged = { ...normalized, ...current }
-      writeLocal(merged)
+      const fileStore = (await res.json()) as Store
+      writeLocal(fileStore)
     }
   } catch {}
   inited = true
 }
-
+/**
+ * 获取单个公司记录
+ */
 export function getCompanyRecord(code: string): CompanyRecord | undefined {
   const s = readLocal()
   return s[code]
 }
-
+/**
+ * 获取当前股票池（全部公司）
+ */
 export function getCompanyCache(): Store {
   return readLocal()
 }
@@ -80,10 +81,12 @@ export async function enrichMissingProfiles(): Promise<void> {
       if (Array.isArray(list) && list[0]) {
         upsertCompanyRecord(code, { profile: list[0] })
       }
-    } catch {}
+    } catch { /* empty */ }
   }
 }
-
+/**
+ * 更新/插入公司记录（增量合并），并写入最近更新时间戳
+ */
 export function upsertCompanyRecord(code: string, payload: Partial<CompanyRecord>): CompanyRecord {
   const s = readLocal()
   const prev = s[code] || { code }
@@ -97,9 +100,44 @@ export function upsertCompanyRecord(code: string, payload: Partial<CompanyRecord
   writeLocal(s)
   return next
 }
-
+/**
+ * 写入最新的涨停池条目 `list`
+ */
 export function upsertList(code: string, list: LimitUpItem): CompanyRecord {
   return upsertCompanyRecord(code, { list })
 }
 
 // 导出功能已移除，保留控制台打印股票池
+
+export const COMPANY_CACHE_UPDATE_EVENT = 'company-cache:update'
+
+export function updateCompanyCache(input: Record<string, Partial<CompanyRecord>>): Store {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    return getCompanyCache()
+  }
+  const s = readLocal()
+  for (const [code, rec] of Object.entries(input)) {
+    const prev = s[code] || { code }
+    const next: CompanyRecord = {
+      ...prev,
+      ...rec,
+      code,
+      lastUpdated: new Date().toISOString()
+    }
+    s[code] = next
+  }
+  writeLocal(s)
+  // eslint-disable-next-line no-console
+  console.log('股票池', s)
+  return s
+}
+
+export function registerCompanyCacheEvent(): void {
+  if (typeof window === 'undefined') return
+  window.addEventListener(COMPANY_CACHE_UPDATE_EVENT, (e: Event) => {
+    const detail = (e as CustomEvent).detail
+    if (detail && typeof detail === 'object' && !Array.isArray(detail)) {
+      updateCompanyCache(detail as Record<string, Partial<CompanyRecord>>)
+    }
+  })
+}
