@@ -1,4 +1,5 @@
 import type { CompanyProfile, LimitUpItem } from '../api/types'
+import { fetchCompanyProfile } from '../api/company'
 
 export type CompanyRecord = {
   code: string
@@ -70,6 +71,19 @@ export function getCompanyCache(): Store {
 
 export const getCompanyPool = getCompanyCache
 
+export async function enrichMissingProfiles(): Promise<void> {
+  const s = getCompanyCache()
+  const codes = Object.keys(s).filter(code => !s[code].profile)
+  for (const code of codes) {
+    try {
+      const list = await fetchCompanyProfile(code)
+      if (Array.isArray(list) && list[0]) {
+        upsertCompanyRecord(code, { profile: list[0] })
+      }
+    } catch {}
+  }
+}
+
 export function upsertCompanyRecord(code: string, payload: Partial<CompanyRecord>): CompanyRecord {
   const s = readLocal()
   const prev = s[code] || { code }
@@ -88,15 +102,4 @@ export function upsertList(code: string, list: LimitUpItem): CompanyRecord {
   return upsertCompanyRecord(code, { list })
 }
 
-export function exportCompanyCache(): void {
-  const s = readLocal()
-  const blob = new Blob([JSON.stringify(s, null, 2)], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'company-cache.json'
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  URL.revokeObjectURL(url)
-}
+// 导出功能已移除，保留控制台打印股票池

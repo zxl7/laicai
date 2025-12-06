@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "check": "tsc -b --noEmit",
-    "build:cache": "node scripts/build-company-cache.mjs"
+    "build:cache": "node scripts/build-company-cache.mjs",
+    "normalize:cache": "node scripts/normalize-company-cache.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.86.1",

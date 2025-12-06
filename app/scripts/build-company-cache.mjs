@@ -37,9 +37,8 @@ async function main() {
   const store = {}
   for (const item of items) {
     const code = item.dm
-    store[code] = store[code] || { code, dates: {} }
-    store[code].dates[TARGET_DATE] = store[code].dates[TARGET_DATE] || {}
-    store[code].dates[TARGET_DATE].list = item
+    store[code] = store[code] || { code }
+    store[code].list = item
   }
 
   // Fetch company profiles sequentially to be gentle with the API
