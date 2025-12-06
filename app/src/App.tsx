@@ -3,6 +3,7 @@ import { Navigation } from "./components/Navigation"
 import { Home } from "./pages/Home"
 import { Sectors } from "./pages/Sectors"
 import { Login } from "./pages/Login"
+import { Company } from "./pages/Company"
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/sectors" element={<Sectors />} />
+                <Route path="/company" element={<Company />} />
               </Routes>
             </>
           } />

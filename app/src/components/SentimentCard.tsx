@@ -42,9 +42,9 @@ export function SentimentCard({ sentiment, loading }: SentimentCardProps) {
   const getTrendIcon = () => {
     switch (sentiment.trend_direction) {
       case 'up':
-        return <TrendingUp className="w-6 h-6 text-green-500" />
+        return <TrendingUp className="w-6 h-6 text-red-500" />
       case 'down':
-        return <TrendingDown className="w-6 h-6 text-red-500" />
+        return <TrendingDown className="w-6 h-6 text-green-500" />
       default:
         return <Minus className="w-6 h-6 text-slate-500" />
     }
@@ -52,16 +52,16 @@ export function SentimentCard({ sentiment, loading }: SentimentCardProps) {
 
   /** 根据分数返回数值颜色 */
   const getScoreColor = () => {
-    if (sentiment.sentiment_score >= 70) return 'text-green-500'
+    if (sentiment.sentiment_score >= 70) return 'text-red-500'
     if (sentiment.sentiment_score >= 40) return 'text-yellow-500'
-    return 'text-red-500'
+    return 'text-green-500'
   }
 
   /** 根据分数返回卡片渐变背景 */
   const getBackgroundGradient = () => {
-    if (sentiment.sentiment_score >= 70) return 'from-green-900/20 to-green-800/10'
+    if (sentiment.sentiment_score >= 70) return 'from-red-900/20 to-red-800/10'
     if (sentiment.sentiment_score >= 40) return 'from-yellow-900/20 to-yellow-800/10'
-    return 'from-red-900/20 to-red-800/10'
+    return 'from-green-900/20 to-green-800/10'
   }
 
   return (
@@ -80,11 +80,11 @@ export function SentimentCard({ sentiment, loading }: SentimentCardProps) {
 
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div className="bg-slate-800/30 rounded-lg p-3">
-          <div className="text-green-500 font-semibold">{sentiment.limit_up_count}</div>
+          <div className="text-red-500 font-semibold">{sentiment.limit_up_count}</div>
           <div className="text-slate-400 text-xs">涨停家数</div>
         </div>
         <div className="bg-slate-800/30 rounded-lg p-3">
-          <div className="text-red-500 font-semibold">{sentiment.limit_down_count}</div>
+          <div className="text-green-500 font-semibold">{sentiment.limit_down_count}</div>
           <div className="text-slate-400 text-xs">跌停家数</div>
         </div>
       </div>

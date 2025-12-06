@@ -53,16 +53,16 @@ export function SentimentTrendChart({ data, loading }: SentimentTrendChartProps)
       {
         label: '涨停家数',
         data: data.map(item => item.limit_up_count),
-        borderColor: '#10b981',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        borderColor: '#ef4444',
+        backgroundColor: 'rgba(239, 68, 68, 0.1)',
         tension: 0.4,
         fill: false
       },
       {
         label: '跌停家数',
         data: data.map(item => item.limit_down_count),
-        borderColor: '#ef4444',
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
         tension: 0.4,
         fill: false
       }

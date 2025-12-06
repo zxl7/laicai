@@ -19,9 +19,9 @@ export function SectorCard({ sector, onFavorite, isFavorite }: SectorCardProps) 
   const getTrendIcon = () => {
     switch (sector.trend_direction) {
       case 'up':
-        return <TrendingUp className="w-4 h-4 text-green-500" />
+        return <TrendingUp className="w-4 h-4 text-red-500" />
       case 'down':
-        return <TrendingDown className="w-4 h-4 text-red-500" />
+        return <TrendingDown className="w-4 h-4 text-green-500" />
       default:
         return <Minus className="w-4 h-4 text-slate-500" />
     }
@@ -45,9 +45,9 @@ export function SectorCard({ sector, onFavorite, isFavorite }: SectorCardProps) 
   /** 净额颜色（涨停-跌停） */
   const getScoreColor = () => {
     const score = sector.limit_up_stocks - sector.limit_down_stocks
-    if (score >= 5) return 'text-green-500'
+    if (score >= 5) return 'text-red-500'
     if (score >= 0) return 'text-yellow-500'
-    return 'text-red-500'
+    return 'text-green-500'
   }
 
   /** 计算净额（涨停-跌停） */
@@ -77,11 +77,11 @@ export function SectorCard({ sector, onFavorite, isFavorite }: SectorCardProps) 
 
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div className="bg-slate-700/30 rounded-lg p-2">
-          <div className="text-green-500 font-semibold text-sm">{sector.limit_up_stocks}</div>
+          <div className="text-red-500 font-semibold text-sm">{sector.limit_up_stocks}</div>
           <div className="text-slate-400 text-xs">涨停</div>
         </div>
         <div className="bg-slate-700/30 rounded-lg p-2">
-          <div className="text-red-500 font-semibold text-sm">{sector.limit_down_stocks}</div>
+          <div className="text-green-500 font-semibold text-sm">{sector.limit_down_stocks}</div>
           <div className="text-slate-400 text-xs">跌停</div>
         </div>
       </div>

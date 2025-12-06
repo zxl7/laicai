@@ -53,11 +53,11 @@ export function SectorSentimentMatrix({ sectors, loading }: SectorSentimentMatri
                 </div>
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div className="bg-slate-700/30 rounded-lg p-2">
-                    <div className="text-green-500 font-semibold text-sm">{sector.limit_up_stocks}</div>
+                  <div className="text-red-500 font-semibold text-sm">{sector.limit_up_stocks}</div>
                     <div className="text-slate-400 text-xs">涨停</div>
                   </div>
                   <div className="bg-slate-700/30 rounded-lg p-2">
-                    <div className="text-red-500 font-semibold text-sm">{sector.limit_down_stocks}</div>
+                  <div className="text-green-500 font-semibold text-sm">{sector.limit_down_stocks}</div>
                     <div className="text-slate-400 text-xs">跌停</div>
                   </div>
                 </div>
@@ -86,11 +86,11 @@ export function SectorSentimentMatrix({ sectors, loading }: SectorSentimentMatri
                 </div>
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div className="bg-slate-700/30 rounded-lg p-2">
-                    <div className="text-green-500 font-semibold text-sm">{sector.limit_up_stocks}</div>
+                    <div className="text-red-500 font-semibold text-sm">{sector.limit_up_stocks}</div>
                     <div className="text-slate-400 text-xs">涨停</div>
                   </div>
                   <div className="bg-slate-700/30 rounded-lg p-2">
-                    <div className="text-red-500 font-semibold text-sm">{sector.limit_down_stocks}</div>
+                    <div className="text-green-500 font-semibold text.sm">{sector.limit_down_stocks}</div>
                     <div className="text-slate-400 text-xs">跌停</div>
                   </div>
                 </div>
@@ -116,11 +116,11 @@ export function SectorSentimentMatrix({ sectors, loading }: SectorSentimentMatri
                 </div>
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div className="bg-slate-700/30 rounded-lg p-2">
-                    <div className="text-green-500 font-semibold text-sm">{sector.limit_up_stocks}</div>
+                    <div className="text-red-500 font-semibold text-sm">{sector.limit_up_stocks}</div>
                     <div className="text-slate-400 text-xs">涨停</div>
                   </div>
                   <div className="bg-slate-700/30 rounded-lg p-2">
-                    <div className="text-red-500 font-semibold text-sm">{sector.limit_down_stocks}</div>
+                    <div className="text-green-500 font-semibold text-sm">{sector.limit_down_stocks}</div>
                     <div className="text-slate-400 text-xs">跌停</div>
                   </div>
                 </div>

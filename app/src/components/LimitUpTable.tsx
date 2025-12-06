@@ -1,5 +1,9 @@
 import type { LimitUpItem } from '../types/biying'
 import { formatCurrency, formatPercent } from '../services/limitUpApi'
+import { useState } from 'react'
+import { fetchCompanyProfile } from '../services/companyProfileApi'
+import { setCombined, hasCombined } from '../services/cache'
+import type { CombinedStockData } from '../types/combined'
 
 /**
  * 涨停股池表格
@@ -16,6 +20,29 @@ interface Props {
  * 表格主组件
  */
 export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
+  const [cachingCode, setCachingCode] = useState<string | null>(null)
+  const [cachedCodes, setCachedCodes] = useState<Record<string, boolean>>({})
+
+  const handleFetchDetail = async (item: LimitUpItem) => {
+    try {
+      setCachingCode(item.dm)
+      const profiles = await fetchCompanyProfile(item.dm)
+      const profile = profiles[0]
+      if (!profile) throw new Error('公司简介为空')
+      const combined: CombinedStockData = {
+        code: item.dm,
+        date: String(date ?? ''),
+        list: item,
+        profile
+      }
+      setCombined(combined)
+      setCachedCodes(prev => ({ ...prev, [item.dm]: true }))
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setCachingCode(null)
+    }
+  }
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden">
       <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700">
@@ -38,7 +65,7 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
           <thead className="sticky top-0 z-10 bg-slate-900">
             <tr>
               {[
-                '代码', '名称', '价格', '涨幅', '成交额', '流通市值', '总市值', '换手率', '连板数', '首封时间', '末封时间', '封板资金', '炸板次数', '统计'
+                '代码', '名称', '价格', '涨幅', '成交额', '流通市值', '总市值', '换手率', '连板数', '首封时间', '末封时间', '封板资金', '炸板次数', '统计', '详情'
               ].map((h) => (
                 <th key={h} className="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                   {h}
@@ -67,7 +94,7 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
                   <td className="px-4 py-3 text-white font-mono">{item.dm}</td>
                   <td className="px-4 py-3 text-slate-200">{item.mc}</td>
                   <td className="px-4 py-3 text-slate-200">{item.p?.toFixed(2)}</td>
-                  <td className={`px-4 py-3 font-medium ${item.zf >= 0 ? 'text-green-400' : 'text-red-400'}`}>{formatPercent(item.zf)}</td>
+                  <td className={`px-4 py-3 font-medium ${item.zf >= 0 ? 'text-red-400' : 'text-green-400'}`}>{formatPercent(item.zf)}</td>
                   <td className="px-4 py-3 text-slate-200">{formatCurrency(item.cje)}</td>
                   <td className="px-4 py-3 text-slate-200">{formatCurrency(item.lt)}</td>
                   <td className="px-4 py-3 text-slate-200">{formatCurrency(item.zsz)}</td>
@@ -78,6 +105,15 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
                   <td className="px-4 py-3 text-slate-200">{formatCurrency(item.zj)}</td>
                   <td className="px-4 py-3 text-slate-200">{item.zbc}</td>
                   <td className="px-4 py-3 text-slate-400 text-xs">{item.tj}</td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => handleFetchDetail(item)}
+                      disabled={cachingCode === item.dm}
+                      className="px-3 py-1 rounded-md text-xs font-medium bg-slate-700 hover:bg-slate-600 disabled:bg-slate-600 text-slate-200"
+                    >
+                      {cachingCode === item.dm ? '保存中…' : hasCombined(item.dm, date) || cachedCodes[item.dm] ? '已缓存' : '查看详情'}
+                    </button>
+                  </td>
                 </tr>
               ))
             )}

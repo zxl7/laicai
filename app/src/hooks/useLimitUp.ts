@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from 'react'
-import { fetchLimitUpList, getTodayDateStr } from '../services/limitUpApi'
+import { fetchLimitUpList, UNIFIED_DATE } from '../services/limitUpApi'
 import type { LimitUpItem } from '../types/biying'
 
 export function useLimitUpList(date?: string) {
   const [data, setData] = useState<LimitUpItem[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
-  const targetDate = date ?? getTodayDateStr()
+  const targetDate = date ?? UNIFIED_DATE
 
   const load = useCallback(async () => {
     try {
@@ -30,4 +30,3 @@ export function useLimitUpList(date?: string) {
 
   return { data, loading, error, refresh: load, date: targetDate }
 }
-

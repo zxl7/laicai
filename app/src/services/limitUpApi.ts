@@ -41,6 +41,7 @@ export function getTodayDateStr(): string {
 }
 
 export const EARLIEST_DATE = '2019-11-28'
+export const UNIFIED_DATE = '2025-12-05'
 
 export async function fetchLimitUpList(date: string): Promise<LimitUpItem[]> {
   const license = resolveLicense()

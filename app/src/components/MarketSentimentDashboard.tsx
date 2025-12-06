@@ -31,9 +31,9 @@ export function MarketSentimentDashboard({ data, loading }: MarketSentimentDashb
   const getSentimentColor = (sentiment: string) => {
     switch (sentiment) {
       case 'up':
-        return 'text-green-500'
-      case 'down':
         return 'text-red-500'
+      case 'down':
+        return 'text-green-500'
       case 'sideways':
         return 'text-slate-500'
       default:
@@ -75,7 +75,7 @@ export function MarketSentimentDashboard({ data, loading }: MarketSentimentDashb
       
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
         <div className="text-slate-400 text-sm mb-2">涨停家数</div>
-        <div className="text-2xl font-bold text-green-500">
+        <div className="text-2xl font-bold text-red-500">
           {data.limit_up_count}
         </div>
         <div className="text-xs text-slate-500 mt-1">只个股</div>
@@ -83,7 +83,7 @@ export function MarketSentimentDashboard({ data, loading }: MarketSentimentDashb
       
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
         <div className="text-slate-400 text-sm mb-2">跌停家数</div>
-        <div className="text-2xl font-bold text-red-500">
+        <div className="text-2xl font-bold text-green-500">
           {data.limit_down_count}
         </div>
         <div className="text-xs text-slate-500 mt-1">只个股</div>

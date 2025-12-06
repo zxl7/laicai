@@ -4,13 +4,13 @@ import { SentimentTrendChart } from "../components/SentimentTrendChart"
 import { useLimitUpList } from "../hooks/useLimitUp"
 import { LimitUpTable } from "../components/LimitUpTable"
 import { useMemo, useState } from "react"
-import { getTodayDateStr, getStoredLicense, setStoredLicense } from "../services/limitUpApi"
+import { UNIFIED_DATE, getStoredLicense, setStoredLicense } from "../services/limitUpApi"
 
 export function Home() {
   const { sentiment, loading, error } = useMarketSentiment()
-  const [selectedDate, setSelectedDate] = useState<string>(getTodayDateStr())
+  const [selectedDate, setSelectedDate] = useState<string>(UNIFIED_DATE)
   const { data: limitUpList, loading: luLoading, error: luError, refresh, date } = useLimitUpList(selectedDate)
-  const today = useMemo(() => getTodayDateStr(), [])
+  const today = useMemo(() => UNIFIED_DATE, [])
   const [licenseInput, setLicenseInput] = useState<string>(getStoredLicense() || "")
 
   // 模拟历史数据用于图表显示
@@ -50,9 +50,10 @@ export function Home() {
                 type="date"
                 value={selectedDate}
                 max={today}
-                min={"2019-11-28"}
+                min={today}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                disabled
+                className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
               />
               <input
                 type="text"
@@ -71,9 +72,7 @@ export function Home() {
                 className="px-3 py-2 rounded-md text-sm font-medium bg-slate-700 hover:bg-slate-600 text-slate-200">
                 保存Token
               </button>
-              <button onClick={() => setSelectedDate(today)} className="px-3 py-2 rounded-md text-sm font-medium bg-slate-700 hover:bg-slate-600 text-slate-200">
-                今天
-              </button>
+              
               <button onClick={refresh} disabled={luLoading} className="px-3 py-2 rounded-md text-sm font-medium bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white">
                 查询
               </button>
@@ -97,7 +96,7 @@ export function Home() {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-slate-400">情绪状态</span>
-                <span className={`font-medium ${sentiment?.trend_direction === "up" ? "text-green-500" : sentiment?.trend_direction === "down" ? "text-red-500" : "text-yellow-500"}`}>
+                <span className={`font-medium ${sentiment?.trend_direction === "up" ? "text-red-500" : sentiment?.trend_direction === "down" ? "text-green-500" : "text-yellow-500"}`}>
                   {sentiment?.trend_direction === "up" ? "递增" : sentiment?.trend_direction === "down" ? "递减" : "震荡"}
                 </span>
               </div>
