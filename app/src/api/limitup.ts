@@ -8,7 +8,7 @@ const BASE = import.meta.env.VITE_BIYING_API_BASE ?? 'https://api.biyingapi.com/
 
 export async function fetchLimitUpList(date: string): Promise<LimitUpItem[]> {
   const license = resolveLicense()
-  if (!license) throw new Error('缺少 VITE_BIYING_LICENSE 环境变量或 URL 参数 ?license')
+  if (!license) return []
   const url = `${BASE}/${date}/${license}`
   const data = await get<LimitUpItem[]>(url)
   return Array.isArray(data) ? data : []

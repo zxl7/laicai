@@ -32,17 +32,18 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
   const handleFetchDetail = async (item: LimitUpItem) => {
     setCachingCode(item.dm)
     const profiles = await fetchCompanyProfile(item.dm)
-    if (!profiles) throw new Error('公司简介为空')
+    const profile = profiles[0] || null
+    if (!profile) throw new Error('公司简介为空')
     const payload = {
       [item.dm]: {
         code: item.dm,
         list: item,
         lastUpdated: new Date().toISOString(),
-        ...profiles
+        ...profile
       }
     }
     updateCompanyCache(payload)
-    // setDetailProfile(profiles)
+    setDetailProfile(profile)
     setDetailOpen(true)
     setCachingCode(null)
     console.log('股票池', getCompanyCache())

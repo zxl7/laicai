@@ -1,10 +1,13 @@
 import type { CompanyProfile } from '../api/types'
+import { Tag } from 'antd'
+import { resolveTagColor } from '../lib/tagColors'
 
 interface Props {
   profile: CompanyProfile
 }
 
 export function CompanyProfileCard({ profile }: Props) {
+  const tags = (profile.idea || '').split(',').map(s => s.trim()).filter(Boolean)
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
       <div className="mb-4">
@@ -31,7 +34,15 @@ export function CompanyProfileCard({ profile }: Props) {
         </div>
         <div className="md:col-span-2">
           <div className="text-slate-400 text-xs">概念及板块</div>
-          <div className="text-white">{profile.idea}</div>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {tags.length === 0 ? (
+              <span className="text-slate-500 text-xs">-</span>
+            ) : (
+              tags.map(t => (
+                <Tag key={t} className="m-0" color={resolveTagColor(t)}>{t}</Tag>
+              ))
+            )}
+          </div>
         </div>
       </div>
 

@@ -1,8 +1,8 @@
-import { Link, useLocation } from 'react-router-dom'
-import { Activity, Grid3X3, User, LogOut } from 'lucide-react'
-import { cn } from '../lib/utils'
-import { useAuth } from '../hooks/useAuth'
-import { enrichMissingProfiles, getCompanyCache } from '../services/companyStore'
+import { Link, useLocation } from "react-router-dom"
+import { Activity, Grid3X3, User, LogOut } from "lucide-react"
+import { cn } from "../lib/utils"
+import { useAuth } from "../hooks/useAuth"
+import { enrichMissingProfiles, getCompanyCache } from "../services/companyStore"
 
 /**
  * 顶部导航栏
@@ -14,9 +14,9 @@ export function Navigation() {
 
   /** 主导航项定义 */
   const navItems = [
-    { path: '/', label: '市场情绪', icon: Activity },
-    { path: '/sectors', label: '板块矩阵', icon: Grid3X3 },
-    { path: '/company', label: '股票总池', icon: User }
+    { path: "/", label: "市场情绪", icon: Activity },
+    { path: "/sectors", label: "板块矩阵", icon: Grid3X3 },
+    { path: "/company", label: "股票总池", icon: User },
   ]
 
   /** 退出登录 */
@@ -37,18 +37,15 @@ export function Navigation() {
                 {navItems.map((item) => {
                   const Icon = item.icon
                   const isActive = location.pathname === item.path
-                  
+
                   return (
                     <Link
                       key={item.path}
                       to={item.path}
                       className={cn(
-                        'flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                        isActive
-                          ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                      )}
-                    >
+                        "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                        isActive ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                      )}>
                       <Icon className="w-4 h-4" />
                       <span>{item.label}</span>
                     </Link>
@@ -62,22 +59,13 @@ export function Navigation() {
           <div className="flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-3">
-                <div className="text-slate-300 text-sm">
-                  {user.email}
-                </div>
+                <div className="text-slate-300 text-sm">{user.email}</div>
                 <button
                   onClick={handleSignOut}
                   disabled={loading}
-                  className="flex items-center space-x-1 px-3 py-1 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
-                >
+                  className="flex items-center space-x-1 px-3 py-1 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
                   <LogOut className="w-4 h-4" />
                   <span>退出</span>
-                </button>
-                <button
-                  onClick={async () => { await enrichMissingProfiles(); console.log('股票池', getCompanyCache()) }}
-                  className="flex items-center space-x-1 px-3 py-1 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
-                >
-                  <span>补全并打印</span>
                 </button>
               </div>
             ) : (
@@ -85,57 +73,44 @@ export function Navigation() {
                 <Link
                   to="/login"
                   className={cn(
-                    'flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                    location.pathname === '/login'
-                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                  )}
-                >
+                    "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                    location.pathname === "/login" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  )}>
                   <User className="w-4 h-4" />
                   <span>登录</span>
                 </Link>
-                <button
-                  onClick={async () => { await enrichMissingProfiles(); console.log('股票池', getCompanyCache()) }}
-                  className="flex items-center space-x-1 px-3 py-2 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
-                >
-                  <span>补全并打印</span>
-                </button>
               </div>
             )}
           </div>
         </div>
       </div>
-      
+
       {/* 移动端导航 */}
       <div className="md:hidden border-t border-slate-700">
         <div className="px-2 pt-2 pb-3 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = location.pathname === item.path
-            
+
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  'flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors',
-                  isActive
-                    ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                )}
-              >
+                  "flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors",
+                  isActive ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                )}>
                 <Icon className="w-5 h-5" />
                 <span>{item.label}</span>
               </Link>
             )
           })}
-          
+
           {user ? (
             <button
               onClick={handleSignOut}
               disabled={loading}
-              className="flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors w-full"
-            >
+              className="flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors w-full">
               <LogOut className="w-5 h-5" />
               <span>退出登录</span>
             </button>
@@ -143,12 +118,9 @@ export function Navigation() {
             <Link
               to="/login"
               className={cn(
-                'flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors',
-                location.pathname === '/login'
-                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-              )}
-            >
+                "flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors",
+                location.pathname === "/login" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "text-slate-300 hover:bg-slate-800 hover:text-white"
+              )}>
               <User className="w-5 h-5" />
               <span>登录</span>
             </Link>

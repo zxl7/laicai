@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import 'antd/dist/reset.css'
 import { useEffect } from "react"
 import { Navigation } from "./components/Navigation"
 import { Home } from "./pages/Home"

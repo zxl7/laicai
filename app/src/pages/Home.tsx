@@ -6,6 +6,7 @@ import { LimitUpTable } from "../components/LimitUpTable"
 import { useMemo, useState } from "react"
 import { getStoredLicense, setStoredLicense } from "../api/utils"
 import { UNIFIED_DATE } from "../api/limitup"
+import { getCompanyCache } from "../services/companyStore"
 
 export function Home() {
   const { sentiment, loading, error } = useMarketSentiment()
@@ -13,6 +14,14 @@ export function Home() {
   const { data: limitUpList, loading: luLoading, error: luError, refresh, date } = useLimitUpList(selectedDate)
   const today = useMemo(() => UNIFIED_DATE, [])
   const [licenseInput, setLicenseInput] = useState<string>(getStoredLicense() || "")
+  const cachedLimitUpList = useMemo(() => {
+    const s = getCompanyCache()
+    return Object.values(s)
+      .map(rec => rec.list)
+      .filter((x): x is NonNullable<typeof x> => !!x)
+  }, [])
+  const displayLimitUp = (limitUpList && limitUpList.length > 0) ? limitUpList : cachedLimitUpList
+  const displayLoading = luLoading && displayLimitUp.length === 0
 
   // 模拟历史数据用于图表显示
   const mockChartData = [
@@ -132,7 +141,7 @@ export function Home() {
 
         <div className="space-y-4">
           {luError && <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 text-red-400">涨停股池加载异常：{luError}</div>}
-          <LimitUpTable data={limitUpList} loading={luLoading} onRefresh={refresh} date={date} />
+          <LimitUpTable data={displayLimitUp} loading={displayLoading} onRefresh={refresh} date={date} />
         </div>
       </div>
     </div>
