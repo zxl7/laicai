@@ -1,7 +1,8 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Activity, Grid3X3, User, LogOut } from 'lucide-react'
+import { Activity, Grid3X3, User, LogOut, Download } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useAuth } from '../hooks/useAuth'
+import { exportCompanyCache } from '../services/companyStore'
 
 /**
  * 顶部导航栏
@@ -65,6 +66,13 @@ export function Navigation() {
                   {user.email}
                 </div>
                 <button
+                  onClick={exportCompanyCache}
+                  className="flex items-center space-x-1 px-3 py-1 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>导出股票池</span>
+                </button>
+                <button
                   onClick={handleSignOut}
                   disabled={loading}
                   className="flex items-center space-x-1 px-3 py-1 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
@@ -74,18 +82,27 @@ export function Navigation() {
                 </button>
               </div>
             ) : (
-              <Link
-                to="/login"
-                className={cn(
-                  'flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                  location.pathname === '/login'
-                    ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                )}
-              >
-                <User className="w-4 h-4" />
-                <span>登录</span>
-              </Link>
+              <div className="flex items-center space-x-2">
+                <Link
+                  to="/login"
+                  className={cn(
+                    'flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                    location.pathname === '/login'
+                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  )}
+                >
+                  <User className="w-4 h-4" />
+                  <span>登录</span>
+                </Link>
+                <button
+                  onClick={exportCompanyCache}
+                  className="flex items-center space-x-1 px-3 py-2 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>导出股票池</span>
+                </button>
+              </div>
             )}
           </div>
         </div>

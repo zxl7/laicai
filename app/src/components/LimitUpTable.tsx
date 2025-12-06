@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { fetchCompanyProfile } from '../api/company'
 import { setCombined, hasCombined } from '../services/cache'
 import type { CombinedStockData } from '../types/combined'
-import { exportCompanyCache, initCompanyCache, upsertCompanyRecord, upsertDateEntry, getCompanyRecord } from '../services/companyStore'
+import { exportCompanyCache, initCompanyCache, upsertCompanyRecord, upsertList, getCompanyRecord, getCompanyCache } from '../services/companyStore'
 
 /**
  * 涨停股池表格
@@ -33,8 +33,13 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
     if (!date || !Array.isArray(data)) return
     for (const item of data) {
       upsertCompanyRecord(item.dm, {})
-      upsertDateEntry(item.dm, date, { list: item })
+      upsertList(item.dm, item)
     }
+    // 打印当前股票池
+    try {
+      // eslint-disable-next-line no-console
+      console.log('股票池', getCompanyCache())
+    } catch {}
   }, [data, date])
 
   const handleFetchDetail = async (item: LimitUpItem) => {
@@ -45,19 +50,21 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
       if (!profile) throw new Error('公司简介为空')
       const combined: CombinedStockData = {
         code: item.dm,
-        date: String(date ?? ''),
         list: item,
         profile
       }
       setCombined(combined)
       upsertCompanyRecord(item.dm, { profile })
-      if (date) upsertDateEntry(item.dm, date, { list: item })
       setCachedCodes(prev => ({ ...prev, [item.dm]: true }))
     } catch (e) {
       console.error(e)
     } finally {
       setCachingCode(null)
     }
+    try {
+      // eslint-disable-next-line no-console
+      console.log('股票池', getCompanyCache())
+    } catch {}
   }
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden">
@@ -135,9 +142,9 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
                     >
                       {cachingCode === item.dm
                         ? '保存中…'
-                        : (getCompanyRecord(item.dm)?.dates?.[String(date || '')]?.list
+                        : getCompanyRecord(item.dm)?.list
                           ? '已缓存'
-                          : '查看详情')}
+                          : '查看详情'}
                     </button>
                   </td>
                 </tr>

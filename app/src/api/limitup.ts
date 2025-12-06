@@ -1,7 +1,7 @@
 import { get } from './client'
 import { resolveLicense } from './utils'
 import type { LimitUpItem } from './types'
-import { initCompanyCache, upsertCompanyRecord, upsertDateEntry } from '../services/companyStore'
+import { initCompanyCache, upsertCompanyRecord, upsertList } from '../services/companyStore'
 
 export const UNIFIED_DATE = '2025-12-05'
 const BASE = import.meta.env.VITE_BIYING_API_BASE ?? 'https://api.biyingapi.com/hslt/ztgc'
@@ -17,9 +17,8 @@ export async function fetchLimitUpList(date: string): Promise<LimitUpItem[]> {
     for (const item of list) {
       const code = item.dm
       upsertCompanyRecord(code, {})
-      if (date) upsertDateEntry(code, date, { list: item })
+      upsertList(code, item)
     }
   } catch {}
   return list
 }
-
