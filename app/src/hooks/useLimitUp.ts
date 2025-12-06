@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { fetchLimitUpList, UNIFIED_DATE } from '../api/limitup'
-import type { LimitUpItem } from '../types/biying'
+import type { LimitUpItem } from '../api/types'
 
 export function useLimitUpList(date?: string) {
   const [data, setData] = useState<LimitUpItem[]>([])
@@ -12,8 +12,7 @@ export function useLimitUpList(date?: string) {
     try {
       setLoading(true)
       setError(null)
-      // const list = await fetchLimitUpList(targetDate)
-      const list = await fetchLimitUpList('2025-12-05')
+      const list = await fetchLimitUpList(targetDate)
       setData(list)
     } catch (e) {
       setError(e instanceof Error ? e.message : '加载失败')

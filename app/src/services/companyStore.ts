@@ -1,5 +1,4 @@
-import type { CompanyProfile } from '../types/company'
-import type { LimitUpItem } from '../types/biying'
+import type { CompanyProfile, LimitUpItem } from '../api/types'
 
 type DateEntry = {
   list?: LimitUpItem
@@ -94,4 +93,3 @@ export function exportCompanyCache(): void {
   a.remove()
   URL.revokeObjectURL(url)
 }
-

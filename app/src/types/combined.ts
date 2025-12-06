@@ -1,5 +1,4 @@
-import type { LimitUpItem } from './biying'
-import type { CompanyProfile } from './company'
+import type { LimitUpItem, CompanyProfile } from '../api/types'
 
 export interface CombinedStockData {
   code: string
@@ -7,4 +6,3 @@ export interface CombinedStockData {
   list: LimitUpItem
   profile: CompanyProfile
 }
-
