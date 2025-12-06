@@ -12,7 +12,8 @@ export function useLimitUpList(date?: string) {
     try {
       setLoading(true)
       setError(null)
-      const list = await fetchLimitUpList(targetDate)
+      // const list = await fetchLimitUpList(targetDate)
+      const list = await fetchLimitUpList('2025-12-05')
       setData(list)
     } catch (e) {
       setError(e instanceof Error ? e.message : '加载失败')

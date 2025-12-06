@@ -1,6 +1,10 @@
 import type { LimitUpItem } from '../types/biying'
 import { formatCurrency, formatPercent } from '../services/limitUpApi'
 
+/**
+ * 涨停股池表格
+ * 用途：展示指定日期的涨停股票明细，支持手动刷新与表头固定
+ */
 interface Props {
   data: LimitUpItem[]
   loading?: boolean
@@ -8,6 +12,9 @@ interface Props {
   date?: string
 }
 
+/**
+ * 表格主组件
+ */
 export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden">
@@ -25,6 +32,7 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
         </button>
       </div>
 
+      {/* 固定表头，容器可滚动 */}
       <div className="overflow-auto max-h-[70vh]">
         <table className="min-w-full divide-y divide-slate-700">
           <thead className="sticky top-0 z-10 bg-slate-900">

@@ -1,13 +1,21 @@
 import { TrendingUp, TrendingDown, Minus, Star } from 'lucide-react'
 import { Sector } from '../types'
 
+/**
+ * 单个板块卡片
+ * 用途：展示板块的涨/跌停个股数与趋势，支持收藏标记
+ */
 interface SectorCardProps {
   sector: Sector
   onFavorite?: (sectorId: string) => void
   isFavorite?: boolean
 }
 
+/**
+ * 板块卡片主组件
+ */
 export function SectorCard({ sector, onFavorite, isFavorite }: SectorCardProps) {
+  /** 返回板块趋势图标 */
   const getTrendIcon = () => {
     switch (sector.trend_direction) {
       case 'up':
@@ -19,6 +27,7 @@ export function SectorCard({ sector, onFavorite, isFavorite }: SectorCardProps) 
     }
   }
 
+  /** 根据板块状态返回卡片样式（主升/退潮强调动效） */
   const getCardStyles = () => {
     let baseClasses = "bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border transition-all duration-300 hover:shadow-lg"
     
@@ -33,6 +42,7 @@ export function SectorCard({ sector, onFavorite, isFavorite }: SectorCardProps) 
     return baseClasses
   }
 
+  /** 净额颜色（涨停-跌停） */
   const getScoreColor = () => {
     const score = sector.limit_up_stocks - sector.limit_down_stocks
     if (score >= 5) return 'text-green-500'
@@ -40,6 +50,7 @@ export function SectorCard({ sector, onFavorite, isFavorite }: SectorCardProps) 
     return 'text-red-500'
   }
 
+  /** 计算净额（涨停-跌停） */
   const getScore = () => {
     return sector.limit_up_stocks - sector.limit_down_stocks
   }

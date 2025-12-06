@@ -1,10 +1,17 @@
 import { Sector } from '../types'
 
+/**
+ * 板块情绪监控矩阵
+ * 用途：按主升/退潮/普通分区展示板块情绪与关键指标
+ */
 interface SectorSentimentMatrixProps {
   sectors: Sector[]
   loading: boolean
 }
 
+/**
+ * 矩阵主组件
+ */
 export function SectorSentimentMatrix({ sectors, loading }: SectorSentimentMatrixProps) {
   if (loading) {
     return (
@@ -23,6 +30,7 @@ export function SectorSentimentMatrix({ sectors, loading }: SectorSentimentMatri
     )
   }
 
+  /** 分类板块列表 */
   const risingSectors = sectors.filter(s => s.is_rising)
   const fallingSectors = sectors.filter(s => s.is_falling)
   const normalSectors = sectors.filter(s => !s.is_rising && !s.is_falling)

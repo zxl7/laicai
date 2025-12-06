@@ -1,11 +1,24 @@
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { MarketSentiment } from '../types'
 
+/**
+ * 情绪指标卡片组件
+ * 用途：展示市场情绪分数、趋势箭头以及涨跌停家数的核心信息
+ */
+
+/**
+ * 组件入参
+ * - sentiment: 市场情绪数据；为空时显示“暂无数据”
+ * - loading: 加载占位骨架
+ */
 interface SentimentCardProps {
   sentiment: MarketSentiment | null
   loading?: boolean
 }
 
+/**
+ * 情绪卡片主组件
+ */
 export function SentimentCard({ sentiment, loading }: SentimentCardProps) {
   if (loading) {
     return (
@@ -25,6 +38,7 @@ export function SentimentCard({ sentiment, loading }: SentimentCardProps) {
     )
   }
 
+  /** 返回趋势图标（递增/递减/震荡） */
   const getTrendIcon = () => {
     switch (sentiment.trend_direction) {
       case 'up':
@@ -36,12 +50,14 @@ export function SentimentCard({ sentiment, loading }: SentimentCardProps) {
     }
   }
 
+  /** 根据分数返回数值颜色 */
   const getScoreColor = () => {
     if (sentiment.sentiment_score >= 70) return 'text-green-500'
     if (sentiment.sentiment_score >= 40) return 'text-yellow-500'
     return 'text-red-500'
   }
 
+  /** 根据分数返回卡片渐变背景 */
   const getBackgroundGradient = () => {
     if (sentiment.sentiment_score >= 70) return 'from-green-900/20 to-green-800/10'
     if (sentiment.sentiment_score >= 40) return 'from-yellow-900/20 to-yellow-800/10'

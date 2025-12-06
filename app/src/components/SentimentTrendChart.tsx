@@ -21,6 +21,10 @@ ChartJS.register(
   Legend
 )
 
+/**
+ * 涨跌停趋势图组件
+ * 用途：以折线图展示时间维度上的涨停/跌停家数变化
+ */
 interface SentimentTrendChartProps {
   data: Array<{
     timestamp: string
@@ -30,6 +34,9 @@ interface SentimentTrendChartProps {
   loading?: boolean
 }
 
+/**
+ * 趋势图主组件
+ */
 export function SentimentTrendChart({ data, loading }: SentimentTrendChartProps) {
   if (loading) {
     return (
@@ -39,6 +46,7 @@ export function SentimentTrendChart({ data, loading }: SentimentTrendChartProps)
     )
   }
 
+  /** 构造 Chart.js 数据 */
   const chartData = {
     labels: data.map(item => new Date(item.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })),
     datasets: [
@@ -61,6 +69,7 @@ export function SentimentTrendChart({ data, loading }: SentimentTrendChartProps)
     ]
   }
 
+  /** 图表配置项（深色主题适配） */
   const options: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,

@@ -1,10 +1,17 @@
 import { MarketSentiment } from '../types'
 
+/**
+ * 市场情绪概览仪表板
+ * 用途：以卡片形式汇总展示趋势方向、情绪强度、涨/跌停家数
+ */
 interface MarketSentimentDashboardProps {
   data: MarketSentiment | null
   loading: boolean
 }
 
+/**
+ * 仪表板主组件
+ */
 export function MarketSentimentDashboard({ data, loading }: MarketSentimentDashboardProps) {
   if (loading || !data) {
     return (
@@ -20,6 +27,7 @@ export function MarketSentimentDashboard({ data, loading }: MarketSentimentDashb
     )
   }
 
+  /** 趋势文案颜色 */
   const getSentimentColor = (sentiment: string) => {
     switch (sentiment) {
       case 'up':
@@ -33,6 +41,7 @@ export function MarketSentimentDashboard({ data, loading }: MarketSentimentDashb
     }
   }
 
+  /** 趋势中文文案 */
   const getSentimentText = (sentiment: string) => {
     switch (sentiment) {
       case 'up':

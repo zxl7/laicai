@@ -3,15 +3,21 @@ import { Activity, Grid3X3, User, LogOut } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useAuth } from '../hooks/useAuth'
 
+/**
+ * 顶部导航栏
+ * 用途：页面路由切换、用户登录/退出入口（移动端含折叠导航）
+ */
 export function Navigation() {
   const location = useLocation()
   const { user, signOut, loading } = useAuth()
 
+  /** 主导航项定义 */
   const navItems = [
     { path: '/', label: '市场情绪', icon: Activity },
     { path: '/sectors', label: '板块矩阵', icon: Grid3X3 }
   ]
 
+  /** 退出登录 */
   const handleSignOut = async () => {
     await signOut()
   }
