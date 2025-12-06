@@ -16,7 +16,7 @@ export function Navigation() {
   const navItems = [
     { path: '/', label: '市场情绪', icon: Activity },
     { path: '/sectors', label: '板块矩阵', icon: Grid3X3 },
-    { path: '/company', label: '公司简介', icon: User }
+    { path: '/company', label: '股票总池', icon: User }
   ]
 
   /** 退出登录 */

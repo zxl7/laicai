@@ -2,7 +2,7 @@ import type { LimitUpItem } from '../api/types'
 import { formatCurrency, formatPercent } from '../api/utils'
 import { useEffect, useState } from 'react'
 import { fetchCompanyProfile } from '../api/company'
-import { getCompanyCache } from '../services/companyStore'
+import { getCompanyCache, updateCompanyCache } from '../services/companyStore'
 
 /**
  * 涨停股池表格
@@ -35,8 +35,15 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
       const profiles = await fetchCompanyProfile(item.dm)
       const profile = profiles[0]
       if (!profile) throw new Error('公司简介为空')
-      // eslint-disable-next-line no-console
-      console.log('公司详情', { code: item.dm, list: item, profile })
+      const payload = {
+        [item.dm]: {
+          code: item.dm,
+          list: item,
+          lastUpdated: new Date().toISOString(),
+          ...profile
+        }
+      }
+      updateCompanyCache(payload)
     } catch (e) {
       console.error(e)
     } finally {

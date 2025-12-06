@@ -10,11 +10,10 @@ import { fetchCompanyProfile } from '../api/company'
 
 export type CompanyRecord = {
   code: string
-  profile?: CompanyProfile
   list?: LimitUpItem
   trades?: unknown
   lastUpdated?: string
-}
+} & Partial<CompanyProfile>
 /**
  * 股票池存储结构：键为公司代码，值为该公司最新的聚合数据
  */
@@ -29,31 +28,23 @@ let inited = false
  */
 
 function readLocal(): Store {
-  try {
-    const raw = localStorage.getItem(LS_KEY)
-    return raw ? JSON.parse(raw) : {}
-  } catch {
-    return {}
-  }
+  const raw = localStorage.getItem(LS_KEY)
+  return raw ? JSON.parse(raw) : {}
 }
 /**
  * 将股票池写入本地存储（JSON 序列化）
  */
 function writeLocal(store: Store) {
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify(store))
-  } catch {}
+  localStorage.setItem(LS_KEY, JSON.stringify(store))
 }
 
 export async function initCompanyCache(): Promise<void> {
   if (inited) return
-  try {
-    const res = await fetch('/company-cache.json')
-    if (res.ok) {
-      const fileStore = (await res.json()) as Store
-      writeLocal(fileStore)
-    }
-  } catch {}
+  const res = await fetch('/company-cache.json')
+  if (res.ok) {
+    const fileStore = (await res.json()) as Store
+    writeLocal(fileStore)
+  }
   inited = true
 }
 /**
@@ -74,14 +65,12 @@ export const getCompanyPool = getCompanyCache
 
 export async function enrichMissingProfiles(): Promise<void> {
   const s = getCompanyCache()
-  const codes = Object.keys(s).filter(code => !s[code].profile)
+  const codes = Object.keys(s).filter(code => !s[code].name)
   for (const code of codes) {
-    try {
-      const list = await fetchCompanyProfile(code)
-      if (Array.isArray(list) && list[0]) {
-        upsertCompanyRecord(code, { profile: list[0] })
-      }
-    } catch { /* empty */ }
+    const list = await fetchCompanyProfile(code)
+    if (Array.isArray(list) && list[0]) {
+      upsertCompanyRecord(code, { ...list[0] })
+    }
   }
 }
 /**
