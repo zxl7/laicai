@@ -11,4 +11,10 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --bg-base: #101725;
+  --bg-container: #151d2c;
+  --bg-container-50: #151d2c80;
+  --bg-container-60: #151d2c99;
+  --border: #1a2130;
+  --tooltip-bg: var(--bg-container);
 }

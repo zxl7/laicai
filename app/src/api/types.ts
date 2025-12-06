@@ -15,6 +15,23 @@ export interface LimitUpItem {
   tj: string
 }
 
+export interface LimitDownItem {
+  dm: string
+  mc: string
+  p: number
+  zf: number
+  cje: number
+  lt: number
+  zsz: number
+  pe: number
+  hs: number
+  lbc: number
+  lbt: string
+  zj: number
+  fba: number
+  zbc: number
+}
+
 export interface CompanyProfile {
   name: string
   ename: string
@@ -56,4 +73,3 @@ export interface CompanyProfile {
   signfee: string
   pdate: string
 }
-

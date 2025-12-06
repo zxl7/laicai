@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import 'antd/dist/reset.css'
+import { ConfigProvider, theme } from 'antd'
+import { darkTokens } from './theme'
 import { useEffect } from "react"
 import { Navigation } from "./components/Navigation"
 import { Home } from "./pages/Home"
@@ -15,22 +17,24 @@ export default function App() {
     registerCompanyCacheEvent()
   }, [])
   return (
-    <Router>
-      <div className="min-h-screen bg-slate-900">
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/*" element={
-            <>
-              <Navigation />
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/sectors" element={<Sectors />} />
-                <Route path="/company" element={<Company />} />
-              </Routes>
-            </>
-          } />
-        </Routes>
-      </div>
-    </Router>
+    <ConfigProvider theme={{ algorithm: theme.darkAlgorithm, token: darkTokens }}>
+      <Router>
+        <div className="min-h-screen bg-[var(--bg-base)]">
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/*" element={
+              <>
+                <Navigation />
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/sectors" element={<Sectors />} />
+                  <Route path="/company" element={<Company />} />
+                </Routes>
+              </>
+            } />
+          </Routes>
+        </div>
+      </Router>
+    </ConfigProvider>
   )
 }

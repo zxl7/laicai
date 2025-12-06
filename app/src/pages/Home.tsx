@@ -2,7 +2,9 @@ import { useMarketSentiment } from "../hooks/useSentimentData"
 import { SentimentCard } from "../components/SentimentCard"
 import { SentimentTrendChart } from "../components/SentimentTrendChart"
 import { useLimitUpList } from "../hooks/useLimitUp"
+import { useLimitDownList } from "../hooks/useLimitDown"
 import { LimitUpTable } from "../components/LimitUpTable"
+import { LimitDownTable } from "../components/LimitDownTable"
 import { useMemo, useState } from "react"
 import { getStoredLicense, setStoredLicense } from "../api/utils"
 import { UNIFIED_DATE } from "../api/limitup"
@@ -12,6 +14,7 @@ export function Home() {
   const { sentiment, loading, error } = useMarketSentiment()
   const [selectedDate, setSelectedDate] = useState<string>(UNIFIED_DATE)
   const { data: limitUpList, loading: luLoading, error: luError, refresh, date } = useLimitUpList(selectedDate)
+  const { data: limitDownList, loading: ldLoading, error: ldError, refresh: refreshDown, date: dateDown } = useLimitDownList(selectedDate)
   const today = useMemo(() => UNIFIED_DATE, [])
   const [licenseInput, setLicenseInput] = useState<string>(getStoredLicense() || "")
   const cachedLimitUpList = useMemo(() => {
@@ -49,7 +52,7 @@ export function Home() {
 
         {error && <div className="mb-6 bg-red-900/20 border border-red-500/30 rounded-lg p-4 text-red-400">情绪数据加载异常：{error}</div>}
 
-        <div className="mb-6 bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700">
+        <div className="mb-6 bg-[var(--bg-container-50)] backdrop-blur-sm rounded-xl p-4 border border-[var(--border)]">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="text-white font-semibold">涨停股池查询</h2>
@@ -63,28 +66,32 @@ export function Home() {
                 min={today}
                 onChange={(e) => setSelectedDate(e.target.value)}
                 disabled
-                className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
+                className="px-3 py-2 bg-[var(--bg-container-60)] border border-[var(--border)] rounded-lg text-white text-sm"
               />
               <input
                 type="text"
                 placeholder="输入API Token"
                 value={licenseInput}
                 onChange={(e) => setLicenseInput(e.target.value)}
-                className="w-64 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                className="w-64 px-3 py-2 bg-[var(--bg-container-60)] border border-[var(--border)] rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
               />
               <button
                 onClick={() => {
                   if (licenseInput.trim()) {
                     setStoredLicense(licenseInput.trim())
                     refresh()
+                    refreshDown()
                   }
                 }}
-                className="px-3 py-2 rounded-md text-sm font-medium bg-slate-700 hover:bg-slate-600 text-slate-200">
+                className="px-3 py-2 rounded-md text-sm font-medium bg-[var(--bg-container-60)] hover:bg-slate-600 text-slate-200">
                 保存Token
               </button>
               
               <button onClick={refresh} disabled={luLoading} className="px-3 py-2 rounded-md text-sm font-medium bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white">
                 查询
+              </button>
+              <button onClick={refreshDown} disabled={ldLoading} className="px-3 py-2 rounded-md text-sm font-medium bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white">
+                查询跌停
               </button>
             </div>
           </div>
@@ -142,6 +149,8 @@ export function Home() {
         <div className="space-y-4">
           {luError && <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 text-red-400">涨停股池加载异常：{luError}</div>}
           <LimitUpTable data={displayLimitUp} loading={displayLoading} onRefresh={refresh} date={date} />
+          {ldError && <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 text-red-400">跌停股池加载异常：{ldError}</div>}
+          <LimitDownTable data={limitDownList} loading={ldLoading} onRefresh={refreshDown} date={dateDown} />
         </div>
       </div>
     </div>

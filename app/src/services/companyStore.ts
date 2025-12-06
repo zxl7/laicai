@@ -1,4 +1,4 @@
-import type { CompanyProfile, LimitUpItem } from '../api/types'
+import type { CompanyProfile, LimitUpItem, LimitDownItem } from '../api/types'
 import { fetchCompanyProfile } from '../api/company'
 /**
  * 股票池本地缓存（扁平结构）
@@ -11,6 +11,7 @@ import { fetchCompanyProfile } from '../api/company'
 export type CompanyRecord = {
   code: string
   list?: LimitUpItem
+  listDown?: LimitDownItem
   trades?: unknown
   lastUpdated?: string
 } & Partial<CompanyProfile>
@@ -94,6 +95,10 @@ export function upsertCompanyRecord(code: string, payload: Partial<CompanyRecord
  */
 export function upsertList(code: string, list: LimitUpItem): CompanyRecord {
   return upsertCompanyRecord(code, { list })
+}
+
+export function upsertListDown(code: string, listDown: LimitDownItem): CompanyRecord {
+  return upsertCompanyRecord(code, { listDown })
 }
 
 // 导出功能已移除，保留控制台打印股票池
