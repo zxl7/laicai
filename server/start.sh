@@ -2,38 +2,49 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-cd "$REPO_ROOT"
+cd "$SCRIPT_DIR"
 
-VENV_DIR="${VENV_DIR:-server/.venv}"
 PORT="${PORT:-8000}"
 HOST="${HOST:-0.0.0.0}"
 RELOAD="${RELOAD:-}"
+ENV_FILE="${ENV_FILE:-}"
+APP="${APP:-main:app}"
+FIND_PORT="${FIND_PORT:-}"
 
-if [ ! -x "$VENV_DIR/bin/python" ]; then
-  python3 -m venv "$VENV_DIR"
-fi
-
-REQ_FILE="${REQ_FILE:-server/requirements.txt}"
-"$VENV_DIR/bin/pip" install -r "$REQ_FILE" >/dev/null
+while [ "${1-}" != "" ]; do
+  case "$1" in
+    --port) PORT="$2"; shift 2;;
+    --host) HOST="$2"; shift 2;;
+    --reload) RELOAD=1; shift;;
+    --env) ENV_FILE="$2"; shift 2;;
+    --app) APP="$2"; shift 2;;
+    --find-port) FIND_PORT=1; shift;;
+    *) shift;;
+  esac
+done
 
 if [ -f ".env" ]; then
-  set -a
-  . ".env"
-  set +a
+  set -a; . ".env"; set +a
 fi
-if [ -f "server/.env" ]; then
-  set -a
-  . "server/.env"
-  set +a
+if [ -n "$ENV_FILE" ] && [ -f "$ENV_FILE" ]; then
+  set -a; . "$ENV_FILE"; set +a
 fi
 
 export THIRD_PARTY_BASE_URL="${THIRD_PARTY_BASE_URL:-}"
 export THIRD_PARTY_API_KEY="${THIRD_PARTY_API_KEY:-}"
+
+if [ -n "$FIND_PORT" ]; then
+  TRY="$PORT"
+  while lsof -i ":$TRY" >/dev/null 2>&1; do
+    TRY="$((TRY+1))"
+  done
+  PORT="$TRY"
+fi
 
 ARGS=("--host" "$HOST" "--port" "$PORT")
 if [ -n "$RELOAD" ]; then
   ARGS+=("--reload")
 fi
 
-exec "$VENV_DIR/bin/python" -m uvicorn main:app "${ARGS[@]}"
+echo "Launching $APP on http://$HOST:$PORT"
+exec python3 -m uvicorn "$APP" "${ARGS[@]}"
