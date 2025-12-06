@@ -1,9 +1,10 @@
-import type { LimitUpItem } from '../types/biying'
-import { formatCurrency, formatPercent } from '../services/limitUpApi'
-import { useState } from 'react'
-import { fetchCompanyProfile } from '../services/companyProfileApi'
+import type { LimitUpItem } from '../api/types'
+import { formatCurrency, formatPercent } from '../api/utils'
+import { useEffect, useState } from 'react'
+import { fetchCompanyProfile } from '../api/company'
 import { setCombined, hasCombined } from '../services/cache'
 import type { CombinedStockData } from '../types/combined'
+import { exportCompanyCache, initCompanyCache, upsertCompanyRecord, upsertDateEntry, getCompanyRecord } from '../services/companyStore'
 
 /**
  * 涨停股池表格
@@ -23,6 +24,19 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
   const [cachingCode, setCachingCode] = useState<string | null>(null)
   const [cachedCodes, setCachedCodes] = useState<Record<string, boolean>>({})
 
+  useEffect(() => {
+    initCompanyCache()
+  }, [])
+
+  // 将涨停池返回的所有数据写入缓存（按日期分散存储），即使没有公司详情
+  useEffect(() => {
+    if (!date || !Array.isArray(data)) return
+    for (const item of data) {
+      upsertCompanyRecord(item.dm, {})
+      upsertDateEntry(item.dm, date, { list: item })
+    }
+  }, [data, date])
+
   const handleFetchDetail = async (item: LimitUpItem) => {
     try {
       setCachingCode(item.dm)
@@ -36,6 +50,8 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
         profile
       }
       setCombined(combined)
+      upsertCompanyRecord(item.dm, { profile })
+      if (date) upsertDateEntry(item.dm, date, { list: item })
       setCachedCodes(prev => ({ ...prev, [item.dm]: true }))
     } catch (e) {
       console.error(e)
@@ -56,6 +72,12 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
           className="px-3 py-1 rounded-md text-sm font-medium bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white transition-colors"
         >
           刷新
+        </button>
+        <button
+          onClick={exportCompanyCache}
+          className="ml-3 px-3 py-1 rounded-md text-sm font-medium bg-slate-700 hover:bg-slate-600 text-slate-200"
+        >
+          导出缓存
         </button>
       </div>
 
@@ -111,7 +133,11 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
                       disabled={cachingCode === item.dm}
                       className="px-3 py-1 rounded-md text-xs font-medium bg-slate-700 hover:bg-slate-600 disabled:bg-slate-600 text-slate-200"
                     >
-                      {cachingCode === item.dm ? '保存中…' : hasCombined(item.dm, date) || cachedCodes[item.dm] ? '已缓存' : '查看详情'}
+                      {cachingCode === item.dm
+                        ? '保存中…'
+                        : (getCompanyRecord(item.dm)?.dates?.[String(date || '')]?.list
+                          ? '已缓存'
+                          : '查看详情')}
                     </button>
                   </td>
                 </tr>

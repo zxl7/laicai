@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { fetchCompanyProfile } from '../services/companyProfileApi'
-import type { CompanyProfile } from '../types/company'
+import { fetchCompanyProfile } from '../api/company'
+import type { CompanyProfile } from '../api/types'
 
 export function useCompanyProfile(code?: string) {
   const [data, setData] = useState<CompanyProfile[] | null>(null)
@@ -27,4 +27,3 @@ export function useCompanyProfile(code?: string) {
 
   return { data, loading, error, refresh: load }
 }
-

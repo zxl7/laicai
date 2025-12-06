@@ -1,4 +1,5 @@
 import type { LimitUpItem } from '../types/biying'
+import { initCompanyCache, upsertCompanyRecord, upsertDateEntry } from './companyStore'
 
 const BASE = import.meta.env.VITE_BIYING_API_BASE ?? 'https://api.biyingapi.com/hslt/ztgc'
 
@@ -52,7 +53,16 @@ export async function fetchLimitUpList(date: string): Promise<LimitUpItem[]> {
     throw new Error(`请求失败: ${res.status}`)
   }
   const data = await res.json()
-  return Array.isArray(data) ? data as LimitUpItem[] : []
+  const list = Array.isArray(data) ? (data as LimitUpItem[]) : []
+  try {
+    await initCompanyCache()
+    for (const item of list) {
+      const code = item.dm
+      upsertCompanyRecord(code, {})
+      if (date) upsertDateEntry(code, date, { list: item })
+    }
+  } catch {}
+  return list
 }
 
 export function formatCurrency(n: number): string {

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { fetchLimitUpList, UNIFIED_DATE } from '../services/limitUpApi'
+import { fetchLimitUpList, UNIFIED_DATE } from '../api/limitup'
 import type { LimitUpItem } from '../types/biying'
 
 export function useLimitUpList(date?: string) {

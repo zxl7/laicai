@@ -4,7 +4,8 @@ import { SentimentTrendChart } from "../components/SentimentTrendChart"
 import { useLimitUpList } from "../hooks/useLimitUp"
 import { LimitUpTable } from "../components/LimitUpTable"
 import { useMemo, useState } from "react"
-import { UNIFIED_DATE, getStoredLicense, setStoredLicense } from "../services/limitUpApi"
+import { getStoredLicense, setStoredLicense } from "../api/utils"
+import { UNIFIED_DATE } from "../api/limitup"
 
 export function Home() {
   const { sentiment, loading, error } = useMarketSentiment()

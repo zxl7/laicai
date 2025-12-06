@@ -8,12 +8,14 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "check": "tsc -b --noEmit"
+    "check": "tsc -b --noEmit",
+    "build:cache": "node scripts/build-company-cache.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.86.1",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
+    "axios": "^1.7.7",
     "lucide-react": "^0.511.0",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.3.1",

@@ -1,4 +1,4 @@
-import type { CompanyProfile } from '../types/company'
+import type { CompanyProfile } from '../api/types'
 
 interface Props {
   profile: CompanyProfile
@@ -63,4 +63,3 @@ export function CompanyProfileCard({ profile }: Props) {
     </div>
   )
 }
-

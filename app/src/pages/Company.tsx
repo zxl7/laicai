@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useCompanyProfile } from '../hooks/useCompanyProfile'
 import { CompanyProfileCard } from '../components/CompanyProfileCard'
-import { getStoredLicense, setStoredLicense } from '../services/limitUpApi'
+import { getStoredLicense, setStoredLicense } from '../api/utils'
 
 export function Company() {
   const [params, setParams] = useSearchParams()
@@ -83,4 +83,3 @@ export function Company() {
     </div>
   )
 }
-
