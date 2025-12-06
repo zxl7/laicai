@@ -2,8 +2,10 @@ import type { LimitUpItem, CompanyProfile } from '../api/types'
 import { formatCurrency, formatPercent } from '../api/utils'
 import { useEffect, useState } from 'react'
 import { fetchCompanyProfile } from '../api/company'
-import { getCompanyCache, updateCompanyCache } from '../services/companyStore'
+import { getCompanyCache, updateCompanyCache, getCompanyRecord } from '../services/companyStore'
 import { CompanyProfileCard } from './CompanyProfileCard'
+import { Tag } from 'antd'
+import { resolveTagColor } from '../lib/tagColors'
 
 /**
  * 涨停股池表格
@@ -30,6 +32,12 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
   }, [data])
 
   const handleFetchDetail = async (item: LimitUpItem) => {
+    const local = getCompanyRecord(item.dm)
+    if (local && local.name) {
+      setDetailProfile(local as unknown as CompanyProfile)
+      setDetailOpen(true)
+      return
+    }
     setCachingCode(item.dm)
     const profiles = await fetchCompanyProfile(item.dm)
     const profile = profiles[0] || null
@@ -71,7 +79,7 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
           <thead className="sticky top-0 z-10 bg-slate-900">
             <tr>
               {[
-                '代码', '名称', '价格', '涨幅', '成交额', '流通市值', '总市值', '换手率', '连板数', '首封时间', '末封时间', '封板资金', '炸板次数', '统计', '详情'
+                '代码', '名称', '价格', '涨幅', '成交额', '流通市值', '总市值', '换手率', '连板数', '首封时间', '末封时间', '封板资金', '炸板次数', '统计', '概念', '详情'
               ].map((h) => (
                 <th key={h} className="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                   {h}
@@ -83,7 +91,7 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
             {loading ? (
               Array.from({ length: 10 }).map((_, i) => (
                 <tr key={i} className="animate-pulse">
-                  {Array.from({ length: 14 }).map((__, j) => (
+                  {Array.from({ length: 16 }).map((__, j) => (
                     <td key={j} className="px-4 py-3">
                       <div className="h-4 bg-slate-700 rounded" />
                     </td>
@@ -111,6 +119,28 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
                   <td className="px-4 py-3 text-slate-200">{formatCurrency(item.zj)}</td>
                   <td className="px-4 py-3 text-slate-200">{item.zbc}</td>
                   <td className="px-4 py-3 text-slate-400 text-xs">{item.tj}</td>
+                  <td className="px-4 py-3 group">
+                    {(() => {
+                      const rec = getCompanyRecord(item.dm)
+                      const tags = (rec?.idea || '').split(',').map(s => s.trim()).filter(Boolean)
+                      if (tags.length === 0) return <span className="text-slate-500 text-xs">-</span>
+                      const firstTwo = tags.slice(0, 2)
+                      return (
+                        <>
+                          <div className="flex flex-wrap gap-2 group-hover:hidden">
+                            {firstTwo.map(t => (
+                              <Tag key={t} className="m-0" color={resolveTagColor(t)}>{t}</Tag>
+                            ))}
+                          </div>
+                          <div className="hidden group-hover:flex flex-wrap gap-2">
+                            {tags.map(t => (
+                              <Tag key={t} className="m-0" color={resolveTagColor(t)}>{t}</Tag>
+                            ))}
+                          </div>
+                        </>
+                      )
+                    })()}
+                  </td>
                   <td className="px-4 py-3">
                     <button
                       onClick={() => handleFetchDetail(item)}

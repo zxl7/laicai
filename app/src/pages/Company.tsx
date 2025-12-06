@@ -3,6 +3,8 @@ import { getCompanyCache, Store, CompanyRecord } from '../services/companyStore'
 import { formatCurrency, formatPercent } from '../api/utils'
 import { CompanyProfileCard } from '../components/CompanyProfileCard'
 import type { CompanyProfile } from '../api/types'
+import { Tag } from 'antd'
+import { resolveTagColor } from '../lib/tagColors'
 
 export function Company() {
   const [pool, setPool] = useState<Store>({})
@@ -30,7 +32,7 @@ export function Company() {
             <table className="min-w-full divide-y divide-slate-700">
               <thead className="sticky top-0 bg-slate-900">
                 <tr>
-                  {['代码', '名称', '涨幅', '价格', '成交额', '最近更新', '详情状态', '详情'].map(h => (
+                  {['代码', '名称', '涨幅', '价格', '成交额', '最近更新', '详情状态', '概念', '详情'].map(h => (
                     <th key={h} className="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
@@ -45,6 +47,27 @@ export function Company() {
                     <td className="px-4 py-3 text-slate-200">{rec.list?.cje != null ? formatCurrency(rec.list.cje) : '-'}</td>
                     <td className="px-4 py-3 text-slate-400 text-xs">{rec.lastUpdated ? new Date(rec.lastUpdated).toLocaleString('zh-CN') : '-'}</td>
                     <td className="px-4 py-3 text-slate-200">{rec.name ? '已补全' : '缺失'}</td>
+                    <td className="px-4 py-3 group">
+                      {(() => {
+                        const tags = (rec.idea || '').split(',').map(s => s.trim()).filter(Boolean)
+                        if (tags.length === 0) return <span className="text-slate-500 text-xs">-</span>
+                        const firstTwo = tags.slice(0, 2)
+                        return (
+                          <>
+                            <div className="flex flex-wrap gap-2 group-hover:hidden">
+                              {firstTwo.map(t => (
+                                <Tag key={t} className="m-0" color={resolveTagColor(t)}>{t}</Tag>
+                              ))}
+                            </div>
+                            <div className="hidden group-hover:flex flex-wrap gap-2">
+                              {tags.map(t => (
+                                <Tag key={t} className="m-0" color={resolveTagColor(t)}>{t}</Tag>
+                              ))}
+                            </div>
+                          </>
+                        )
+                      })()}
+                    </td>
                     <td className="px-4 py-3">
                       <button
                         onClick={() => { setDetailRec(rec); setDetailOpen(true) }}
@@ -57,7 +80,7 @@ export function Company() {
                 ))}
                 {entries.length === 0 && (
                   <tr>
-                    <td className="px-4 py-8 text-center text-slate-400" colSpan={8}>暂无股票池数据</td>
+                    <td className="px-4 py-8 text-center text-slate-400" colSpan={9}>暂无股票池数据</td>
                   </tr>
                 )}
               </tbody>
