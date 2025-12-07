@@ -1,36 +1,39 @@
-import type { CompanyProfile } from '../api/types'
-import { Tag } from 'antd'
-import { resolveTagColor } from '../lib/tagColors'
+import type { CompanyProfile } from "../api/types"
+import { Tag } from "antd"
+import { resolveTagColor } from "../lib/tagColors"
 
 interface Props {
   profile: CompanyProfile
 }
 
 export function CompanyProfileCard({ profile }: Props) {
-  const tags = (profile.idea || '').split(',').map(s => s.trim()).filter(Boolean)
+  const tags = (profile.idea || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
       <div className="mb-4">
-        <h2 className="text-xl font-semibold text-white">{profile.name}</h2>
+        <h2 className="text-xl font-semibold text-white">{profile.mc}</h2>
         <p className="text-slate-400 text-sm">{profile.ename}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <div className="text-slate-400 text-xs">上市市场</div>
-          <div className="text-white">{profile.market}</div>
+          <div className="text-slate-400 text-xs">当前价格</div>
+          <div className="text-white">{profile.p}</div>
         </div>
         <div>
-          <div className="text-slate-400 text-xs">上市日期</div>
-          <div className="text-white">{profile.ldate}</div>
+          <div className="text-slate-400 text-xs">所属板块</div>
+          <div className="text-white">{profile.hy}</div>
         </div>
         <div>
-          <div className="text-slate-400 text-xs">发行价格</div>
-          <div className="text-white">{profile.sprice}</div>
+          <div className="text-slate-400 text-xs">公司全称</div>
+          <div className="text-white">{profile.name}</div>
         </div>
         <div>
-          <div className="text-slate-400 text-xs">主承销商</div>
-          <div className="text-white">{profile.principal}</div>
+          <div className="text-slate-400 text-xs">公司地址</div>
+          <div className="text-white">{profile.addr}</div>
         </div>
         <div className="md:col-span-2">
           <div className="text-slate-400 text-xs">概念及板块</div>
@@ -38,8 +41,10 @@ export function CompanyProfileCard({ profile }: Props) {
             {tags.length === 0 ? (
               <span className="text-slate-500 text-xs">-</span>
             ) : (
-              tags.map(t => (
-                <Tag key={t} className="m-0" color={resolveTagColor(t)}>{t}</Tag>
+              tags.map((t) => (
+                <Tag key={t} className="m-0" color={resolveTagColor(t)}>
+                  {t}
+                </Tag>
               ))
             )}
           </div>
@@ -48,28 +53,26 @@ export function CompanyProfileCard({ profile }: Props) {
 
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <div className="text-slate-400 text-xs">公司网站</div>
-          <div className="text-amber-400 break-all">{profile.site}</div>
+          <div className="text-slate-400 text-xs">是否异动</div>
+          {/* <div className="text-amber-400 break-all">{profile.yd === "1" ? "是" : "否"}</div> */}
         </div>
         <div>
-          <div className="text-slate-400 text-xs">信息披露网址</div>
-          <div className="text-amber-400 break-all">{profile.infosite}</div>
+          <div className="text-slate-400 text-xs">利好</div>
+          {/* <div className="text-amber-400 break-all">{profile.infosite}</div> */}
         </div>
         <div>
-          <div className="text-slate-400 text-xs">公司邮箱</div>
-          <div className="text-white break-all">{profile.email}</div>
+          <div className="text-slate-400 text-xs">利空</div>
+          {/* <div className="text-white break-all">{profile.email}</div> */}
         </div>
         <div>
-          <div className="text-slate-400 text-xs">联系电话</div>
-          <div className="text-white">{profile.phone}</div>
+          <div className="text-slate-400 text-xs">信息披露</div>
+          {/* <div className="text-white">{profile.phone}</div> */}
         </div>
       </div>
 
       <div className="mt-6">
         <div className="text-slate-400 text-xs mb-2">公司简介</div>
-        <div className="text-slate-200 text-sm leading-6 whitespace-pre-line">
-          {profile.desc}
-        </div>
+        <div className="text-slate-200 text-sm leading-6 whitespace-pre-line">{profile.bscope}</div>
       </div>
     </div>
   )

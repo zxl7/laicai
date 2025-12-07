@@ -221,7 +221,7 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
         {detailProfile && (
           <div className="space-y-4">
             <CompanyProfileCard profile={detailProfile} />
-            <pre className="bg-[var(--bg-container-60)] text-slate-200 text-xs rounded-lg p-3 overflow-auto max-h-[40vh]">{JSON.stringify(detailProfile, null, 2)}</pre>
+            {/* <pre className="bg-[var(--bg-container-60)] text-slate-200 text-xs rounded-lg p-3 overflow-auto max-h-[40vh]">{JSON.stringify(detailProfile, null, 2)}</pre> */}
           </div>
         )}
       </Modal>

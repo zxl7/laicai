@@ -87,7 +87,7 @@ export function Company() {
               ) : (
                 <div className="text-slate-400 text-sm">该公司详情尚未补全</div>
               )}
-              <pre className="bg-[var(--bg-container-60)] text-slate-200 text-xs rounded-lg p-3 overflow-auto max-h-[40vh]">{JSON.stringify(detailRec, null, 2)}</pre>
+              {/* <pre className="bg-[var(--bg-container-60)] text-slate-200 text-xs rounded-lg p-3 overflow-auto max-h-[40vh]">{JSON.stringify(detailRec, null, 2)}</pre> */}
             </div>
           )}
         </Modal>

@@ -72,4 +72,19 @@ export interface CompanyProfile {
   collect: string
   signfee: string
   pdate: string
+  dm: string
+  mc: string
+  zf: string
+  p: string
+  cje: string
+  lt: string
+  zsz: string
+  hs: string
+  zj: string
+  fbt: string
+  lbt: string
+  zbc: string
+  tj: string
+  lbc: string
+  hy: string
 }
