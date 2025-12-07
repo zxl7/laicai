@@ -12,10 +12,9 @@ import { getCompanyCache } from "../services/companyStore"
 
 export function Home() {
   const { sentiment, loading, error } = useMarketSentiment()
-  const [dateUp, setDateUp] = useState<string>(UNIFIED_DATE)
-  const [dateDown, setDateDown] = useState<string>(UNIFIED_DATE)
-  const { data: limitUpList, loading: luLoading, error: luError, refresh, date } = useLimitUpList(dateUp)
-  const { data: limitDownList, loading: ldLoading, error: ldError, refresh: refreshDown, date: dateDownResolved } = useLimitDownList(dateDown)
+  const [selectedDate, setSelectedDate] = useState<string>(UNIFIED_DATE)
+  const { data: limitUpList, loading: luLoading, error: luError, refresh } = useLimitUpList(selectedDate)
+  const { data: limitDownList, loading: ldLoading, error: ldError, refresh: refreshDown } = useLimitDownList(selectedDate)
   const today = useMemo(() => UNIFIED_DATE, [])
   const [licenseInput, setLicenseInput] = useState<string>(getStoredLicense() || "")
   const cachedLimitUpList = useMemo(() => {
@@ -82,9 +81,10 @@ export function Home() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
               <h2 className="text-white font-semibold">查询设置</h2>
-              <p className="text-xs text-slate-400">同时查询涨停/跌停，按日期分别调用接口</p>
+              <p className="text-xs text-slate-400">统一日期查询涨停/跌停</p>
             </div>
             <div className="flex items-center gap-3">
+              <input type="date" value={selectedDate} min="2019-11-28" max={today} onChange={(e) => setSelectedDate(e.target.value)} className="px-3 py-2 bg-[var(--bg-container-60)] border border-[var(--border)] rounded-lg text-white text-sm" />
               <input
                 type="text"
                 placeholder="输入API Token"
@@ -100,43 +100,11 @@ export function Home() {
                     refreshDown()
                   }
                 }}
-                className="px-3 py-2 rounded-md text-sm font-medium bg-[var(--bg-container-60)] hover:bg-slate-600 text-slate-200">
+                className="px-3 py-2 rounded-md text-sm font-medium bg-[var(--bg-container-60)] hover:bg-slate-600 text-slate-200"
+              >
                 保存Token
               </button>
-            </div>
-          </div>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="text-sm text-slate-300">涨停日期</div>
-              <div className="flex items-center gap-3">
-                <input
-                  type="date"
-                  value={dateUp}
-                  min="2019-11-28"
-                  max={today}
-                  onChange={(e) => setDateUp(e.target.value)}
-                  className="px-3 py-2 bg-[var(--bg-container-60)] border border-[var(--border)] rounded-lg text-white text-sm"
-                />
-                <button onClick={refresh} disabled={luLoading} className="px-3 py-2 rounded-md text-sm font-medium bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white">
-                  查询
-                </button>
-              </div>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <div className="text-sm text-slate-300">跌停日期</div>
-              <div className="flex items-center gap-3">
-                <input
-                  type="date"
-                  value={dateDown}
-                  min="2019-11-28"
-                  max={today}
-                  onChange={(e) => setDateDown(e.target.value)}
-                  className="px-3 py-2 bg-[var(--bg-container-60)] border border-[var(--border)] rounded-lg text-white text-sm"
-                />
-                <button onClick={refreshDown} disabled={ldLoading} className="px-3 py-2 rounded-md text-sm font-medium bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white">
-                  查询
-                </button>
-              </div>
+              <button onClick={() => { refresh(); refreshDown() }} disabled={luLoading || ldLoading} className="px-3 py-2 rounded-md text-sm font-medium bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white">查询</button>
             </div>
           </div>
           {!licenseInput && <div className="mt-3 text-xs text-red-400">未设置Token：请通过URL参数 ?license=... 或在此输入并点击保存</div>}
@@ -193,11 +161,11 @@ export function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             {luError && <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 text-red-400">涨停股池加载异常：{luError}</div>}
-            <LimitUpTable data={displayLimitUp} loading={displayLoading} onRefresh={refresh} date={date} />
+            <LimitUpTable data={displayLimitUp} loading={displayLoading} onRefresh={refresh} date={selectedDate} />
           </div>
           <div className="space-y-4">
             {ldError && <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 text-red-400">跌停股池加载异常：{ldError}</div>}
-            <LimitDownTable data={limitDownList} loading={ldLoading} onRefresh={refreshDown} date={dateDownResolved} />
+            <LimitDownTable data={limitDownList} loading={ldLoading} onRefresh={refreshDown} date={selectedDate} />
           </div>
         </div>
       </div>
