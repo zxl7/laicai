@@ -74,3 +74,19 @@ def get_json(url: str, params: Optional[Dict[str, Any]] = None, headers: Optiona
     _cache[key] = (time.time() + ttl, data)
     return data
 
+
+def get_text(url: str, params: Optional[Dict[str, Any]] = None, headers: Optional[Dict[str, str]] = None, timeout: float = 10.0, referer: Optional[str] = None) -> str:
+    _rate_limit()
+    ttl = int(os.environ.get("HTTP_CACHE_TTL", "30"))
+    key = _cache_key(url, params)
+    c = _cache.get(key)
+    if c and c[0] > time.time():
+        return c[1]
+    h = _default_headers(ref=referer)
+    if headers:
+        h.update(headers)
+    r = _session.get(url, params=params, headers=h, timeout=timeout, proxies=_proxies())
+    r.raise_for_status()
+    text = r.text
+    _cache[key] = (time.time() + ttl, text)
+    return text

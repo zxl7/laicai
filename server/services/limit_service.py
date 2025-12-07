@@ -1,9 +1,8 @@
 import os
-import json
 from typing import Dict, Any
-from urllib.request import Request, urlopen
 
 from core.utils import normalize_symbol, round_price, limit_rate, symbol_to_instrument, read_env_from_file
+from core.http_client import get_json
 from services.quote_service import get_quote, get_quote_price
 
 
@@ -14,16 +13,7 @@ def get_limit_status(symbol: str) -> Dict[str, Any]:
         try:
             instrument = symbol_to_instrument(symbol)
             url = base.rstrip("/") + "/" + instrument + ("/" + api_key if api_key else "")
-            req = Request(url, headers={
-                "User-Agent": "Mozilla/5.0",
-                "Accept": "application/json, */*;q=0.1",
-                "Connection": "keep-alive",
-                "Referer": "https://api.biyingapi.com/",
-            })
-            with urlopen(req, timeout=10) as resp:
-                if resp.status != 200:
-                    raise ValueError("第三方接口请求失败")
-                data = json.loads(resp.read().decode("utf-8", errors="ignore"))
+            data = get_json(url, timeout=10, referer="https://api.biyingapi.com/")
             if not isinstance(data, dict):
                 raise ValueError("第三方接口返回格式错误")
             code_tp = str(data.get("ii") or "")
@@ -66,4 +56,3 @@ def get_limit_status(symbol: str) -> Dict[str, Any]:
         "is_limit_down": bool(is_down),
         "limit_rate": rate,
     }
-

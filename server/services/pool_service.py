@@ -1,9 +1,9 @@
 import os
-import requests
 import time
 from typing import Dict, Any, List, Optional
 
 from core.utils import round_price, format_hms, read_env_from_file
+from core.http_client import get_json
 
 
 def _to_float(v: Any) -> float:
@@ -42,16 +42,10 @@ def get_limit_up_pool(date: Optional[str] = None, api_key: Optional[str] = None)
     if not date:
         date = time.strftime("%Y-%m-%d", time.localtime())
     url = base.rstrip("/") + "/" + date + "/" + api_key
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json, */*;q=0.1",
-        "Connection": "keep-alive",
-        "Referer": "https://api.biyingapi.com/",
-    }
-    resp = requests.get(url, headers=headers, timeout=10)
-    if resp.status_code != 200:
+    try:
+        data = get_json(url, timeout=10, referer="https://api.biyingapi.com/")
+    except Exception as e:
         raise ValueError("涨停股池接口请求失败")
-    data = resp.json()
     if not isinstance(data, list):
         raise ValueError("涨停股池返回格式错误")
     def _float(v: Any) -> float:
@@ -109,16 +103,10 @@ def get_limit_down_pool(date: Optional[str] = None, api_key: Optional[str] = Non
     if not date:
         date = time.strftime("%Y-%m-%d", time.localtime())
     url = base.rstrip("/") + "/" + date + "/" + api_key
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json, */*;q=0.1",
-        "Connection": "keep-alive",
-        "Referer": "https://api.biyingapi.com/",
-    }
-    resp = requests.get(url, headers=headers, timeout=10)
-    if resp.status_code != 200:
+    try:
+        data = get_json(url, timeout=10, referer="https://api.biyingapi.com/")
+    except Exception:
         raise ValueError("跌停股池接口请求失败")
-    data = resp.json()
     if not isinstance(data, list):
         raise ValueError("跌停股池返回格式错误")
     items: List[Dict[str, Any]] = []
@@ -150,16 +138,10 @@ def get_break_pool(date: Optional[str] = None, api_key: Optional[str] = None) ->
     if not date:
         date = time.strftime("%Y-%m-%d", time.localtime())
     url = base.rstrip("/") + "/" + date + "/" + api_key
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json, */*;q=0.1",
-        "Connection": "keep-alive",
-        "Referer": "https://api.biyingapi.com/",
-    }
-    resp = requests.get(url, headers=headers, timeout=10)
-    if resp.status_code != 200:
+    try:
+        data = get_json(url, timeout=10, referer="https://api.biyingapi.com/")
+    except Exception:
         raise ValueError("炸板股池接口请求失败")
-    data = resp.json()
     if not isinstance(data, list):
         raise ValueError("炸板股池返回格式错误")
     items: List[Dict[str, Any]] = []
@@ -190,38 +172,13 @@ def get_strong_pool(date: Optional[str] = None, api_key: Optional[str] = None) -
     if not date:
         date = time.strftime("%Y-%m-%d", time.localtime())
     url = base.rstrip("/") + "/" + date + "/" + api_key
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json, */*;q=0.1",
-        "Connection": "keep-alive",
-        "Referer": "https://api.biyingapi.com/",
-    }
-    resp = requests.get(url, headers=headers, timeout=10)
-    if resp.status_code != 200:
-        # 协议回退 https->http
-        if base.startswith("https://"):
-            alt = "http://" + base[len("https://"):]
-            url = alt.rstrip("/") + "/" + date + "/" + api_key
-            resp = requests.get(url, headers=headers, timeout=10)
-        if resp.status_code != 200:
-            # 尝试读取错误详情
-            try:
-                err = resp.json()
-            except Exception:
-                err = resp.text
-            raise ValueError(f"强势股池接口请求失败: {err}")
     try:
-        data = resp.json()
+        data = get_json(url, timeout=10, referer="https://api.biyingapi.com/")
     except Exception:
-        # 若解析失败再尝试协议回退
         if base.startswith("https://"):
             alt = "http://" + base[len("https://"):]
             url = alt.rstrip("/") + "/" + date + "/" + api_key
-            resp = requests.get(url, headers=headers, timeout=10)
-            try:
-                data = resp.json()
-            except Exception:
-                raise ValueError("强势股池返回格式错误")
+            data = get_json(url, timeout=10, referer="https://api.biyingapi.com/")
     if not isinstance(data, list):
         # 有时返回错误对象，提取信息提示
         msg = ""

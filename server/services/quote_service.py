@@ -1,15 +1,12 @@
 import re
-import requests
 from typing import Dict, Any, Optional
 
 from core.utils import normalize_symbol, round_price
+from core.http_client import get_text
 
 
 def _fetch_sina(sym: str) -> Dict[str, Any]:
-    resp = requests.get("http://hq.sinajs.cn/list=" + sym, timeout=5, headers={"Referer": "https://finance.sina.com.cn/"})
-    if resp.status_code != 200:
-        raise ValueError("行情接口请求失败")
-    txt = resp.text
+    txt = get_text("http://hq.sinajs.cn/list=" + sym, timeout=5, referer="https://finance.sina.com.cn/")
     m = re.search(r'"([^"]*)"\s*;', txt)
     if not m:
         raise ValueError("未获取到行情数据")
@@ -47,4 +44,3 @@ def get_quote(symbol: str) -> Dict[str, Any]:
 
 def get_quote_price(symbol: str) -> float:
     return float(get_quote(symbol).get("price", 0.0))
-

@@ -1,8 +1,8 @@
 import os
-import requests
 from typing import Dict, Any, List, Optional
 
 from core.utils import normalize_symbol, round_price, read_env_from_file
+from core.http_client import get_json
 
 
 def _to_float(v: Any) -> float:
@@ -56,16 +56,10 @@ def get_realtime_public(symbol: str, api_key: Optional[str] = None) -> List[Dict
     code = normalize_symbol(symbol)[2:]
     base = os.environ.get("THIRD_PARTY_SSJY_BASE_URL") or "http://api.biyingapi.com/hsrl/ssjy"
     url = base.rstrip("/") + f"/{code}/{api_key}"
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json, */*;q=0.1",
-        "Connection": "keep-alive",
-        "Referer": "https://api.biyingapi.com/",
-    }
-    resp = requests.get(url, headers=headers, timeout=10)
-    if resp.status_code != 200:
+    try:
+        data = get_json(url, timeout=10, referer="https://api.biyingapi.com/")
+    except Exception:
         raise ValueError("实时交易(公开)接口请求失败")
-    data = resp.json()
     if not isinstance(data, list):
         if isinstance(data, dict):
             for k in ("data", "list", "items", "result"):
@@ -96,16 +90,10 @@ def get_realtime_broker(symbol: str, api_key: Optional[str] = None) -> List[Dict
     code = normalize_symbol(symbol)[2:]
     base = os.environ.get("THIRD_PARTY_REALTIME_BASE_URL") or "https://api.biyingapi.com/hsstock/real/time"
     url = base.rstrip("/") + f"/{code}/{api_key}"
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json, */*;q=0.1",
-        "Connection": "keep-alive",
-        "Referer": "https://api.biyingapi.com/",
-    }
-    resp = requests.get(url, headers=headers, timeout=10)
-    if resp.status_code != 200:
+    try:
+        data = get_json(url, timeout=10, referer="https://api.biyingapi.com/")
+    except Exception:
         raise ValueError("实时交易(券商)接口请求失败")
-    data = resp.json()
     def _map_broker_item(it: Dict[str, Any]) -> Dict[str, Any]:
         return {
             "p": round_price(_to_float(it.get("p"))),
@@ -149,16 +137,10 @@ def get_realtime_public_batch(symbols: List[str], api_key: Optional[str] = None)
     base = os.environ.get("THIRD_PARTY_SSJY_MORE_BASE_URL") or "http://api.biyingapi.com/hsrl/ssjy_more"
     url = base.rstrip("/") + f"/{api_key}"
     params = {"stock_codes": ",".join(codes)}
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json, */*;q=0.1",
-        "Connection": "keep-alive",
-        "Referer": "https://api.biyingapi.com/",
-    }
-    resp = requests.get(url, params=params, headers=headers, timeout=10)
-    if resp.status_code != 200:
+    try:
+        data = get_json(url, params=params, timeout=10, referer="https://api.biyingapi.com/")
+    except Exception:
         raise ValueError("实时交易(公开-多股)接口请求失败")
-    data = resp.json()
     if not isinstance(data, list):
         raise ValueError("实时交易(公开-多股)返回格式错误")
     items: List[Dict[str, Any]] = []
