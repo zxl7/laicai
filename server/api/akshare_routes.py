@@ -4,7 +4,12 @@ from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 
 from models.schemas import QuoteResponse, ErrorResponse
-from akshareData.provider import get_quote_by_akshare, get_board_concept_info_ths, get_board_concept_list_ths
+from akshareData.provider import (
+    get_quote_by_akshare,
+    get_board_concept_info_ths,
+    get_board_concept_list_ths,
+    get_stock_market_activity_legu,
+)
 
 
 router = APIRouter()
@@ -37,6 +42,15 @@ def akshare_board_concept_list():
     try:
         data = get_board_concept_list_ths()
 
+        return data
+    except Exception as e:
+        return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())
+
+
+@router.get("/akshare/api/market/activity/legu", response_model=List[Dict[str, Any]], responses={400: {"model": ErrorResponse}})
+def akshare_market_activity_legu():
+    try:
+        data = get_stock_market_activity_legu()
         return data
     except Exception as e:
         return JSONResponse(status_code=400, content=ErrorResponse(error=str(e)).dict())

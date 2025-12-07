@@ -6,12 +6,13 @@ import { useLimitDownList } from "../hooks/useLimitDown"
 import { LimitUpTable } from "../components/LimitUpTable"
 import { LimitDownTable } from "../components/LimitDownTable"
 import { useMemo, useState } from "react"
+import type { MarketSentiment } from "../types"
 import { getStoredLicense, setStoredLicense } from "../api/utils"
 import { UNIFIED_DATE } from "../api/limitup"
 import { getCompanyCache } from "../services/companyStore"
 
 export function Home() {
-  const { sentiment, loading, error } = useMarketSentiment()
+  const { loading, error } = useMarketSentiment()
   const [selectedDate, setSelectedDate] = useState<string>(UNIFIED_DATE)
   const { data: limitUpList, loading: luLoading, error: luError, refresh } = useLimitUpList(selectedDate)
   const { data: limitDownList, loading: ldLoading, error: ldError, refresh: refreshDown } = useLimitDownList(selectedDate)
@@ -65,6 +66,24 @@ export function Home() {
     })
   }, [displayLimitUp, limitDownList])
 
+  const aggSentiment = useMemo<MarketSentiment>(() => {
+    const up = displayLimitUp.length
+    const down = limitDownList.length
+    const total = up + down
+    const score = Math.round((up / Math.max(total, 1)) * 100)
+    const trend_direction: MarketSentiment["trend_direction"] = up > down ? 'up' : up < down ? 'down' : 'sideways'
+    const now = new Date().toISOString()
+    return {
+      id: 'derived',
+      timestamp: now,
+      sentiment_score: score,
+      trend_direction,
+      limit_up_count: up,
+      limit_down_count: down,
+      created_at: now,
+    }
+  }, [displayLimitUp, limitDownList])
+
   // 避免因情绪数据错误阻断页面，其它模块继续渲染
 
   return (
@@ -112,7 +131,7 @@ export function Home() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-1">
-            <SentimentCard sentiment={sentiment} loading={loading} />
+            <SentimentCard sentiment={aggSentiment} loading={loading} />
           </div>
           <div className="lg:col-span-2">
             <SentimentTrendChart data={chartData} loading={loading} />
@@ -125,13 +144,13 @@ export function Home() {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-slate-400">情绪状态</span>
-                <span className={`font-medium ${sentiment?.trend_direction === "up" ? "text-red-500" : sentiment?.trend_direction === "down" ? "text-green-500" : "text-yellow-500"}`}>
-                  {sentiment?.trend_direction === "up" ? "递增" : sentiment?.trend_direction === "down" ? "递减" : "震荡"}
+                <span className={`font-medium ${aggSentiment.trend_direction === "up" ? "text-red-500" : aggSentiment.trend_direction === "down" ? "text-green-500" : "text-yellow-500"}`}>
+                  {aggSentiment.trend_direction === "up" ? "递增" : aggSentiment.trend_direction === "down" ? "递减" : "震荡"}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-400">涨跌比</span>
-                <span className="text-white">{sentiment ? (sentiment.limit_up_count / Math.max(sentiment.limit_down_count, 1)).toFixed(2) : "-"}</span>
+                <span className="text-white">{(aggSentiment.limit_up_count / Math.max(aggSentiment.limit_down_count, 1)).toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -139,11 +158,10 @@ export function Home() {
           <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
             <h3 className="text-lg font-semibold text-white mb-4">风险提示</h3>
             <div className="space-y-2">
-              {sentiment?.sentiment_score && sentiment.sentiment_score < 30 && <div className="text-red-400 text-sm">⚠️ 市场情绪低迷，注意风险</div>}
-              {sentiment?.sentiment_score && sentiment.sentiment_score > 80 && <div className="text-yellow-400 text-sm">⚠️ 市场情绪过热，谨慎追高</div>}
-              {sentiment?.limit_down_count && sentiment.limit_down_count > 50 && <div className="text-red-400 text-sm">⚠️ 跌停家数较多，市场恐慌</div>}
-              {!sentiment?.sentiment_score ||
-                (sentiment.sentiment_score >= 30 && sentiment.sentiment_score <= 80 && sentiment.limit_down_count <= 50 && <div className="text-green-400 text-sm">✅ 市场情绪正常</div>)}
+              {aggSentiment.sentiment_score < 30 && <div className="text-red-400 text-sm">⚠️ 市场情绪低迷，注意风险</div>}
+              {aggSentiment.sentiment_score > 80 && <div className="text-yellow-400 text-sm">⚠️ 市场情绪过热，谨慎追高</div>}
+              {aggSentiment.limit_down_count > 50 && <div className="text-red-400 text-sm">⚠️ 跌停家数较多，市场恐慌</div>}
+              {aggSentiment.sentiment_score >= 30 && aggSentiment.sentiment_score <= 80 && aggSentiment.limit_down_count <= 50 && <div className="text-green-400 text-sm">✅ 市场情绪正常</div>}
             </div>
           </div>
 

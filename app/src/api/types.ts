@@ -15,6 +15,25 @@ export interface LimitUpItem {
   tj: string
 }
 
+/**
+ * 强势股数据项
+ */
+export interface StrongStockItem {
+  dm: string        // 代码
+  mc: string        // 名称
+  p: number         // 价格（元）
+  ztp: number       // 涨停价（元）
+  zf: number        // 涨幅（%）
+  cje: number       // 成交额（元）
+  lt: number        // 流通市值（元）
+  zsz: number       // 总市值（元）
+  zs: number        // 涨速（%）
+  nh: number        // 是否新高（0：否，1：是）
+  lb: number        // 量比
+  hs: number        // 换手率（%）
+  tj: string        // 涨停统计（x天/y板）
+}
+
 export interface LimitDownItem {
   dm: string
   mc: string

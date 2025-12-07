@@ -12,15 +12,27 @@ function buildKey(method: string, url: string, config?: AxiosRequestConfig, data
   return `${method}|${url}|p:${paramsStr}|d:${dataStr}`
 }
 
-async function dedup<T>(method: 'GET' | 'POST', url: string, exec: () => Promise<any>, config?: AxiosRequestConfig, data?: any): Promise<T> {
+async function dedup<T>(method: 'GET' | 'POST', url: string, exec: () => Promise<any>, config?: AxiosRequestConfig & { bypassCache?: boolean }, data?: any): Promise<T> {
+  const bypassCache = config?.bypassCache || false
   const k = buildKey(method, url, config, data)
-  const now = Date.now()
-  const last = lastResult.get(k)
-  if (last && now - last.time < THROTTLE_MS) {
-    return last.data as T
+  
+  if (!bypassCache) {
+    const now = Date.now()
+    const last = lastResult.get(k)
+    if (last && now - last.time < THROTTLE_MS) {
+      console.log('Returning cached result for:', url)
+      return last.data as T
+    }
+    
+    const pending = inFlight.get(k)
+    if (pending) {
+      console.log('Returning pending result for:', url)
+      return pending as Promise<T>
+    }
+  } else {
+    console.log('Bypassing cache for:', url)
   }
-  const pending = inFlight.get(k)
-  if (pending) return pending as Promise<T>
+  
   const p = exec()
   inFlight.set(k, p)
   try {
@@ -32,10 +44,10 @@ async function dedup<T>(method: 'GET' | 'POST', url: string, exec: () => Promise
   }
 }
 
-export function get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
+export function get<T = any>(url: string, config?: AxiosRequestConfig & { bypassCache?: boolean }): Promise<T> {
   return dedup<T>('GET', url, () => http.get<T>(url, config), config)
 }
 
-export function post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+export function post<T = any>(url: string, data?: any, config?: AxiosRequestConfig & { bypassCache?: boolean }): Promise<T> {
   return dedup<T>('POST', url, () => http.post<T>(url, data, config), config, data)
 }

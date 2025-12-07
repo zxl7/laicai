@@ -2,11 +2,14 @@ import { useState } from 'react'
 import { useSectors } from '../hooks/useSentimentData'
 import { SectorCard } from '../components/SectorCard'
 import { Filter } from 'lucide-react'
+import { StrongStocksTable } from '../components/StrongStocksTable'
+import { useStrongStocks } from '../hooks/useStrongStocks'
 
 export function Sectors() {
   const { sectors, loading, error } = useSectors()
   const [favorites, setFavorites] = useState<string[]>([])
   const [filter, setFilter] = useState<'all' | 'rising' | 'falling'>('all')
+  const { data: strongStocks, loading: luLoading, refresh: refreshUp, date, changeDate } = useStrongStocks()
 
   const toggleFavorite = (sectorId: string) => {
     setFavorites(prev => 
@@ -46,7 +49,7 @@ export function Sectors() {
           <p className="text-slate-400">实时监控各板块情绪变化和热点识别</p>
         </div>
 
-        {/* 筛选器 */}
+        {/* 筛选器和日期选择器 */}
         <div className="flex flex-wrap items-center gap-4 mb-6">
           <div className="flex items-center space-x-2">
             <Filter className="w-4 h-4 text-slate-400" />
@@ -70,6 +73,18 @@ export function Sectors() {
                 {option.label}
               </button>
             ))}
+          </div>
+          
+          {/* 日期选择器 */}
+          <div className="flex items-center space-x-2 ml-auto">
+            <span className="text-slate-300 text-sm">日期:</span>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => changeDate(e.target.value)}
+              max={new Date().toISOString().split('T')[0]} // 限制最大日期为今天
+              className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-1 text-sm"
+            />
           </div>
         </div>
 
@@ -171,6 +186,10 @@ export function Sectors() {
             <div className="text-slate-500 text-sm">尝试调整筛选条件或稍后再试</div>
           </div>
         )}
+
+        <div className="mt-8">
+          <StrongStocksTable data={strongStocks} loading={luLoading} onRefresh={refreshUp} title="强势股（按连板/强度排序）" />
+        </div>
       </div>
     </div>
   )

@@ -70,3 +70,19 @@ def get_board_concept_list_ths() -> List[Dict[str, Any]]:
         raise ValueError(str(e))
 
 _ak_cache: Dict[str, Any] = {}
+
+
+def get_stock_market_activity_legu() -> List[Dict[str, Any]]:
+    try:
+        import akshare as ak
+        c = _ak_cache.get("market_activity_legu")
+        if c and c[0] > time.time():
+            return c[1]
+        df = ak.stock_market_activity_legu()
+        if df is None or df.empty:
+            raise ValueError("乐咕乐股-赚钱情绪数据为空")
+        data = df.fillna(0).to_dict(orient="records")
+        _ak_cache["market_activity_legu"] = (time.time() + 300, data)
+        return data
+    except Exception as e:
+        raise ValueError(str(e))
