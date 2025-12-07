@@ -101,8 +101,8 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
     return -1
   }
   const columns: TableColumnsType<LimitUpItem> = [
-    // { title: "代码", dataIndex: "dm", key: "dm", render: (dm: string) => <span className="font-mono text-white">{dm}</span> },
     { title: "名称", dataIndex: "mc", key: "mc", render: (mc: string) => <span className="text-slate-200">{mc}</span> },
+    { title: "涨幅", dataIndex: "zf", key: "zf", render: (zf: number) => <span className={`font-medium ${zf >= 0 ? "text-red-400" : "text-green-400"}`}>{formatPercent(zf)}</span> },
     {
       title: "首封时间",
       dataIndex: "fbt",
@@ -138,7 +138,6 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
     { title: "统计", key: "tj", render: (_: unknown, item: LimitUpItem) => <span className="text-red-400 text-xs">{`${item.lbc}天${item.lbc}板`}</span> },
 
     { title: "价格", dataIndex: "p", key: "p", render: (p?: number) => <span className="text-slate-200">{p != null ? p.toFixed(2) : "-"}</span> },
-    { title: "涨幅", dataIndex: "zf", key: "zf", render: (zf: number) => <span className={`font-medium ${zf >= 0 ? "text-red-400" : "text-green-400"}`}>{formatPercent(zf)}</span> },
     {
       title: "概念",
       key: "idea",
