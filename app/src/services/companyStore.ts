@@ -112,12 +112,14 @@ export function updateCompanyCache(input: Record<string, Partial<CompanyRecord>>
   const s = readLocal()
   for (const [code, rec] of Object.entries(input)) {
     const prev = s[code] || { code }
-    const next: CompanyRecord = {
-      ...prev,
-      ...rec,
-      code,
-      lastUpdated: new Date().toISOString()
+    const next: CompanyRecord = { ...prev, ...rec, code }
+    // 若存在 list，则将其字段平铺到外层（不覆盖已有同名属性）
+    if (rec.list && typeof rec.list === 'object') {
+      for (const [k, v] of Object.entries(rec.list as any)) {
+        if ((next as any)[k] === undefined) (next as any)[k] = v
+      }
     }
+    next.lastUpdated = new Date().toISOString()
     s[code] = next
   }
   writeLocal(s)

@@ -38,6 +38,10 @@ async function main() {
     const code = item.dm
     store[code] = store[code] || { code }
     store[code].list = item
+    // 平铺 list 字段到外层，方便读取
+    for (const [k, v] of Object.entries(item)) {
+      if (store[code][k] === undefined) store[code][k] = v
+    }
   }
 
   // Fetch company profiles sequentially to be gentle with the API

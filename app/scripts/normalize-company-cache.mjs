@@ -20,6 +20,17 @@ async function main() {
       const latestEntry = latest ? rec.dates[latest] : null
       if (latestEntry && latestEntry.list) next.list = latestEntry.list
     }
+    // 将 list 字段平铺到外层，便于直接读取（不覆盖已有同名属性）
+    if (next.list && typeof next.list === 'object') {
+      for (const [k, v] of Object.entries(next.list)) {
+        if (next[k] === undefined) next[k] = v
+      }
+    }
+    // 保留原对象除 dates 外的所有顶层属性（不覆盖已存在字段）
+    for (const [k, v] of Object.entries(rec)) {
+      if (k === 'dates') continue
+      if (next[k] === undefined) next[k] = v
+    }
     normalized[code] = next
   }
   await fs.writeFile(filePath, JSON.stringify(normalized, null, 2), 'utf-8')
@@ -27,4 +38,3 @@ async function main() {
 }
 
 main().catch(e => { console.error(e); process.exit(1) })
-
