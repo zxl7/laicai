@@ -6,7 +6,7 @@ import { StrongStockItem } from '../api/types'
  * 使用强势股数据的Hook
  * @param initialDate 初始日期，默认使用当前日期
  */
-export function useStrongStocks(initialDate?: string) {
+export const useStrongStocks = (initialDate?: string) => {
   const [data, setData] = useState<StrongStockItem[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)

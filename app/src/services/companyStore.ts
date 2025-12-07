@@ -110,6 +110,8 @@ export function updateCompanyCache(input: Record<string, Partial<CompanyRecord>>
     return getCompanyCache()
   }
   const s = readLocal()
+  let hasChanges = false
+
   for (const [code, rec] of Object.entries(input)) {
     const prev = s[code] || { code }
     const next: CompanyRecord = { ...prev, ...rec, code }
@@ -119,12 +121,32 @@ export function updateCompanyCache(input: Record<string, Partial<CompanyRecord>>
         if ((next as any)[k] === undefined) (next as any)[k] = v
       }
     }
-    next.lastUpdated = new Date().toISOString()
-    s[code] = next
+
+    // 检查数据是否实际发生变化
+    const isDataChanged = () => {
+      // 比较对象属性是否有变化（不包括lastUpdated字段）
+      const prevWithoutTime = { ...prev }
+      const nextWithoutTime = { ...next }
+      delete prevWithoutTime.lastUpdated
+      delete nextWithoutTime.lastUpdated
+
+      return JSON.stringify(prevWithoutTime) !== JSON.stringify(nextWithoutTime)
+    }
+
+    if (isDataChanged()) {
+      // 只有数据实际变化时才更新lastUpdated
+      next.lastUpdated = new Date().toISOString()
+      s[code] = next
+      hasChanges = true
+    }
+    // 数据未变化时，保持原有数据不变
   }
-  writeLocal(s)
-  // eslint-disable-next-line no-console
-  console.log('股票池', s)
+
+  if (hasChanges) {
+    writeLocal(s)
+    console.log('股票池数据已更新', s)
+  }
+
   return s
 }
 

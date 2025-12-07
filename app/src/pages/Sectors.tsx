@@ -188,7 +188,7 @@ export function Sectors() {
         )}
 
         <div className="mt-8">
-          <StrongStocksTable data={strongStocks} loading={luLoading} onRefresh={refreshUp} title="强势股（按连板/强度排序）" />
+          <StrongStocksTable data={strongStocks} loading={luLoading} onRefresh={refreshUp} title="强势股（按连板/强度排序）" date={date} />
         </div>
       </div>
     </div>
