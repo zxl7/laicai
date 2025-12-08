@@ -33,6 +33,6 @@ export async function fetchStrongStocks(date: string, bypassCache: boolean = fal
     return result
   } catch (error) {
     console.error('API request failed:', error)
-    throw error
+    return []
   }
 }
