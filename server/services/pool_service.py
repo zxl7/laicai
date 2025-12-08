@@ -7,6 +7,17 @@ from core.http_client import get_json
 
 
 def _to_float(v: Any) -> float:
+    """
+    将任意值转换为浮点数的辅助函数
+    
+    支持处理字符串、百分比值、空值等各种类型的输入，并进行适当的格式化和转换。
+    
+    Args:
+        v: 需要转换为浮点数的任意值
+        
+    Returns:
+        float: 转换后的浮点数，如果转换失败则返回 0.0
+    """
     s = str(v or "").strip()
     if not s:
         return 0.0
@@ -20,6 +31,18 @@ def _to_float(v: Any) -> float:
 
 
 def _to_int(v: Any) -> int:
+    """
+    将任意值转换为整数的辅助函数
+    
+    支持处理字符串、布尔值、数字等各种类型的输入，并进行适当的格式化和转换。
+    特别支持中文的"是/否"、英文的"Y/N"、布尔值的"true/false"等表示方式。
+    
+    Args:
+        v: 需要转换为整数的任意值
+        
+    Returns:
+        int: 转换后的整数，如果转换失败则返回 0
+    """
     s = str(v or "").strip()
     if not s:
         return 0
@@ -34,13 +57,41 @@ def _to_int(v: Any) -> int:
         return 0
 
 
-def get_limit_up_pool(date: Optional[str] = None, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_limit_up_pool(date: str, api_key: str) -> List[Dict[str, Any]]:
+    """
+    获取指定日期的涨停股池数据
+    
+    从第三方API获取涨停股池数据，并进行格式化处理后返回。
+    数据包括股票代码、名称、价格、涨跌幅、成交量、成交额等信息。
+    
+    Args:
+        date: 查询日期，格式为 YYYY-MM-DD
+        api_key: API 密钥，用于访问第三方服务
+        
+    Returns:
+        List[Dict[str, Any]]: 涨停股池数据列表
+            每个字典包含一只涨停股票的详细信息，如：
+            - code: 股票代码
+            - name: 股票名称
+            - price: 当前价格
+            - change_percent: 涨跌幅百分比
+            - amount: 成交额
+            - float_market_cap: 流通市值
+            - total_market_cap: 总市值
+            - turnover_rate: 换手率
+            - consecutive_boards: 连续涨停板数
+            - first_board_time: 首次涨停时间
+            - last_board_time: 最后涨停时间
+            - seal_funds: 封单资金
+            - broken_boards: 炸板次数
+            - stat: 统计信息
+    
+    Raises:
+        ValueError: 当缺少 API 密钥、请求失败或返回格式错误时抛出
+    """
     base = os.environ.get("THIRD_PARTY_ZTGC_BASE_URL") or "https://api.biyingapi.com/hslt/ztgc"
-    api_key = api_key or os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
     if not api_key:
         raise ValueError("缺少第三方licence(THIRD_PARTY_API_KEY)")
-    if not date:
-        date = time.strftime("%Y-%m-%d", time.localtime())
     url = base.rstrip("/") + "/" + date + "/" + api_key
     try:
         data = get_json(url, timeout=10, referer="https://api.biyingapi.com/")
@@ -95,13 +146,41 @@ def get_limit_up_pool(date: Optional[str] = None, api_key: Optional[str] = None)
     return items
 
 
-def get_limit_down_pool(date: Optional[str] = None, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_limit_down_pool(date: str, api_key: str) -> List[Dict[str, Any]]:
+    """
+    获取指定日期的跌停股池数据
+    
+    从第三方API获取跌停股池数据，并进行格式化处理后返回。
+    数据包括股票代码、名称、价格、涨跌幅、成交量、成交额等信息。
+    
+    Args:
+        date: 查询日期，格式为 YYYY-MM-DD
+        api_key: API 密钥，用于访问第三方服务
+        
+    Returns:
+        List[Dict[str, Any]]: 跌停股池数据列表
+            每个字典包含一只跌停股票的详细信息，如：
+            - dm: 股票代码
+            - mc: 股票名称
+            - p: 当前价格
+            - zf: 涨跌幅百分比
+            - cje: 成交额
+            - lt: 流通市值
+            - zsz: 总市值
+            - pe: 市盈率
+            - hs: 换手率
+            - lbc: 连续跌停板数
+            - lbt: 最后跌停时间
+            - zj: 封单资金
+            - fba: 封板金额
+            - zbc: 炸板次数
+    
+    Raises:
+        ValueError: 当缺少 API 密钥、请求失败或返回格式错误时抛出
+    """
     base = os.environ.get("THIRD_PARTY_DTGC_BASE_URL") or "http://api.biyingapi.com/hslt/dtgc"
-    api_key = api_key or os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
     if not api_key:
         raise ValueError("缺少第三方licence(THIRD_PARTY_API_KEY)")
-    if not date:
-        date = time.strftime("%Y-%m-%d", time.localtime())
     url = base.rstrip("/") + "/" + date + "/" + api_key
     try:
         data = get_json(url, timeout=10, referer="https://api.biyingapi.com/")
@@ -130,13 +209,40 @@ def get_limit_down_pool(date: Optional[str] = None, api_key: Optional[str] = Non
     return items
 
 
-def get_break_pool(date: Optional[str] = None, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_break_pool(date: str, api_key: str) -> List[Dict[str, Any]]:
+    """
+    获取指定日期的炸板股池数据
+    
+    从第三方API获取炸板股池数据，并进行格式化处理后返回。
+    数据包括股票代码、名称、价格、涨停价、涨跌幅、成交量、成交额等信息。
+    
+    Args:
+        date: 查询日期，格式为 YYYY-MM-DD
+        api_key: API 密钥，用于访问第三方服务
+        
+    Returns:
+        List[Dict[str, Any]]: 炸板股池数据列表
+            每个字典包含一只炸板股票的详细信息，如：
+            - dm: 股票代码
+            - mc: 股票名称
+            - p: 当前价格
+            - ztp: 涨停价
+            - zf: 涨跌幅百分比
+            - cje: 成交额
+            - lt: 流通市值
+            - zsz: 总市值
+            - zs: 总手数
+            - hs: 换手率
+            - tj: 统计信息
+            - fbt: 首次封板时间
+            - zbc: 炸板次数
+    
+    Raises:
+        ValueError: 当缺少 API 密钥、请求失败或返回格式错误时抛出
+    """
     base = os.environ.get("THIRD_PARTY_ZBGC_BASE_URL") or "http://api.biyingapi.com/hslt/zbgc"
-    api_key = api_key or os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
     if not api_key:
         raise ValueError("缺少第三方licence(THIRD_PARTY_API_KEY)")
-    if not date:
-        date = time.strftime("%Y-%m-%d", time.localtime())
     url = base.rstrip("/") + "/" + date + "/" + api_key
     try:
         data = get_json(url, timeout=10, referer="https://api.biyingapi.com/")
@@ -164,13 +270,41 @@ def get_break_pool(date: Optional[str] = None, api_key: Optional[str] = None) ->
     return items
 
 
-def get_strong_pool(date: Optional[str] = None, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_strong_pool(date: str, api_key: str) -> List[Dict[str, Any]]:
+    """
+    获取指定日期的强势股池数据
+    
+    从第三方API获取强势股池数据，并进行格式化处理后返回。
+    如果HTTPS请求失败，会自动尝试HTTP请求。
+    数据包括股票代码、名称、价格、涨停价、涨跌幅、成交量、成交额等信息。
+    
+    Args:
+        date: 查询日期，格式为 YYYY-MM-DD
+        api_key: API 密钥，用于访问第三方服务
+        
+    Returns:
+        List[Dict[str, Any]]: 强势股池数据列表
+            每个字典包含一只强势股票的详细信息，如：
+            - dm: 股票代码
+            - mc: 股票名称
+            - p: 当前价格
+            - ztp: 涨停价
+            - zf: 涨跌幅百分比
+            - cje: 成交额
+            - lt: 流通市值
+            - zsz: 总市值
+            - zs: 总手数
+            - nh: 内在价值
+            - lb: 连板数
+            - hs: 换手率
+            - tj: 统计信息
+    
+    Raises:
+        ValueError: 当缺少 API 密钥、请求失败或返回格式错误时抛出
+    """
     base = os.environ.get("THIRD_PARTY_QSGC_BASE_URL") or "https://api.biyingapi.com/hslt/qsgc"
-    api_key = api_key or os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
     if not api_key:
         raise ValueError("缺少第三方licence(THIRD_PARTY_API_KEY)")
-    if not date:
-        date = time.strftime("%Y-%m-%d", time.localtime())
     url = base.rstrip("/") + "/" + date + "/" + api_key
     try:
         data = get_json(url, timeout=10, referer="https://api.biyingapi.com/")

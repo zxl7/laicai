@@ -1,14 +1,38 @@
 import os
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 from core.utils import normalize_symbol, round_price, limit_rate, symbol_to_instrument, read_env_from_file
 from core.http_client import get_json
 from services.quote_service import get_quote, get_quote_price
 
 
-def get_limit_status(symbol: str) -> Dict[str, Any]:
+def get_limit_status(symbol: str, api_key: Optional[str] = None) -> Dict[str, Any]:
+    """
+    获取股票涨跌停状态信息
+    
+    优先使用第三方接口获取涨跌停数据，失败时回退到本地计算方式。
+    返回股票的涨停价、跌停价、是否涨停、是否跌停等状态信息。
+    
+    Args:
+        symbol: 股票代码，支持多种格式（如 600000、sh600000、000547.SZ 等）
+        api_key: API 密钥（可选），用于访问第三方服务
+        
+    Returns:
+        Dict[str, Any]: 包含涨跌停状态信息的字典
+            - code: 归一化后的股票代码
+            - name: 股票名称
+            - price: 当前价格
+            - limit_up_price: 涨停价
+            - limit_down_price: 跌停价
+            - is_limit_up: 是否涨停
+            - is_limit_down: 是否跌停
+            - limit_rate: 涨跌停幅度
+            
+    Raises:
+        Exception: 当本地计算也失败时，可能抛出各种异常
+    """
     base = os.environ.get("THIRD_PARTY_BASE_URL")
-    api_key = os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
+    api_key = api_key or os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
     if base and ("biyingapi.com" in base or base.rstrip("/").endswith("/hsstock/instrument")):
         try:
             instrument = symbol_to_instrument(symbol)

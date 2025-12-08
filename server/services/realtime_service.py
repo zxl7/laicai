@@ -6,6 +6,17 @@ from core.http_client import get_json
 
 
 def _to_float(v: Any) -> float:
+    """
+    将任意值转换为浮点数的辅助函数
+    
+    支持处理字符串、百分比值、空值等各种类型的输入，并进行适当的格式化和转换。
+    
+    Args:
+        v: 需要转换为浮点数的任意值
+        
+    Returns:
+        float: 转换后的浮点数，如果转换失败则返回 0.0
+    """
     s = str(v or "").strip()
     if not s:
         return 0.0
@@ -19,6 +30,38 @@ def _to_float(v: Any) -> float:
 
 
 def _map_public_item(it: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    将公开源实时交易数据映射为标准格式的辅助函数
+    
+    从第三方API返回的原始数据中提取并格式化所需字段，转换为统一的数据结构。
+    
+    Args:
+        it: 原始实时交易数据字典
+        
+    Returns:
+        Dict[str, Any]: 格式化后的实时交易数据字典
+            - fm: 浮筹
+            - h: 最高价
+            - hs: 换手率
+            - lb: 连板
+            - l: 最低价
+            - lt: 流通市值
+            - o: 开盘价
+            - pe: 市盈率
+            - pc: 成交量
+            - p: 当前价格
+            - sz: 总市值
+            - cje: 成交额
+            - ud: 涨跌额
+            - v: 成交量
+            - yc: 昨收
+            - zf: 涨跌幅
+            - zs: 总手
+            - sjl: 净流入
+            - zdf60: 60分钟涨跌幅
+            - zdfnc: 年内涨跌幅
+            - t: 更新时间
+    """
     return {
         "fm": round_price(_to_float(it.get("fm"))),
         "h": round_price(_to_float(it.get("h"))),
@@ -44,13 +87,45 @@ def _map_public_item(it: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def get_realtime_public(symbol: str, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_realtime_public(symbol: str, api_key: str) -> List[Dict[str, Any]]:
     """
-    公开源实时交易
-    - 数据源: http://api.biyingapi.com/hsrl/ssjy/{code}/{licence}
-    - 返回: 列表，包含价、涨跌、量额、市值、更新时间等
+    获取公开源实时交易数据
+    
+    从第三方API获取单只股票的公开源实时交易数据，并进行格式化处理后返回。
+    数据包括价格、涨跌、成交量、成交额、市值、更新时间等信息。
+    
+    Args:
+        symbol: 股票代码，支持多种格式（如 600000、sh600000、000547.SZ 等）
+        api_key: API 密钥，用于访问第三方服务
+        
+    Returns:
+        List[Dict[str, Any]]: 实时交易数据列表
+            每个字典包含一只股票的实时交易信息，字段包括：
+            - fm: 浮筹
+            - h: 最高价
+            - hs: 换手率
+            - lb: 连板
+            - l: 最低价
+            - lt: 流通市值
+            - o: 开盘价
+            - pe: 市盈率
+            - pc: 成交量
+            - p: 当前价格
+            - sz: 总市值
+            - cje: 成交额
+            - ud: 涨跌额
+            - v: 成交量
+            - yc: 昨收
+            - zf: 涨跌幅
+            - zs: 总手
+            - sjl: 净流入
+            - zdf60: 60分钟涨跌幅
+            - zdfnc: 年内涨跌幅
+            - t: 更新时间
+    
+    Raises:
+        ValueError: 当缺少 API 密钥、请求失败或返回格式错误时抛出
     """
-    api_key = api_key or os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
     if not api_key:
         raise ValueError("缺少第三方licence(THIRD_PARTY_API_KEY)")
     code = normalize_symbol(symbol)[2:]
@@ -78,13 +153,40 @@ def get_realtime_public(symbol: str, api_key: Optional[str] = None) -> List[Dict
     return items
 
 
-def get_realtime_broker(symbol: str, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_realtime_broker(symbol: str, api_key: str) -> List[Dict[str, Any]]:
     """
-    券商源实时交易
-    - 数据源: https://api.biyingapi.com/hsstock/real/time/{code}/{licence}
-    - 返回: 列表，包含最新价、开高低、前收、量额、市盈率、换手、市净率等
+    获取券商源实时交易数据
+    
+    从第三方API获取单只股票的券商源实时交易数据，并进行格式化处理后返回。
+    数据包括最新价、开盘价、最高价、最低价、前收盘价、成交量、成交额、市盈率、换手率、市净率等信息。
+    
+    Args:
+        symbol: 股票代码，支持多种格式（如 600000、sh600000、000547.SZ 等）
+        api_key: API 密钥，用于访问第三方服务
+        
+    Returns:
+        List[Dict[str, Any]]: 实时交易数据列表
+            每个字典包含一只股票的实时交易信息，字段包括：
+            - p: 当前价格
+            - o: 开盘价
+            - h: 最高价
+            - l: 最低价
+            - yc: 昨收
+            - cje: 成交额
+            - v: 成交量
+            - pv: 前成交量
+            - t: 更新时间
+            - ud: 涨跌额
+            - pc: 成交量
+            - zf: 涨跌幅
+            - pe: 市盈率
+            - tr: 换手率
+            - pb_ratio: 市净率
+            - tv: 总市值
+    
+    Raises:
+        ValueError: 当缺少 API 密钥、请求失败或返回格式错误时抛出
     """
-    api_key = api_key or os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
     if not api_key:
         raise ValueError("缺少第三方licence(THIRD_PARTY_API_KEY)")
     code = normalize_symbol(symbol)[2:]
@@ -124,13 +226,41 @@ def get_realtime_broker(symbol: str, api_key: Optional[str] = None) -> List[Dict
     raise ValueError("实时交易(券商)返回格式错误")
 
 
-def get_realtime_public_batch(symbols: List[str], api_key: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_realtime_public_batch(symbols: List[str], api_key: str) -> List[Dict[str, Any]]:
     """
-    公开源批量实时交易
-    - 数据源: http://api.biyingapi.com/hsrl/ssjy_more/{licence}?stock_codes=code1,...
-    - 返回: 列表，字段与公开源单股类似，包含 dm 表示股票代码
+    获取公开源批量实时交易数据
+    
+    从第三方API获取多只股票的公开源实时交易数据，并进行格式化处理后返回。
+    数据包括股票代码、价格、涨跌、成交量、成交额、市值、更新时间等信息。
+    
+    Args:
+        symbols: 股票代码列表，支持多种格式（如 ["600000", "000001"] 等）
+        api_key: API 密钥，用于访问第三方服务
+        
+    Returns:
+        List[Dict[str, Any]]: 批量实时交易数据列表
+            每个字典包含一只股票的实时交易信息，字段包括：
+            - dm: 股票代码
+            - p: 当前价格
+            - o: 开盘价
+            - h: 最高价
+            - l: 最低价
+            - yc: 昨收
+            - cje: 成交额
+            - v: 成交量
+            - pv: 前成交量
+            - t: 更新时间
+            - ud: 涨跌额
+            - pc: 成交量
+            - zf: 涨跌幅
+            - pe: 市盈率
+            - tr: 换手率
+            - pb_ratio: 市净率
+            - tv: 总市值
+    
+    Raises:
+        ValueError: 当缺少 API 密钥、请求失败或返回格式错误时抛出
     """
-    api_key = api_key or os.environ.get("THIRD_PARTY_API_KEY") or read_env_from_file("THIRD_PARTY_API_KEY")
     if not api_key:
         raise ValueError("缺少第三方licence(THIRD_PARTY_API_KEY)")
     codes: List[str] = [normalize_symbol(s)[2:] for s in symbols]
