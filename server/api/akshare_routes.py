@@ -7,10 +7,18 @@ from models.schemas import QuoteResponse, ErrorResponse
 from services.api_service import handle_akshare_request
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix="",
+    tags=["Akshare数据接口"],
+)
 
 
-@router.get("/akshare/api/quote", response_model=QuoteResponse, responses={400: {"model": ErrorResponse}})
+@router.get("/akshare/api/quote", 
+    summary="Akshare股票行情查询",
+    description="通过Akshare数据源查询指定股票的最新行情信息",
+    response_model=QuoteResponse, 
+    responses={400: {"model": ErrorResponse}}
+)
 def akshare_quote(symbol: str = Query(..., description="股票代码，如 600000 或 sz000001"), fallback: Optional[bool] = Query(False, description="为true时强制使用备用数据源")):
     """
     Akshare 股票行情查询接口
@@ -33,7 +41,12 @@ def akshare_quote(symbol: str = Query(..., description="股票代码，如 60000
     return handle_akshare_request(_get_quote, symbol, fallback)
 
 
-@router.get("/akshare/api/board/concept/info", response_model=List[Dict[str, Any]], responses={400: {"model": ErrorResponse}})
+@router.get("/akshare/api/board/concept/info", 
+    summary="板块概念信息查询",
+    description="查询指定板块概念的详细信息，包括板块内的股票列表及相关数据",
+    response_model=List[Dict[str, Any]], 
+    responses={400: {"model": ErrorResponse}}
+)
 def akshare_board_concept_info(concept: Optional[str] = Query(None, description="板块概念名称，如 AI概念"), code: Optional[str] = Query(None, description="板块概念代码，如 BKXXXX"), date: Optional[str] = Query(None, description="日期，格式YYYY-MM-DD，可选")):
     """
     Akshare 板块概念信息查询接口
@@ -50,7 +63,12 @@ def akshare_board_concept_info(concept: Optional[str] = Query(None, description=
     return handle_akshare_request(get_board_concept_info_ths, concept=concept, code=code, date=date)
 
 
-@router.get("/akshare/api/board/concept/list", response_model=List[Dict[str, Any]], responses={400: {"model": ErrorResponse}})
+@router.get("/akshare/api/board/concept/list", 
+    summary="板块概念列表查询",
+    description="查询所有可用的板块概念列表",
+    response_model=List[Dict[str, Any]], 
+    responses={400: {"model": ErrorResponse}}
+)
 def akshare_board_concept_list():
     """
     Akshare 板块概念列表查询接口
@@ -62,7 +80,12 @@ def akshare_board_concept_list():
     return handle_akshare_request(get_board_concept_list_ths)
 
 
-@router.get("/akshare/api/market/activity/legu", response_model=List[Dict[str, Any]], responses={400: {"model": ErrorResponse}})
+@router.get("/akshare/api/market/activity/legu", 
+    summary="市场活跃度（乐股）查询",
+    description="查询市场活跃度相关数据",
+    response_model=List[Dict[str, Any]], 
+    responses={400: {"model": ErrorResponse}}
+)
 def akshare_market_activity_legu():
     """
     Akshare 市场活跃度（乐股）查询接口

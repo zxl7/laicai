@@ -20,7 +20,10 @@ from services.api_service import handle_api_request, handle_ws_quote
 
 
 # 路由容器：统一注册所有 HTTP 和 WebSocket 接口，供 main.py 挂载
-router = APIRouter()
+router = APIRouter(
+    prefix="",
+    tags=["基础接口"],
+)
 
 
 # 根路径：返回服务名称与端点列表，便于前端发现可用接口
@@ -52,6 +55,8 @@ def root():
 # 返回最新价格、涨跌幅、开高低收、时间等基础行情
 @router.get(
     "/quote",
+    summary="股票行情查询",
+    description="查询指定股票的最新行情信息，包括最新价格、涨跌幅、开高低收等数据",
     response_model=QuoteResponse,
     responses={400: {"model": ErrorResponse}},
 )
@@ -86,6 +91,8 @@ def quote(symbol: str = Query(..., description="股票代码，如 600000 或 sz
 # 返回涨停价/跌停价与是否触及、涨跌停幅度
 @router.get(
     "/hsstock/instrument/{instrument}",
+    summary="股票涨跌停状态查询",
+    description="查询指定股票的涨跌停状态，包括涨停价、跌停价、是否触及涨跌停等信息",
     response_model=LimitStatusResponse,
     responses={400: {"model": ErrorResponse}},
 )
@@ -120,6 +127,8 @@ def limit_status(instrument: str, api_key: Optional[str] = None, licence_header:
 # 返回按字段映射后的列表项，字段见 models.LimitUpItem
 @router.get(
     "/hslt/ztgc/{date}/{api_key}",
+    summary="涨停股池查询",
+    description="查询指定日期的涨停股池数据，包括涨停股票的代码、名称、涨幅等信息",
     response_model=List[LimitUpItem],
     responses={400: {"model": ErrorResponse}},
 )
@@ -145,6 +154,8 @@ def limit_up_pool(date: str, api_key: str):
 # 跌停股池：入参同上；字段见 models.LimitDownItem
 @router.get(
     "/hslt/dtgc/{date}/{api_key}",
+    summary="跌停股池查询",
+    description="查询指定日期的跌停股池数据，包括跌停股票的代码、名称、跌幅等信息",
     response_model=List[LimitDownItem],
     responses={400: {"model": ErrorResponse}},
 )
@@ -170,6 +181,8 @@ def limit_down_pool(date: str, api_key: str):
 # 炸板股池：入参同上；字段见 models.BreakPoolItem
 @router.get(
     "/hslt/zbgc/{date}/{api_key}",
+    summary="炸板股池查询",
+    description="查询指定日期的炸板股池数据，包括炸板股票的代码、名称、涨跌幅等信息",
     response_model=List[BreakPoolItem],
     responses={400: {"model": ErrorResponse}},
 )
@@ -195,6 +208,8 @@ def break_pool(date: str, api_key: str):
 # 强势股池：入参同上；字段见 models.StrongPoolItem
 @router.get(
     "/hslt/qsgc/{date}/{api_key}",
+    summary="强势股池查询",
+    description="查询指定日期的强势股池数据，包括强势股票的代码、名称、涨跌幅等信息",
     response_model=List[StrongPoolItem],
     responses={400: {"model": ErrorResponse}},
 )
@@ -220,6 +235,8 @@ def strong_pool(date: str, api_key: str):
 # 实时交易（公开源）：入参 symbol；可传 licence 覆盖；返回公开源字段集合
 @router.get(
     "/hsrl/ssjy/{code}/{api_key}",
+    summary="公开源实时交易数据查询",
+    description="查询指定股票的公开源实时交易数据，包括最新价、成交量、成交额等信息",
     response_model=List[RealTimePublicItem],
     responses={400: {"model": ErrorResponse}},
 )
@@ -246,6 +263,8 @@ def realtime_public(code: str, api_key: str):
 # 实时交易（券商源）：入参 symbol；可传 licence 覆盖；返回券商源字段集合
 @router.get(
     "/hsstock/real/time/{code}/{api_key}",
+    summary="券商源实时交易数据查询",
+    description="查询指定股票的券商源实时交易数据，包括最新价、开盘价、最高价、最低价等信息",
     response_model=List[RealTimeBrokerItem],
     responses={400: {"model": ErrorResponse}},
 )
@@ -272,6 +291,8 @@ def realtime_broker(code: str, api_key: str):
 # 实时交易（公开-多股）：入参 symbols（逗号分隔 ≤20）；可传 licence 覆盖
 @router.get(
     "/hsrl/ssjy_more/{api_key}",
+    summary="批量公开源实时交易数据查询",
+    description="批量查询多只股票的公开源实时交易数据，最多支持20只股票",
     response_model=List[RealTimePublicBatchItem],
     responses={400: {"model": ErrorResponse}},
 )
