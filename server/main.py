@@ -1,18 +1,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routes import router
-from api.akshare_routes import router as ak_router
+# 导入路由入口
+from api import main_router
 
-
+# 创建FastAPI应用
 app = FastAPI(
-    title="菜菜股票分析服务",
-    description="提供股票行情查询、涨跌停状态查询、股池查询、实时交易数据查询等功能的股票分析服务API接口",
+    title="股票数据服务",
+    description="提供股票行情、涨跌停、实时交易等数据接口",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi.json"
+    redoc_url="/redoc"
 )
+
+# 配置CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,5 +22,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router)
-app.include_router(ak_router)
+# 注册路由
+app.include_router(main_router)
