@@ -49,7 +49,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Framework :: FastAPI',
     ],
-    python_requires='>=3.11',
+    python_requires='>=3.7',
     entry_points={
         'console_scripts': [
             'laicai-stock=main:main',
