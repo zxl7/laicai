@@ -118,7 +118,7 @@ def limit_status(instrument: str, api_key: Optional[str] = None, licence_header:
     Raises:
         HTTPException: 当请求失败或参数错误时，返回 400 状态码和错误信息
     """
-    from services.limit_service import get_limit_status
+    from services.api_service import get_limit_status
     symbol = instrument
     return handle_api_request(get_limit_status, LimitStatusResponse, symbol, api_key)
 

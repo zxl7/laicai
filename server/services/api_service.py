@@ -17,7 +17,7 @@ from akshareData.provider import (
 
 # 保持向后兼容的函数别名
 get_quote = ThirdPartyAPI.get_stock_quote  # 兼容原get_quote函数
-get_limit_status = ThirdPartyAPI.get_limit_status
+get_limit_status = ThirdPartyAPI.get_limit_up_info  # 兼容原get_limit_status函数
 get_limit_up_pool = ThirdPartyAPI.get_limit_up_pool
 get_limit_down_pool = ThirdPartyAPI.get_limit_down_pool
 get_break_pool = ThirdPartyAPI.get_break_pool
