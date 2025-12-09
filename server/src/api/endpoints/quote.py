@@ -10,15 +10,6 @@ router = APIRouter()
 quote_service = QuoteService()
 
 
-@router.get("/strong", response_model=APIResponse)
-def get_strong_stocks():
-    """
-    获取强势股票列表
-    """
-    data = quote_service.get_strong_stocks()
-    return APIResponse(code=200, message="获取强势股票列表成功", data=data)
-
-
 @router.get("/stock-pool", response_model=APIResponse)
 def get_stock_pool():
     """
