@@ -4,8 +4,9 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from config import settings
+from config.config import settings
 from core.exceptions import setup_exception_handlers
+from api.routes import api_router
 
 
 def create_app() -> FastAPI:
@@ -34,7 +35,8 @@ def create_app() -> FastAPI:
         allow_headers=settings.CORS_ALLOW_HEADERS,
     )
     
-    # API路由将在后续开发中添加
+    # 注册API路由
+    app.include_router(api_router, prefix=settings.API_PREFIX)
     
     # 设置异常处理器
     setup_exception_handlers(app)

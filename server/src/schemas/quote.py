@@ -109,6 +109,35 @@ class StrongStock(BaseModel):
     amount: float = Field(..., description="成交额")
 
 
+class StockPoolItem(BaseModel):
+    """
+    股票池单个股票数据模型
+    """
+    dm: Optional[str] = Field(None, description="股票代码")
+    mc: Optional[str] = Field(None, description="股票名称")
+    zf: Optional[float] = Field(None, description="涨跌幅(%)")
+    p: Optional[float] = Field(None, description="最新价")
+    ztp: Optional[float] = Field(None, description="涨停价")
+    cje: Optional[float] = Field(None, description="成交额")
+    lt: Optional[float] = Field(None, description="流通市值")
+    zsz: Optional[float] = Field(None, description="总市值")
+    hs: Optional[float] = Field(None, description="换手率(%)")
+    zs: Optional[float] = Field(None, description="振幅")
+    nh: Optional[str] = Field(None, description="是否新股")
+    lb: Optional[float] = Field(None, description="量比")
+    tj: Optional[str] = Field(None, description="交易数据")
+    rx: Optional[str] = Field(None, description="入选理由")
+    hy: Optional[str] = Field(None, description="所属行业")
+
+
+class StockPool(BaseModel):
+    """
+    股票池数据模型
+    """
+    total: int = Field(..., description="股票总数")
+    stocks: Dict[str, Any] = Field(..., description="股票池数据，以股票代码为键，存储原始数据")
+
+
 class StrongStocks(BaseModel):
     """
     强势股票列表数据模型
@@ -119,11 +148,11 @@ class StrongStocks(BaseModel):
 
 class APIResponse(BaseModel):
     """
-    API统一响应数据模型
+    API响应通用数据模型
     """
-    code: str = Field(..., description="响应代码")
+    code: int = Field(..., description="响应代码")
     message: str = Field(..., description="响应消息")
-    data: Optional[Dict[str, Any]] = Field(None, description="响应数据")
+    data: Optional[Any] = Field(None, description="响应数据")
     timestamp: datetime = Field(default_factory=datetime.now, description="响应时间戳")
 
 

@@ -11,7 +11,7 @@ sqlalchemy==2.0.23
 aiosqlite==0.19.0
 
 # 股票数据依赖
-akshare==1.10.1
+akshare==1.17.93
 
 # 工具依赖
 python-multipart==0.0.6

@@ -4,6 +4,12 @@
 """
 
 import uvicorn
+import os
+import sys
+
+# 添加src目录到Python路径
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+
 from core.app import create_app
 from config import settings
 

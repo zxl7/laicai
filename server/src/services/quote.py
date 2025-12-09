@@ -3,8 +3,10 @@
 """
 
 import akshare as ak
+import json
+import os
 from typing import List, Dict, Any
-from schemas.quote import StockQuote, LimitUpStocks, LimitDownStocks, FailedLimitUpStocks, StrongStocks
+from schemas.quote import StockQuote, LimitUpStocks, LimitDownStocks, FailedLimitUpStocks, StrongStocks, StockPool, StockPoolItem
 
 
 class QuoteService:
@@ -330,3 +332,43 @@ class QuoteService:
             }
         ]
         return StrongStocks(total=2, stocks=stocks)
+    
+    def get_stock_pool(self) -> StockPool:
+        """
+        从本地文件获取股票池数据
+        
+        Returns:
+            StockPool: 股票池数据
+        """
+        try:
+            # 使用绝对路径
+            file_path = "/Users/zxl/Desktop/laicai/server/DataBase/stockCompanyPool.json"
+            
+            # 调试：打印文件路径
+            print(f"股票池文件路径: {file_path}")
+            
+            # 读取JSON文件
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            
+            # 调试：打印数据结构
+            print(f"数据条目数: {len(data)}")
+            
+            # 直接返回所有原始数据，不做模型验证，保证不丢失任何数据
+            stocks = {}
+            for code, item in data.items():
+                # 直接使用原始数据，即使没有'list'字段
+                stocks[code] = item.get("list", {})
+            
+            print(f"返回全部 {len(stocks)} 个股票数据")
+            return StockPool(total=len(stocks), stocks=stocks)
+        except FileNotFoundError:
+            # 如果文件不存在，返回空数据
+            print(f"文件不存在: {file_path}")
+            return StockPool(total=0, stocks={})
+        except Exception as e:
+            # 处理其他异常
+            print(f"读取股票池数据失败: {e}")
+            import traceback
+            traceback.print_exc()
+            return StockPool(total=0, stocks={})

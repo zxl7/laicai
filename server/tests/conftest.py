@@ -4,8 +4,8 @@
 
 import pytest
 from fastapi.testclient import TestClient
-from core.app import create_app
-from config import settings
+from laicai.core.app import create_app
+from laicai.core.config import settings
 
 
 @pytest.fixture(scope="session")

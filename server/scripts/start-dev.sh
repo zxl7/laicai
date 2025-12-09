@@ -36,4 +36,4 @@ echo "API文档: http://localhost:8000/docs"
 echo "按 Ctrl+C 停止服务器"
 echo "======================================"
 
-uvicorn laicai.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
