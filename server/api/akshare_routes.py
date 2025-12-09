@@ -95,3 +95,40 @@ def akshare_market_activity_legu():
     """
     from akshareData.provider import get_stock_market_activity_legu
     return handle_akshare_request(get_stock_market_activity_legu)
+
+
+@router.get("/akshare/api/stock/basic/info", 
+    summary="个股基本信息查询",
+    description="通过Akshare数据源查询指定股票的基本信息",
+    response_model=Dict[str, Any], 
+    responses={400: {"model": ErrorResponse}}
+)
+def akshare_stock_basic_info(symbol: str = Query(..., description="股票代码，如 600000 或 sz000001")):
+    """
+    Akshare 个股基本信息查询接口
+    
+    Args:
+        symbol: 股票代码，如 600000 或 sz000001
+        
+    Returns:
+        Dict[str, Any]: 包含个股基本信息的数据字典
+    """
+    from akshareData.provider import get_stock_individual_basic_info_xq
+    return handle_akshare_request(get_stock_individual_basic_info_xq, symbol)
+
+
+@router.get("/akshare/api/stock/spot/all", 
+    summary="所有A股实时行情查询",
+    description="通过Akshare数据源查询所有A股的实时行情数据",
+    response_model=List[Dict[str, Any]], 
+    responses={400: {"model": ErrorResponse}}
+)
+def akshare_stock_spot_all():
+    """
+    Akshare 所有A股实时行情查询接口
+    
+    Returns:
+        List[Dict[str, Any]]: 包含所有A股实时行情数据的列表
+    """
+    from akshareData.provider import get_stock_zh_a_spot_em
+    return handle_akshare_request(get_stock_zh_a_spot_em)

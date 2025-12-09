@@ -17,6 +17,8 @@ from akshareData.provider import (
     get_board_concept_info_ths,
     get_board_concept_list_ths,
     get_stock_market_activity_legu,
+    get_stock_individual_basic_info_xq,
+    get_stock_zh_a_spot_em,
 )
 
 
