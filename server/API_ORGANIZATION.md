@@ -3,8 +3,8 @@
 ## 当前接口组织方式分析
 
 目前项目的接口组织方式是：
-1. `api/routes.py` - 包含所有基础接口的路由定义（349行）
-2. `api/akshare_routes.py` - 包含所有Akshare数据接口的路由定义（134行）
+1. `api/routes.py` - 包含所有基础接口的路由定义
+2. `api/akshare_routes.py` - 包含所有Akshare数据接口的路由定义
 
 每个文件中包含多个接口路由，业务逻辑主要在services目录下实现。这种方式已经初步实现了路由和业务逻辑的分离，但还可以进一步优化。
 
@@ -18,9 +18,6 @@
 /api/
 ├── __init__.py           # 路由注册入口
 ├── routes.py             # 基础路由（根路径等）
-├── quote_routes.py       # 行情相关接口
-├── limit_routes.py       # 涨跌停相关接口
-├── pool_routes.py        # 股票池相关接口
 ├── realtime_routes.py    # 实时数据相关接口
 └── akshare/
     ├── __init__.py       # Akshare路由注册
