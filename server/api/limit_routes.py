@@ -2,7 +2,10 @@ from typing import Optional
 from fastapi import APIRouter, Query, Header
 from models.schemas import LimitStatusResponse, ErrorResponse
 from services.api_service import handle_api_request
-from services.limit_service import get_limit_status
+from services.third_party_api import ThirdPartyAPI
+
+# 使用统一的第三方API服务
+get_limit_status = ThirdPartyAPI.get_limit_status
 
 # 创建涨跌停相关路由
 router = APIRouter(

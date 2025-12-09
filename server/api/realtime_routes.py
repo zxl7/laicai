@@ -5,9 +5,12 @@ from models.schemas import (
     RealTimePublicItem, RealTimeBrokerItem, RealTimePublicBatchItem, ErrorResponse
 )
 from services.api_service import handle_api_request, handle_ws_quote
-from services.realtime_service import (
-    get_realtime_public, get_realtime_broker, get_realtime_public_batch
-)
+from services.third_party_api import ThirdPartyAPI
+
+# 使用统一的第三方API服务
+get_realtime_public = ThirdPartyAPI.get_realtime_public
+get_realtime_broker = ThirdPartyAPI.get_realtime_broker
+get_realtime_public_batch = ThirdPartyAPI.get_realtime_public_batch
 
 # 创建实时数据相关路由
 router = APIRouter(

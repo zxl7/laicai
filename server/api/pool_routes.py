@@ -4,9 +4,13 @@ from models.schemas import (
     LimitUpItem, LimitDownItem, BreakPoolItem, StrongPoolItem, ErrorResponse
 )
 from services.api_service import handle_api_request
-from services.pool_service import (
-    get_limit_up_pool, get_limit_down_pool, get_break_pool, get_strong_pool
-)
+from services.third_party_api import ThirdPartyAPI
+
+# 使用统一的第三方API服务
+get_limit_up_pool = ThirdPartyAPI.get_limit_up_pool
+get_limit_down_pool = ThirdPartyAPI.get_limit_down_pool
+get_break_pool = ThirdPartyAPI.get_break_pool
+get_strong_pool = ThirdPartyAPI.get_strong_pool
 
 # 创建股票池相关路由
 router = APIRouter(
