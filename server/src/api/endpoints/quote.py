@@ -1,5 +1,5 @@
 """
-股票行情API端点
+股票行情全部股票
 """
 
 from fastapi import APIRouter
