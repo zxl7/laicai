@@ -354,13 +354,13 @@ class QuoteService:
             # 调试：打印数据结构
             print(f"数据条目数: {len(data)}")
             
-            # 直接返回所有原始数据，不做模型验证，保证不丢失任何数据
+            # 直接返回所有原始数据，不做任何过滤或限制，保证数据的完整性
             stocks = {}
             for code, item in data.items():
-                # 直接使用原始数据，即使没有'list'字段
-                stocks[code] = item.get("list", {})
+                # 直接返回item的所有字段，包括code、list、lastUpdated等所有信息
+                stocks[code] = item
             
-            print(f"返回全部 {len(stocks)} 个股票数据")
+            print(f"返回全部 {len(stocks)} 个股票的完整数据")
             return StockPool(total=len(stocks), stocks=stocks)
         except FileNotFoundError:
             # 如果文件不存在，返回空数据
