@@ -1,0 +1,29 @@
+# 包含README.md文件
+include README.md
+
+# 包含LICENSE文件
+include LICENSE
+
+# 包含CHANGELOG.md文件
+include CHANGELOG.md
+
+# 包含requirements.txt文件
+include requirements.txt
+
+# 包含配置文件
+recursive-include src/config *.py *.yaml *.yml *.json *.toml
+
+# 包含文档文件
+recursive-include docs *
+
+# 包含脚本文件
+recursive-include scripts *
+
+# 排除测试文件
+exclude tests/*.py
+recursive-exclude tests *
+
+# 排除开发环境文件
+exclude .gitignore
+exclude .vscode/*
+exclude .idea/*
