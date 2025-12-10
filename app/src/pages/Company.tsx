@@ -106,6 +106,20 @@ export function Company() {
       if (profiles && profiles.length > 0) {
         setDetailProfile(profiles[0])
         message.success("详情加载成功")
+        
+        // 同时更新表格中对应股票的数据
+        setPool(prevPool => {
+          const updatedPool = { ...prevPool }
+          if (updatedPool[code]) {
+            // 更新公司记录，合并最新的详情数据
+            updatedPool[code] = {
+              ...updatedPool[code],
+              ...profiles[0], // 合并最新详情
+              lastUpdated: new Date().toISOString()
+            }
+          }
+          return updatedPool
+        })
       } else {
         message.info("未获取到最新详情，显示本地缓存数据")
       }
@@ -131,6 +145,14 @@ export function Company() {
         <Card className="bg-[var(--bg-container-50)] backdrop-blur-sm rounded-xl border border-[var(--border)] overflow-hidden">
           <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">
             <div className="text-sm text-slate-400">共 {entries.length} 条</div>
+            <Button 
+              type="primary" 
+              onClick={fetchAllStockPoolData}
+              loading={poolLoading}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              查询
+            </Button>
           </div>
           <Spin spinning={poolLoading} tip="加载中...">
             <Table
