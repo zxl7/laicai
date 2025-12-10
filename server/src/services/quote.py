@@ -119,6 +119,45 @@ class QuoteService:
                     print(f"处理数据时发生异常: {e}")
             
             print(f"成功获取 {len(profiles)} 条上市公司简介数据")
+            
+            # 更新或添加数据到stockCompanyPool.json文件
+            if profiles:
+                try:
+                    # 读取stockCompanyPool.json文件
+                    pool_file_path = "/Users/zxl/Desktop/laicai/server/DataBase/stockCompanyPool.json"
+                    with open(pool_file_path, 'r', encoding='utf-8') as f:
+                        pool_data = json.load(f)
+                    
+                    # 使用stock_code作为键来更新或添加数据
+                    for profile in profiles:
+                        # 将CompanyProfile模型转换为字典
+                        profile_dict = profile.dict()
+                        
+                        if stock_code in pool_data:
+                            # 更新现有数据，保留原有字段（如list、lastUpdated等）
+                            existing_data = pool_data[stock_code]
+                            # 只更新CompanyProfile模型中存在的字段，不覆盖原有字段
+                            for key, value in profile_dict.items():
+                                if value is not None:  # 只更新非空值
+                                    existing_data[key] = value
+                            pool_data[stock_code] = existing_data
+                            print(f"增量更新了 {stock_code} 的公司简介数据")
+                        else:
+                            # 添加新数据
+                            pool_data[stock_code] = profile_dict
+                            # 添加code字段，保持与现有数据结构一致
+                            pool_data[stock_code]['code'] = stock_code
+                            print(f"添加了 {stock_code} 的公司简介数据")
+                    
+                    # 保存更新后的数据到文件
+                    with open(pool_file_path, 'w', encoding='utf-8') as f:
+                        json.dump(pool_data, f, ensure_ascii=False, indent=4)
+                    
+                    print(f"成功更新stockCompanyPool.json文件")
+                except Exception as e:
+                    print(f"更新stockCompanyPool.json文件失败: {e}")
+                    # 不影响正常返回，只记录错误
+            
             return profiles
         except requests.exceptions.RequestException as e:
             print(f"API请求异常: {e}")
