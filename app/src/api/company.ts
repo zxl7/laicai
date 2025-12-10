@@ -8,7 +8,9 @@ import type { CompanyProfile } from './types'
  */
 export async function fetchCompanyProfile(code: string): Promise<CompanyProfile[]> {
   const url = `/api/quote/company-profile/${code}`
-  const data = await get<unknown>(url)
+  let data = await get<unknown>(url)
+  data = (data as any).data
+
   if (Array.isArray(data)) return data as CompanyProfile[]
   if (data && typeof data === 'object') return [data as CompanyProfile]
   return []

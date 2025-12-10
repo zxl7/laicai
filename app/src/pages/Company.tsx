@@ -32,39 +32,43 @@ export function Company() {
       // 将StrongStockItem数组转换为Store格式
       const newPool: Store = {}
       const arr = Object.values(stockPoolData)
-      console.log("%c Line:36 🥪 arr", "color:#3f7cff", arr)
+
       arr.forEach((item) => {
         // 为每个股票创建CompanyRecord对象（允许数据不存在）
-        const dm = item.dm || '' // 获取股票代码，默认为空字符串
-        
+        const dm = item.dm || "" // 获取股票代码，默认为空字符串
+
         // 确保代码不为空才创建记录
         if (dm) {
-          newPool[dm] = {
+          // 创建基础CompanyRecord对象，使用展开运算符保留所有item字段
+          // 将数字字段转换为字符串，符合CompanyProfile的字段类型要求
+          const companyRecord: CompanyRecord = {
             code: dm,
             dm: dm,
-            mc: item.mc || '', // 股票名称，默认为空
-            p: item.p?.toString() || '', // 价格，可能不存在
-            zf: item.zf?.toString() || '', // 涨幅，可能不存在
-            cje: item.cje?.toString() || '', // 成交额，可能不存在
-            // 映射LimitUpItem需要的属性，所有属性都提供默认值
-            list: {
-              dm: dm,
-              mc: item.mc || '',
-              p: item.p || 0, // 价格，默认为0
-              zf: item.zf || 0, // 涨幅，默认为0
-              cje: item.cje || 0, // 成交额，默认为0
-              lt: item.lt || 0, // 流通市值，默认为0
-              zsz: item.zsz || 0, // 总市值，默认为0
-              hs: item.hs || 0, // 换手率，默认为0
-              lbc: 0, // 默认为0
-              fbt: "", // 默认为空
-              lbt: "", // 默认为空
-              zj: 0, // 默认为0
-              zbc: 0, // 默认为0
-              tj: item.tj || '', // 涨停统计，默认为空
-            },
             lastUpdated: new Date().toISOString(),
+            // 展开所有item字段，将数字字段转换为字符串
+            ...Object.entries(item).reduce((acc, [key, value]) => {
+              // 如果是数字类型且不是NaN，则转换为字符串
+              if (typeof value === "number" && !isNaN(value)) {
+                acc[key] = value.toString()
+              } else {
+                // 保留其他类型字段
+                acc[key] = value
+              }
+              return acc
+            }, {} as any),
+            // 创建list对象，包含所有StrongStockItem的原始字段
+            list: {
+              ...item,
+              // LimitUpItem需要的默认字段
+              lbc: 0,
+              fbt: "",
+              lbt: "",
+              zj: 0,
+              zbc: 0,
+            },
           }
+
+          newPool[dm] = companyRecord
         }
       })
 
@@ -86,6 +90,15 @@ export function Company() {
   const handleViewDetail = async (code: string, rec: CompanyRecord) => {
     setDetailRec(rec)
     setDetailOpen(true)
+    setDetailProfile(null) // 重置详情数据
+
+    // 如果详情已补全（rec.name存在），直接显示本地缓存数据，不调用接口
+    if (rec.name) {
+      setLoading(false)
+      return
+    }
+
+    // 详情未补全时，调用接口获取最新详情
     setLoading(true)
 
     try {
