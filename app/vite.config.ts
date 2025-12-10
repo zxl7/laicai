@@ -8,6 +8,9 @@ export default defineConfig({
   build: {
     sourcemap: 'hidden',
   },
+  server: {
+    allowedHosts: ['autokinetic-yen-cauline.ngrok-free.dev'],
+  },
   plugins: [
     react({
       babel: {
