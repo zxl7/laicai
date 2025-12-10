@@ -3,6 +3,7 @@
 """
 
 import json
+import requests
 from datetime import datetime
 from typing import Dict, Any, List
 from schemas.quote import StockPool, CompanyProfile, StrongStock, StrongStockPool
