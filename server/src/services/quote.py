@@ -3,11 +3,11 @@
 """
 
 import json
-import requests
 from datetime import datetime
 from typing import Dict, Any, List
 from schemas.quote import StockPool, CompanyProfile, StrongStock, StrongStockPool
 from src.config.config import settings
+from src.utils.api_client import api_client, ApiClient
 
 
 class QuoteService:
@@ -69,55 +69,11 @@ class QuoteService:
             # 构建API请求URL
             api_url = f"{settings.BIYING_API_HOST}/hscp/gsjj/{stock_code}/{settings.BIYING_API_TOKEN}"
             
-            # 调试：打印API请求URL
-            print(f"请求API URL: {api_url}")
+            # 使用API客户端发送请求
+            data = api_client.get(api_url)
             
-            # 发送API请求
-            response = requests.get(api_url, timeout=30)
-            
-            # 检查响应状态码
-            if response.status_code != 200:
-                print(f"API请求失败，状态码: {response.status_code}")
-                return []
-            
-            # 解析JSON响应
-            data = response.json()
-            
-            # 调试：打印API响应数据
-            print(f"API响应数据: {data}")
-            
-            # 转换为CompanyProfile模型列表
-            profiles = []
-            
-            # 检查API响应数据的结构
-            if isinstance(data, list):
-                # 情况1: data是列表
-                for item in data:
-                    if isinstance(item, dict):
-                        try:
-                            # 尝试转换为模型，处理增量兼容
-                            profile = CompanyProfile(**item)
-                            profiles.append(profile)
-                        except TypeError as e:
-                            # 处理字段不匹配的情况，跳过当前项但继续处理其他数据
-                            print(f"数据转换失败，跳过该项: {e}")
-                            continue
-                        except Exception as e:
-                            # 处理其他异常，跳过当前项但继续处理其他数据
-                            print(f"处理数据时发生异常，跳过该项: {e}")
-                            continue
-            elif isinstance(data, dict):
-                # 情况2: data是字典
-                try:
-                    # 尝试转换为模型，处理增量兼容
-                    profile = CompanyProfile(**data)
-                    profiles.append(profile)
-                except TypeError as e:
-                    # 处理字段不匹配的情况
-                    print(f"数据转换失败: {e}")
-                except Exception as e:
-                    # 处理其他异常
-                    print(f"处理数据时发生异常: {e}")
+            # 使用API客户端的模型映射功能，确保单个模型错误不影响整体输出
+            profiles = api_client.map_to_model(data, CompanyProfile)
             
             print(f"成功获取 {len(profiles)} 条上市公司简介数据")
             
@@ -187,26 +143,11 @@ class QuoteService:
             api_url = f"http://api.biyingapi.com/hslt/qsgc/{date}/{settings.BIYING_API_TOKEN}"
             print(f"请求URL: {api_url}")
             
-            # 发送API请求
-            response = requests.get(api_url, timeout=10)
-            response.raise_for_status()  # 检查请求是否成功
+            # 使用API客户端发送请求
+            data = api_client.get(api_url)
             
-            # 解析JSON响应
-            data = response.json()
-            print(f"API响应数据: {data}")
-            
-            # 转换为StrongStock模型列表 - 保持原始数据类型
-            stocks = []
-            for i, item in enumerate(data):
-                try:
-                    # 直接使用模型转换，保持原始数据类型
-                    stock = StrongStock(**item)
-                    stocks.append(stock)
-                except Exception as e:
-                    # 记录异常但不进行过度转换
-                    print(f"第 {i+1} 条数据转换失败: {e}")
-                    print(f"原始数据: {item}")
-                    continue
+            # 使用API客户端的模型映射功能，确保单个模型错误不影响整体输出
+            stocks = api_client.map_to_model(data, StrongStock)
             
             print(f"成功获取 {len(stocks)} 条强势股数据")
             
