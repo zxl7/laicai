@@ -3,9 +3,15 @@
 """
 
 import pytest
+import os
+import sys
 from fastapi.testclient import TestClient
-from laicai.core.app import create_app
-from laicai.core.config import settings
+
+# 添加src目录到Python路径
+sys.path.append(os.path.join(os.path.dirname(__file__), '../src'))
+
+from core.app import create_app
+from config import settings
 
 
 @pytest.fixture(scope="session")

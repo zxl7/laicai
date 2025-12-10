@@ -48,6 +48,10 @@ class Settings(BaseSettings):
     AK_SHARE_TIMEOUT: int = 30
     AK_SHARE_RETRY: int = 3
     
+    # 必应API配置
+    BIYING_API_HOST: str = "http://api.biyingapi.com"
+    BIYING_API_TOKEN: str = "F70A6924-5CB7-473C-BBC6-A2B0425EAB2E"
+    
     class Config:
         """
         配置类的配置
