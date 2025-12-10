@@ -40,12 +40,8 @@ function writeLocal(store: Store) {
 }
 
 export async function initCompanyCache(): Promise<void> {
+  // 股票总数据现在由后台返回，不再使用本地缓存文件
   if (inited) return
-  const res = await fetch('/company-cache.json')
-  if (res.ok) {
-    const fileStore = (await res.json()) as Store
-    writeLocal(fileStore)
-  }
   inited = true
 }
 /**

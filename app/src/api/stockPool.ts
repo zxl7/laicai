@@ -9,12 +9,11 @@ import { StrongStockItem } from './types'
 export async function fetchStockPool(bypassCache: boolean = false): Promise<StrongStockItem[]> {
   const url = '/api/quote/stock-pool'
   console.log('Stock pool API URL:', url)
-  
+
   try {
-    const result = await get<StrongStockItem[]>(url, { bypassCache })
-    console.log('Stock pool API response:', result)
-    // 确保返回的是数组
-    return Array.isArray(result) ? result : []
+    const result = await get<{ data: { stocks: StrongStockItem[] } }>(url, { bypassCache })
+    // 正确处理接口返回的 { data: { stocks: [...] } } 结构
+    return result.data.stocks || []
   } catch (error) {
     console.error('Failed to fetch stock pool:', error)
     return []

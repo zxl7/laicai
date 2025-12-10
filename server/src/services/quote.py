@@ -6,7 +6,7 @@ import json
 import requests
 from datetime import datetime
 from typing import Dict, Any, List
-from schemas.quote import StockPool, CompanyProfile, StrongStock, StrongStockPool
+from src.schemas.quote import StockPool, CompanyProfile, StrongStock, StrongStockPool
 from src.config.config import settings
 from src.utils.api_client import api_client, ApiClient
 
@@ -61,14 +61,17 @@ class QuoteService:
         根据股票代码获取上市公司简介数据
         
         Args:
-            stock_code: 股票代码
+            stock_code: 股票代码（支持带市场前缀如sz000016或纯数字如000016）
             
         Returns:
             List[CompanyProfile]: 上市公司简介数据列表
         """
         try:
+            # 处理股票代码，去掉市场前缀（如sz、sh）
+            clean_stock_code = stock_code[2:] if stock_code.startswith(('sz', 'sh')) else stock_code
+            
             # 构建API请求URL
-            api_url = f"{settings.BIYING_API_HOST}/hscp/gsjj/{stock_code}/{settings.BIYING_API_TOKEN}"
+            api_url = f"{settings.BIYING_API_HOST}/hscp/gsjj/{clean_stock_code}/{settings.BIYING_API_TOKEN}"
             
             # 使用API客户端发送请求
             data = api_client.get(api_url)
@@ -86,26 +89,26 @@ class QuoteService:
                     with open(pool_file_path, 'r', encoding='utf-8') as f:
                         pool_data = json.load(f)
                     
-                    # 使用stock_code作为键来更新或添加数据
+                    # 使用clean_stock_code作为键来更新或添加数据，保持与股票池数据格式一致
                     for profile in profiles:
                         # 将CompanyProfile模型转换为字典
                         profile_dict = profile.dict()
                         
-                        if stock_code in pool_data:
+                        if clean_stock_code in pool_data:
                             # 更新现有数据，保留原有字段（如list、lastUpdated等）
-                            existing_data = pool_data[stock_code]
+                            existing_data = pool_data[clean_stock_code]
                             # 只更新CompanyProfile模型中存在的字段，不覆盖原有字段
                             for key, value in profile_dict.items():
                                 if value is not None:  # 只更新非空值
                                     existing_data[key] = value
-                            pool_data[stock_code] = existing_data
-                            print(f"增量更新了 {stock_code} 的公司简介数据")
+                            pool_data[clean_stock_code] = existing_data
+                            print(f"增量更新了 {clean_stock_code} 的公司简介数据")
                         else:
                             # 添加新数据
-                            pool_data[stock_code] = profile_dict
+                            pool_data[clean_stock_code] = profile_dict
                             # 添加code字段，保持与现有数据结构一致
-                            pool_data[stock_code]['code'] = stock_code
-                            print(f"添加了 {stock_code} 的公司简介数据")
+                            pool_data[clean_stock_code]['code'] = clean_stock_code
+                            print(f"添加了 {clean_stock_code} 的公司简介数据")
                     
                     # 保存更新后的数据到文件
                     with open(pool_file_path, 'w', encoding='utf-8') as f:
