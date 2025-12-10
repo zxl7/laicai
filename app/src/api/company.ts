@@ -1,13 +1,13 @@
 import { get } from './client'
 import type { CompanyProfile } from './types'
-import { getStoredLicense } from './utils'
 
-const BASE = import.meta.env.VITE_COMPANY_API_BASE ?? 'https://api.biyingapi.com/hscp/gsjj'
-
+/**
+ * 获取公司简介信息
+ * @param code 股票代码
+ * @returns 公司简介信息数组
+ */
 export async function fetchCompanyProfile(code: string): Promise<CompanyProfile[]> {
-  const license = getStoredLicense()
-  if (!license) throw new Error('缺少接口Token：请设置 VITE_BIYING_LICENSE 或 URL 参数 ?license')
-  const url = `${BASE}/${code}/${license}`
+  const url = `/api/quote/company-profile/${code}`
   const data = await get<unknown>(url)
   if (Array.isArray(data)) return data as CompanyProfile[]
   if (data && typeof data === 'object') return [data as CompanyProfile]

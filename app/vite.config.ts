@@ -10,6 +10,12 @@ export default defineConfig({
   },
   server: {
     allowedHosts: ['autokinetic-yen-cauline.ngrok-free.dev'],
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [
     react({
