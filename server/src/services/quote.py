@@ -195,20 +195,17 @@ class QuoteService:
             data = response.json()
             print(f"API响应数据: {data}")
             
-            # 转换为StrongStock模型列表
+            # 转换为StrongStock模型列表 - 保持原始数据类型
             stocks = []
-            for item in data:
+            for i, item in enumerate(data):
                 try:
-                    # 尝试转换为模型，处理增量兼容
+                    # 直接使用模型转换，保持原始数据类型
                     stock = StrongStock(**item)
                     stocks.append(stock)
-                except TypeError as e:
-                    # 处理字段不匹配的情况，跳过当前项但继续处理其他数据
-                    print(f"数据转换失败，跳过该项: {e}")
-                    continue
                 except Exception as e:
-                    # 处理其他异常，跳过当前项但继续处理其他数据
-                    print(f"处理数据时发生异常，跳过该项: {e}")
+                    # 记录异常但不进行过度转换
+                    print(f"第 {i+1} 条数据转换失败: {e}")
+                    print(f"原始数据: {item}")
                     continue
             
             print(f"成功获取 {len(stocks)} 条强势股数据")

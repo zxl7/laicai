@@ -3,7 +3,7 @@
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Union
 from datetime import datetime
 
 
@@ -72,20 +72,20 @@ class CompanyProfile(BaseModel):
 
 class StrongStock(BaseModel):
     """
-    强势股数据模型
+    强势股数据模型 - 保持第三方API返回的原始数据类型
     """
     dm: str = Field(..., description="股票代码")
     mc: str = Field(..., description="股票名称")
-    p: float = Field(..., description="价格（元）")
-    ztp: float = Field(..., description="涨停价（元）")
-    zf: float = Field(..., description="涨幅（%）")
-    cje: float = Field(..., description="成交额（元）")
-    lt: float = Field(..., description="流通市值（元）")
-    zsz: float = Field(..., description="总市值（元）")
-    zs: float = Field(..., description="涨速（%）")
-    nh: int = Field(..., description="是否新高（0：否，1：是）")
-    lb: float = Field(..., description="量比")
-    hs: float = Field(..., description="换手率（%）")
+    p: Union[float, str] = Field(..., description="价格（元）")
+    ztp: Union[float, str] = Field(..., description="涨停价（元）")
+    zf: Union[float, str] = Field(..., description="涨幅（%）")
+    cje: Union[float, str] = Field(..., description="成交额（元）")
+    lt: Union[float, str] = Field(..., description="流通市值（元）")
+    zsz: Union[float, str] = Field(..., description="总市值（元）")
+    zs: Union[float, str] = Field(..., description="涨速（%）")
+    nh: Union[int, str] = Field(..., description="是否新高")
+    lb: Union[float, str] = Field(..., description="量比")
+    hs: Union[float, str] = Field(..., description="换手率（%）")
     tj: str = Field(..., description="涨停统计（x天/y板）")
 
 
