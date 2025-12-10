@@ -3,7 +3,7 @@
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from datetime import datetime
 
 
@@ -68,6 +68,34 @@ class CompanyProfile(BaseModel):
     collect: Optional[str] = Field(None, description="募集资金净额（万元）")
     signfee: Optional[str] = Field(None, description="承销费用（万元）")
     pdate: Optional[str] = Field(None, description="招股公告日")
+
+
+class StrongStock(BaseModel):
+    """
+    强势股数据模型
+    """
+    dm: str = Field(..., description="股票代码")
+    mc: str = Field(..., description="股票名称")
+    p: float = Field(..., description="价格（元）")
+    ztp: float = Field(..., description="涨停价（元）")
+    zf: float = Field(..., description="涨幅（%）")
+    cje: float = Field(..., description="成交额（元）")
+    lt: float = Field(..., description="流通市值（元）")
+    zsz: float = Field(..., description="总市值（元）")
+    zs: float = Field(..., description="涨速（%）")
+    nh: int = Field(..., description="是否新高（0：否，1：是）")
+    lb: float = Field(..., description="量比")
+    hs: float = Field(..., description="换手率（%）")
+    tj: str = Field(..., description="涨停统计（x天/y板）")
+
+
+class StrongStockPool(BaseModel):
+    """
+    强势股池数据模型
+    """
+    date: str = Field(..., description="日期（格式yyyy-MM-dd）")
+    total: int = Field(..., description="股票总数")
+    stocks: List[StrongStock] = Field(..., description="强势股票列表")
 
 
 class ErrorResponse(BaseModel):

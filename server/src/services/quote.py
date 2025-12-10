@@ -4,8 +4,9 @@
 
 import json
 import requests
+from datetime import datetime
 from typing import Dict, Any, List
-from schemas.quote import StockPool, CompanyProfile
+from schemas.quote import StockPool, CompanyProfile, StrongStock, StrongStockPool
 from src.config.config import settings
 
 
@@ -170,3 +171,126 @@ class QuoteService:
             import traceback
             traceback.print_exc()
             return []
+
+    def get_strong_stock_pool(self, date: str) -> StrongStockPool:
+        """
+        根据日期获取强势股票池数据
+        
+        Args:
+            date: 日期（格式yyyy-MM-dd）
+            
+        Returns:
+            StrongStockPool: 强势股池数据
+        """
+        try:
+            # 构建API请求URL
+            api_url = f"http://api.biyingapi.com/hslt/qsgc/{date}/{settings.BIYING_API_TOKEN}"
+            print(f"请求URL: {api_url}")
+            
+            # 发送API请求
+            response = requests.get(api_url, timeout=10)
+            response.raise_for_status()  # 检查请求是否成功
+            
+            # 解析JSON响应
+            data = response.json()
+            print(f"API响应数据: {data}")
+            
+            # 转换为StrongStock模型列表
+            stocks = []
+            for item in data:
+                try:
+                    # 尝试转换为模型，处理增量兼容
+                    stock = StrongStock(**item)
+                    stocks.append(stock)
+                except TypeError as e:
+                    # 处理字段不匹配的情况，跳过当前项但继续处理其他数据
+                    print(f"数据转换失败，跳过该项: {e}")
+                    continue
+                except Exception as e:
+                    # 处理其他异常，跳过当前项但继续处理其他数据
+                    print(f"处理数据时发生异常，跳过该项: {e}")
+                    continue
+            
+            print(f"成功获取 {len(stocks)} 条强势股数据")
+            
+            # 更新或添加数据到stockCompanyPool.json文件
+            if stocks:
+                try:
+                    # 读取stockCompanyPool.json文件
+                    pool_file_path = "/Users/zxl/Desktop/laicai/server/DataBase/stockCompanyPool.json"
+                    with open(pool_file_path, 'r', encoding='utf-8') as f:
+                        pool_data = json.load(f)
+                    
+                    # 遍历强势股数据，更新或添加到stockCompanyPool.json
+                    for stock in stocks:
+                        # 将StrongStock模型转换为字典
+                        stock_dict = stock.dict()
+                        
+                        # 从dm字段提取纯数字股票代码（去掉市场前缀如sz、sh）
+                        stock_code = stock_dict['dm'][2:] if stock_dict['dm'].startswith(('sz', 'sh')) else stock_dict['dm']
+                        
+                        if stock_code in pool_data:
+                            # 更新现有数据，保留原有字段（如list、lastUpdated等）
+                            existing_data = pool_data[stock_code]
+                            
+                            # 更新list字段（如果存在的话）
+                            if 'list' in existing_data:
+                                for key, value in stock_dict.items():
+                                    if value is not None:  # 只更新非空值
+                                        existing_data['list'][key] = value
+                            else:
+                                # 如果list字段不存在，则创建它
+                                existing_data['list'] = stock_dict.copy()
+                            
+                            # 同时更新根级字段（保持数据一致性）
+                            for key, value in stock_dict.items():
+                                if value is not None:  # 只更新非空值
+                                    existing_data[key] = value
+                            
+                            # 更新lastUpdated字段
+                            existing_data['lastUpdated'] = datetime.now().isoformat()
+                            
+                            pool_data[stock_code] = existing_data
+                            print(f"增量更新了 {stock_code} 的强势股数据")
+                        else:
+                            # 添加新数据
+                            new_data = stock_dict.copy()
+                            new_data['code'] = stock_code  # 添加code字段
+                            new_data['list'] = stock_dict.copy()  # 创建list字段
+                            new_data['lastUpdated'] = datetime.now().isoformat()  # 添加更新时间
+                            
+                            pool_data[stock_code] = new_data
+                            print(f"添加了 {stock_code} 的强势股数据")
+                    
+                    # 保存更新后的数据到文件
+                    with open(pool_file_path, 'w', encoding='utf-8') as f:
+                        json.dump(pool_data, f, ensure_ascii=False, indent=4)
+                    
+                    print(f"成功更新stockCompanyPool.json文件")
+                except Exception as e:
+                    print(f"更新stockCompanyPool.json文件失败: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    # 不影响正常返回，只记录错误
+            
+            # 构建并返回StrongStockPool对象
+            return StrongStockPool(
+                date=date,
+                total=len(stocks),
+                stocks=stocks
+            )
+            
+        except requests.exceptions.RequestException as e:
+            print(f"API请求异常: {e}")
+            # 返回空的股票池，不阻拦输出
+            return StrongStockPool(date=date, total=0, stocks=[])
+        except json.JSONDecodeError as e:
+            print(f"API响应解析失败: {e}")
+            # 返回空的股票池，不阻拦输出
+            return StrongStockPool(date=date, total=0, stocks=[])
+        except Exception as e:
+            print(f"获取强势股池数据失败: {e}")
+            import traceback
+            traceback.print_exc()
+            # 返回空的股票池，不阻拦输出
+            return StrongStockPool(date=date, total=0, stocks=[])

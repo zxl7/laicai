@@ -4,7 +4,7 @@
 
 from fastapi import APIRouter
 from services.quote import QuoteService
-from schemas.quote import StockPool, APIResponse, CompanyProfile
+from schemas.quote import StockPool, APIResponse, CompanyProfile, StrongStockPool
 
 router = APIRouter()
 quote_service = QuoteService()
@@ -32,3 +32,18 @@ def get_company_profile(stock_code: str):
     """
     data = quote_service.get_company_profile(stock_code)
     return APIResponse(code=200, message="获取上市公司简介数据成功", data=data)
+
+
+@router.get("/strong-stock-pool/{date}", response_model=APIResponse)
+def get_strong_stock_pool(date: str):
+    """
+    根据日期获取强势股票池数据
+    
+    Args:
+        date: 日期（格式yyyy-MM-dd，如2020-01-15）
+        
+    Returns:
+        APIResponse: 包含强势股池数据的响应
+    """
+    data = quote_service.get_strong_stock_pool(date)
+    return APIResponse(code=200, message="获取强势股票池数据成功", data=data)
