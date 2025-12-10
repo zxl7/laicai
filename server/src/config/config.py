@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     
     # 必应API配置
     BIYING_API_HOST: str = "http://api.biyingapi.com"
-    BIYING_API_TOKEN: str = "F70A6924-5CB7-473C-BBC6-A2B0425EAB2E"
+    BIYING_API_TOKEN: str = "60D084A7-FF4A-4B42-9E1C-45F0B719F33C"
     
     class Config:
         """

@@ -3,7 +3,8 @@ import { getCompanyCache, Store, CompanyRecord } from '../services/companyStore'
 import { formatCurrency, formatPercent } from '../api/utils'
 import { CompanyProfileCard } from '../components/CompanyProfileCard'
 import type { CompanyProfile } from '../api/types'
-import { Tag, Table, Modal, Button, Tooltip } from 'antd'
+import { fetchCompanyProfile } from '../api/company'
+import { Tag, Table, Modal, Button, Tooltip, Spin, message } from 'antd'
 import type { TableColumnsType } from 'antd'
 import { resolveTagColor } from '../lib/tagColors'
 
@@ -11,9 +12,38 @@ export function Company() {
   const [pool, setPool] = useState<Store>({})
   const [detailOpen, setDetailOpen] = useState(false)
   const [detailRec, setDetailRec] = useState<CompanyRecord | null>(null)
+  const [detailProfile, setDetailProfile] = useState<CompanyProfile | null>(null)
+  const [loading, setLoading] = useState(false)
+  
   useEffect(() => {
     setPool(getCompanyCache())
   }, [])
+  
+  /**
+   * 处理查看详情按钮点击事件
+   * @param code 股票代码
+   * @param rec 本地缓存的公司记录
+   */
+  const handleViewDetail = async (code: string, rec: CompanyRecord) => {
+    setDetailRec(rec)
+    setDetailOpen(true)
+    setLoading(true)
+    
+    try {
+      const profiles = await fetchCompanyProfile(code)
+      if (profiles && profiles.length > 0) {
+        setDetailProfile(profiles[0])
+        message.success('详情加载成功')
+      } else {
+        message.info('未获取到最新详情，显示本地缓存数据')
+      }
+    } catch (error) {
+      console.error('获取公司详情失败:', error)
+      message.error('获取公司详情失败，显示本地缓存数据')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const entries = Object.entries(pool)
   const dataSource = entries.map(([code, rec]) => ({ code, rec }))
@@ -67,8 +97,8 @@ export function Company() {
                   </Tooltip>
                 )
               } },
-              { title: '详情', key: 'action', fixed: 'right', width: 120, render: (_, { rec }) => (
-                <Button size="small" onClick={() => { setDetailRec(rec); setDetailOpen(true) }}>查看详情</Button>
+              { title: '详情', key: 'action', fixed: 'right', width: 120, render: (_, { code, rec }) => (
+                <Button size="small" onClick={() => handleViewDetail(code, rec)}>查看详情</Button>
               ) },
             ] as TableColumnsType<any>}
           />
@@ -76,18 +106,25 @@ export function Company() {
         <Modal
           title="公司详情"
           open={detailOpen && !!detailRec}
-          onCancel={() => { setDetailOpen(false); setDetailRec(null) }}
+          onCancel={() => {
+            setDetailOpen(false);
+            setDetailRec(null);
+            setDetailProfile(null);
+          }}
           footer={null}
           width={800}
         >
           {detailRec && (
             <div className="space-y-4">
-              {detailRec.name ? (
-                <CompanyProfileCard profile={detailRec as unknown as CompanyProfile} />
-              ) : (
-                <div className="text-slate-400 text-sm">该公司详情尚未补全</div>
-              )}
-              {/* <pre className="bg-[var(--bg-container-60)] text-slate-200 text-xs rounded-lg p-3 overflow-auto max-h-[40vh]">{JSON.stringify(detailRec, null, 2)}</pre> */}
+              <Spin spinning={loading} tip="加载详情中...">
+                {detailProfile ? (
+                  <CompanyProfileCard profile={detailProfile} />
+                ) : detailRec.name ? (
+                  <CompanyProfileCard profile={detailRec as unknown as CompanyProfile} />
+                ) : (
+                  <div className="text-slate-400 text-sm">该公司详情尚未补全</div>
+                )}
+              </Spin>
             </div>
           )}
         </Modal>
