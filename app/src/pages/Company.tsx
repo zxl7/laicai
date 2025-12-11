@@ -16,6 +16,7 @@ export function Company() {
   const [detailProfile, setDetailProfile] = useState<CompanyProfile | null>(null)
   const [loading, setLoading] = useState(false)
   const [poolLoading, setPoolLoading] = useState(true)
+  const [isFetching, setIsFetching] = useState(false)
 
   useEffect(() => {
     fetchAllStockPoolData()
@@ -25,6 +26,10 @@ export function Company() {
    * 从接口获取全部股票总池数据
    */
   const fetchAllStockPoolData = async () => {
+    // 防止重复请求
+    if (isFetching) return
+    
+    setIsFetching(true)
     setPoolLoading(true)
 
     try {
@@ -79,6 +84,7 @@ export function Company() {
       message.error("获取股票总池数据失败")
     } finally {
       setPoolLoading(false)
+      setIsFetching(false)
     }
   }
 

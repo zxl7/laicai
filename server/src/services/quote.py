@@ -175,6 +175,11 @@ class QuoteService:
                             # 更新现有数据，保留原有字段（如list、lastUpdated等）
                             existing_data = pool_data[stock_code]
                             
+                            # 创建现有数据的副本，用于比较是否发生变化
+                            original_data = existing_data.copy()
+                            if 'list' in original_data:
+                                original_data['list'] = original_data['list'].copy()
+                            
                             # 更新list字段（如果存在的话）
                             if 'list' in existing_data:
                                 for key, value in stock_dict.items():
@@ -189,16 +194,19 @@ class QuoteService:
                                 if value is not None:  # 只更新非空值
                                     existing_data[key] = value
                             
-                            # 更新lastUpdated字段
-                            existing_data['lastUpdated'] = datetime.now().isoformat()
-                            
-                            pool_data[stock_code] = existing_data
-                            print(f"增量更新了 {stock_code} 的强势股数据")
+                            # 比较数据是否发生变化，只有变化时才更新时间字段
+                            if existing_data != original_data:
+                                existing_data['lastUpdated'] = datetime.now().isoformat()
+                                pool_data[stock_code] = existing_data
+                                print(f"增量更新了 {stock_code} 的强势股数据")
+                            else:
+                                print(f"{stock_code} 的强势股数据未发生变化，不更新时间字段")
                         else:
                             # 添加新数据
                             new_data = stock_dict.copy()
                             new_data['code'] = stock_code  # 添加code字段
-                            new_data['list'] = stock_dict.copy()  # 创建list字段
+                            # 创建list字段，排除lastUpdated以避免重复设置
+                            new_data['list'] = {k: v for k, v in stock_dict.items() if k != 'lastUpdated'}
                             new_data['lastUpdated'] = datetime.now().isoformat()  # 添加更新时间
                             
                             pool_data[stock_code] = new_data

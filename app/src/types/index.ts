@@ -13,6 +13,8 @@ export interface Sector {
   name: string
   code: string
   limit_up_stocks: number
+  rising_stocks: number
+  falling_stocks: number
   limit_down_stocks: number
   trend_direction: 'up' | 'down' | 'sideways'
   is_rising: boolean

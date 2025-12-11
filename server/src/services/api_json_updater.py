@@ -6,7 +6,7 @@ API数据更新服务
 import requests
 from typing import Dict, Any, Optional
 from datetime import datetime
-from utils.json_utils import JsonFileHandler
+from src.utils.json_utils import JsonFileHandler
 
 
 class ApiJsonUpdater:
@@ -54,12 +54,13 @@ class ApiJsonUpdater:
             print(f"API响应解析失败: {str(e)}")
             return {}
     
-    def transform_data(self, api_data: Dict[str, Any]) -> Dict[str, Any]:
+    def transform_data(self, api_data: Dict[str, Any], existing_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         转换API数据格式以匹配本地JSON文件的格式
         
         Args:
             api_data: 从API获取的原始数据
+            existing_data: 本地已有的数据，用于比较是否发生变化
             
         Returns:
             Dict[str, Any]: 转换后的数据，符合本地JSON文件格式
@@ -72,7 +73,7 @@ class ApiJsonUpdater:
         if 'data' in api_data and 'stocks' in api_data['data']:
             for code, stock_info in api_data['data']['stocks'].items():
                 # 构造符合本地JSON格式的数据
-                transformed_data[code] = {
+                stock_data = {
                     "code": code,
                     "list": {
                         "dm": stock_info.get("dm", code),
@@ -105,9 +106,29 @@ class ApiJsonUpdater:
                     "lb": stock_info.get("lb", 0.0),
                     "tj": stock_info.get("tj", "0/0"),
                     "rx": stock_info.get("rx", ""),
-                    "hy": stock_info.get("hy", ""),
-                    "lastUpdated": datetime.now().isoformat() + "Z"
+                    "hy": stock_info.get("hy", "")
                 }
+                
+                # 比较数据是否发生变化，只有变化时才更新时间字段
+                if existing_data and code in existing_data:
+                    # 移除lastUpdated字段后比较
+                    existing_copy = existing_data[code].copy()
+                    existing_copy.pop('lastUpdated', None)
+                    
+                    if existing_copy == stock_data:
+                        # 数据未变化，保持原有时间字段
+                        stock_data['lastUpdated'] = existing_data[code].get('lastUpdated', datetime.now().isoformat() + "Z")
+                        print(f"{code} 的数据未发生变化，保持原有时间字段")
+                    else:
+                        # 数据发生变化，更新时间字段
+                        stock_data['lastUpdated'] = datetime.now().isoformat() + "Z"
+                        print(f"{code} 的数据发生变化，更新时间字段")
+                else:
+                    # 新数据，添加时间字段
+                    stock_data['lastUpdated'] = datetime.now().isoformat() + "Z"
+                    print(f"添加新数据 {code}，设置时间字段")
+                
+                transformed_data[code] = stock_data
         
         return transformed_data
     
@@ -130,9 +151,12 @@ class ApiJsonUpdater:
                 print("从API获取数据失败")
                 return False
             
-            # 转换数据格式
+            # 读取现有数据用于比较
+            existing_data = self.json_handler.read()
+            
+            # 转换数据格式，传入现有数据进行比较
             print("正在转换数据格式...")
-            transformed_data = self.transform_data(api_data)
+            transformed_data = self.transform_data(api_data, existing_data)
             
             if not transformed_data:
                 print("数据转换失败")
