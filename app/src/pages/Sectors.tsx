@@ -186,52 +186,52 @@ export function Sectors() {
             <h2 className="text-xl font-semibold text-white mb-4 animate-slide-up">板块情绪变化分析</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                {
-                  title: '上涨动力',
-                  icon: <TrendingUp className="w-5 h-5 text-green-400 mr-2" />,
-                  color: 'text-green-400',
-                  content: (
-                    <>
-                      <p className="text-slate-300 text-sm">
-                        主升板块: <span className="text-white font-bold">{risingSectors.length}</span> 个，
-                        占比 <span className="text-white font-bold">{((risingSectors.length / sectors.length) * 100).toFixed(1)}%</span>
-                      </p>
-                      <p className="text-slate-300 text-sm mt-2">
-                        涨停个股主要集中在: 
-                        {sectors
-                          .filter(s => s.limit_up_stocks > 0)
-                          .sort((a, b) => b.limit_up_stocks - a.limit_up_stocks)
-                          .slice(0, 3)
-                          .map(s => s.name)
-                          .join(', ')}
-                        等板块
-                      </p>
-                    </>
-                  )
-                },
-                {
-                  title: '下跌压力',
-                  icon: <TrendingDown className="w-5 h-5 text-red-400 mr-2" />,
-                  color: 'text-red-400',
-                  content: (
-                    <>
-                      <p className="text-slate-300 text-sm">
-                        退潮板块: <span className="text-white font-bold">{fallingSectors.length}</span> 个，
-                        占比 <span className="text-white font-bold">{((fallingSectors.length / sectors.length) * 100).toFixed(1)}%</span>
-                      </p>
-                      <p className="text-slate-300 text-sm mt-2">
-                        跌停个股主要集中在: 
-                        {sectors
-                          .filter(s => s.limit_down_stocks > 0)
-                          .sort((a, b) => b.limit_down_stocks - a.limit_down_stocks)
-                          .slice(0, 3)
-                          .map(s => s.name)
-                          .join(', ')}
-                        等板块
-                      </p>
-                    </>
-                  )
-                },
+            {
+              title: '上涨动力',
+              icon: <TrendingUp className="w-5 h-5 text-red-400 mr-2" />,
+              color: 'text-red-400',
+              content: (
+                <>
+                  <p className="text-slate-300 text-sm">
+                    主升板块: <span className="text-white font-bold">{risingSectors.length}</span> 个，
+                    占比 <span className="text-white font-bold">{((risingSectors.length / sectors.length) * 100).toFixed(1)}%</span>
+                  </p>
+                  <p className="text-slate-300 text-sm mt-2">
+                    涨停个股主要集中在: 
+                    {sectors
+                      .filter(s => s.limit_up_stocks > 0)
+                      .sort((a, b) => b.limit_up_stocks - a.limit_up_stocks)
+                      .slice(0, 3)
+                      .map(s => s.name)
+                      .join(', ')}
+                    等板块
+                  </p>
+                </>
+              )
+            },
+            {
+              title: '下跌压力',
+              icon: <TrendingDown className="w-5 h-5 text-green-400 mr-2" />,
+              color: 'text-green-400',
+              content: (
+                <>
+                  <p className="text-slate-300 text-sm">
+                    退潮板块: <span className="text-white font-bold">{fallingSectors.length}</span> 个，
+                    占比 <span className="text-white font-bold">{((fallingSectors.length / sectors.length) * 100).toFixed(1)}%</span>
+                  </p>
+                  <p className="text-slate-300 text-sm mt-2">
+                    跌停个股主要集中在: 
+                    {sectors
+                      .filter(s => s.limit_down_stocks > 0)
+                      .sort((a, b) => b.limit_down_stocks - a.limit_down_stocks)
+                      .slice(0, 3)
+                      .map(s => s.name)
+                      .join(', ')}
+                    等板块
+                  </p>
+                </>
+              )
+            },
                 {
                   title: '热点轮动',
                   icon: <Flame className="w-5 h-5 text-amber-400 mr-2" />,

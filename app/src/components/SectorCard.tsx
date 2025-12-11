@@ -33,11 +33,24 @@ export function SectorCard({ sector, onFavorite, isFavorite }: SectorCardProps) 
   /** 返回板块趋势图标 */
   const getTrendIcon = () => {
     if (sector.trend_direction === 'up') {
-      return <TrendingUp className="w-4 h-4 text-green-400" />
+      return <TrendingUp className="w-4 h-4 text-red-400" />
     } else if (sector.trend_direction === 'down') {
-      return <TrendingDown className="w-4 h-4 text-red-400" />
+      return <TrendingDown className="w-4 h-4 text-green-400" />
     }
     return <Minus className="w-4 h-4 text-slate-400" />
+  }
+
+  /** 处理维度点击事件 */
+  const handleDimensionClick = (dimension: 'limit_up' | 'rising' | 'falling' | 'limit_down') => {
+    // 这里可以添加跳转到对应列表的逻辑
+    console.log(`Clicked ${dimension} for sector ${sector.name}`);
+  }
+
+  /** 获取趋势颜色 */
+  const getTrendColor = () => {
+    if (sector.trend_direction === 'up') return 'text-red-400'
+    if (sector.trend_direction === 'down') return 'text-green-400'
+    return 'text-slate-400'
   }
 
   /** 根据板块状态返回卡片样式（主升/退潮强调动效） */
@@ -53,17 +66,9 @@ export function SectorCard({ sector, onFavorite, isFavorite }: SectorCardProps) 
     return `${baseClasses} border-slate-700 hover:bg-slate-800 hover:border-slate-600`
   }
 
-  /** 净额颜色（涨停-跌停） */// 获取净额颜色（涨停-跌停）
-  const getScoreColor = () => {
-    const score = sector.limit_up_stocks - sector.limit_down_stocks
-    if (score >= 5) return 'text-red-400'
-    if (score >= 0) return 'text-yellow-400'
-    return 'text-green-400'
-  }
-
-  // 计算净额（涨停-跌停）
-  const getScore = () => {
-    return sector.limit_up_stocks - sector.limit_down_stocks
+  // 计算涨跌比
+  const getRiseFallRatio = () => {
+    return `${sector.rising_stocks}:${sector.falling_stocks}`
   }
 
   return (
@@ -89,29 +94,49 @@ export function SectorCard({ sector, onFavorite, isFavorite }: SectorCardProps) 
         </div>
       </div>
 
-      {/* 涨跌停数据 */}
+      {/* 板块数据维度 */}
       <div className="grid grid-cols-2 gap-3 mb-3 relative z-10">
-        <div className="bg-slate-700/50 rounded p-2 transition-all duration-300 hover:bg-slate-600/50 hover:scale-105">
+        <div 
+          className="bg-slate-700/50 rounded p-2 transition-all duration-300 hover:bg-red-500/20 hover:border-red-500/50 hover:scale-105 cursor-pointer border border-transparent"
+          onClick={() => handleDimensionClick('limit_up')}
+        >
           <div className="text-xs font-semibold text-red-400">涨停</div>
           <div className="text-white font-bold">{sector.limit_up_stocks}</div>
         </div>
-        <div className="bg-slate-700/50 rounded p-2 transition-all duration-300 hover:bg-slate-600/50 hover:scale-105">
+        <div 
+          className="bg-slate-700/50 rounded p-2 transition-all duration-300 hover:bg-red-500/10 hover:border-red-500/30 hover:scale-105 cursor-pointer border border-transparent"
+          onClick={() => handleDimensionClick('rising')}
+        >
+          <div className="text-xs font-semibold text-red-400">上涨</div>
+          <div className="text-white font-bold">{sector.rising_stocks}</div>
+        </div>
+        <div 
+          className="bg-slate-700/50 rounded p-2 transition-all duration-300 hover:bg-green-500/10 hover:border-green-500/30 hover:scale-105 cursor-pointer border border-transparent"
+          onClick={() => handleDimensionClick('falling')}
+        >
+          <div className="text-xs font-semibold text-green-400">下跌</div>
+          <div className="text-white font-bold">{sector.falling_stocks}</div>
+        </div>
+        <div 
+          className="bg-slate-700/50 rounded p-2 transition-all duration-300 hover:bg-green-500/20 hover:border-green-500/50 hover:scale-105 cursor-pointer border border-transparent"
+          onClick={() => handleDimensionClick('limit_down')}
+        >
           <div className="text-xs font-semibold text-green-400">跌停</div>
           <div className="text-white font-bold">{sector.limit_down_stocks}</div>
         </div>
       </div>
 
-      {/* 净额（涨停-跌停） */}
+      {/* 趋势信息 */}
       <div className="flex justify-between items-center text-xs relative z-10">
         <div className="flex items-center">
-          <span className="text-slate-400 mr-1">涨跌停净额:</span>
-          <span className={`font-semibold ${getScoreColor()}`}>
-            {getScore()}
+          <span className="text-slate-400 mr-1">涨跌比:</span>
+          <span className="font-semibold text-white">
+            {getRiseFallRatio()}
           </span>
         </div>
         <div className="flex items-center">
           <span className="text-slate-400 mr-1">趋势:</span>
-          <span className={`font-semibold ${sector.trend_direction === 'up' ? 'text-green-400' : sector.trend_direction === 'down' ? 'text-red-400' : 'text-slate-400'}`}>
+          <span className={`font-semibold ${getTrendColor()}`}>
             {sector.trend_direction === 'up' ? '上涨' : sector.trend_direction === 'down' ? '下跌' : '横盘'}
           </span>
         </div>

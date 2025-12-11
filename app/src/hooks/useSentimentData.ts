@@ -47,6 +47,14 @@ function analyzeSectorSentiment(companyRecords: CompanyRecord[]): Sector[] {
     // 计算板块指标
     const totalCompanies = companies.length
     const limitUpCount = companies.filter(c => c.list?.zf && parseFloat(c.list.zf.toString()) >= 9.9).length
+    const risingCount = companies.filter(c => {
+      const zf = typeof c.zf === 'string' ? parseFloat(c.zf) : c.zf
+      return zf > 0
+    }).length
+    const fallingCount = companies.filter(c => {
+      const zf = typeof c.zf === 'string' ? parseFloat(c.zf) : c.zf
+      return zf < 0
+    }).length
     const limitDownCount = companies.filter(c => c.listDown?.zf && parseFloat(c.listDown.zf.toString()) <= -9.9).length
     
     // 计算平均涨幅
@@ -67,6 +75,8 @@ function analyzeSectorSentiment(companyRecords: CompanyRecord[]): Sector[] {
       name,
       code: name,
       limit_up_stocks: limitUpCount,
+      rising_stocks: risingCount,
+      falling_stocks: fallingCount,
       limit_down_stocks: limitDownCount,
       trend_direction: trendDirection,
       is_rising: limitUpCount > totalCompanies * 0.2 || avgIncrease > 2, // 20%涨停或平均涨幅>2%视为主升
