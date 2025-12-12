@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
 import { fetchStrongStocks } from '../api/strongStocks'
-import { fetchStockPool } from '../api/stockPool'
 import { StrongStockItem } from '../api/types'
 
 /**
@@ -15,28 +14,14 @@ export const useStrongStocks = (initialDate?: string) => {
 
   /**
    * 获取强势股数据
-   * @param bypassCache 是否绕过缓存，默认为false
+   * @param bypassCache 是否绕过缓存，默认为true
    */
-  const getStrongStocks = useCallback(async (bypassCache: boolean = false) => {
+  const getStrongStocks = useCallback(async (bypassCache: boolean = true) => {
     setLoading(true)
     setError(null)
     try {
       const result = await fetchStrongStocks(date, bypassCache)
-
-      // 如果强势股数据为空，从股票总池API获取数据
-      if (result.length === 0) {
-        const stockPoolData = await fetchStockPool(bypassCache)
-        
-        // 将股票总池数据转换为StrongStockItem格式
-        const convertedData: StrongStockItem[] = stockPoolData
-          .filter(item => item.dm && item.mc) // 确保有必要的代码和名称
-          .sort((a, b) => b.zf - a.zf) // 按照涨幅降序排序
-
-        setData(convertedData)
-      } else {
-
-        setData(result)
-      }
+      setData(result)
     } catch (err) {
       setError(err instanceof Error ? err : new Error('获取强势股数据失败'))
     } finally {
