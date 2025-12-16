@@ -98,6 +98,64 @@ class StrongStockPool(BaseModel):
     stocks: List[StrongStock] = Field(..., description="强势股票列表")
 
 
+class ZTStock(BaseModel):
+    """
+    涨停股数据模型 - 保持第三方API返回的原始数据类型
+    """
+    dm: str = Field(..., description="代码")
+    mc: str = Field(..., description="名称")
+    p: Union[float, str] = Field(..., description="价格（元）")
+    zf: Union[float, str] = Field(..., description="涨幅（%）")
+    cje: Union[float, str] = Field(..., description="成交额（元）")
+    lt: Union[float, str] = Field(..., description="流通市值（元）")
+    zsz: Union[float, str] = Field(..., description="总市值（元）")
+    hs: Union[float, str] = Field(..., description="换手率（%）")
+    lbc: Union[int, str] = Field(..., description="连板数")
+    fbt: str = Field(..., description="首次封板时间（HH:mm:ss）")
+    lbt: str = Field(..., description="最后封板时间（HH:mm:ss）")
+    zj: Union[float, str] = Field(..., description="封板资金（元）")
+    zbc: Union[int, str] = Field(..., description="炸板次数")
+    tj: str = Field(..., description="涨停统计（x天/y板）")
+
+
+class DTStock(BaseModel):
+    """
+    跌停股数据模型 - 保持第三方API返回的原始数据类型
+    """
+    dm: str = Field(..., description="代码")
+    mc: str = Field(..., description="名称")
+    p: Union[float, str] = Field(..., description="价格（元）")
+    zf: Union[float, str] = Field(..., description="跌幅（%）")
+    cje: Union[float, str] = Field(..., description="成交额（元）")
+    lt: Union[float, str] = Field(..., description="流通市值（元）")
+    zsz: Union[float, str] = Field(..., description="总市值（元）")
+    pe: Union[float, str] = Field(..., description="动态市盈率")
+    hs: Union[float, str] = Field(..., description="换手率（%）")
+    lbc: Union[int, str] = Field(..., description="连续跌停次数")
+    lbt: str = Field(..., description="最后封板时间（HH:mm:ss）")
+    zj: Union[float, str] = Field(..., description="封单资金（元）")
+    fba: Union[float, str] = Field(..., description="板上成交额（元）")
+    zbc: Union[int, str] = Field(..., description="开板次数")
+
+
+class ZTStockPool(BaseModel):
+    """
+    涨停股池数据模型
+    """
+    date: str = Field(..., description="日期（格式yyyy-MM-dd）")
+    total: int = Field(..., description="股票总数")
+    stocks: List[ZTStock] = Field(..., description="涨停股票列表")
+
+
+class DTStockPool(BaseModel):
+    """
+    跌停股池数据模型
+    """
+    date: str = Field(..., description="日期（格式yyyy-MM-dd）")
+    total: int = Field(..., description="股票总数")
+    stocks: List[DTStock] = Field(..., description="跌停股票列表")
+
+
 class ErrorResponse(BaseModel):
     """
     错误响应数据模型

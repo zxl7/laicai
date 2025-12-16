@@ -234,13 +234,229 @@ class QuoteService:
             print(f"API请求异常: {e}")
             # 返回空的股票池，不阻拦输出
             return StrongStockPool(date=date, total=0, stocks=[])
+    
+    def get_zt_stock_pool(self, date: str) -> ZTStockPool:
+        """
+        根据日期获取涨停股票池数据
+        
+        Args:
+            date: 日期（格式yyyy-MM-dd）
+            
+        Returns:
+            ZTStockPool: 涨停股池数据
+        """
+        try:
+            # 构建API请求URL
+            api_url = f"http://api.biyingapi.com/hslt/ztgc/{date}/{settings.BIYING_API_TOKEN}"
+            print(f"请求URL: {api_url}")
+            
+            # 使用API客户端发送请求
+            data = api_client.get(api_url)
+            
+            # 使用API客户端的模型映射功能，确保单个模型错误不影响整体输出
+            stocks = api_client.map_to_model(data, ZTStock)
+            
+            print(f"成功获取 {len(stocks)} 条涨停股数据")
+            
+            # 更新或添加数据到stockCompanyPool.json文件
+            if stocks:
+                try:
+                    # 读取stockCompanyPool.json文件
+                    pool_file_path = "/Users/zxl/Desktop/laicai/server/DataBase/stockCompanyPool.json"
+                    with open(pool_file_path, 'r', encoding='utf-8') as f:
+                        pool_data = json.load(f)
+                    
+                    # 遍历涨停股数据，更新或添加到stockCompanyPool.json
+                    for stock in stocks:
+                        # 将ZTStock模型转换为字典
+                        stock_dict = stock.dict()
+                        
+                        # 从dm字段提取纯数字股票代码（去掉市场前缀如sz、sh）
+                        stock_code = stock_dict['dm'][2:] if stock_dict['dm'].startswith(('sz', 'sh')) else stock_dict['dm']
+                        
+                        if stock_code in pool_data:
+                            # 更新现有数据，保留原有字段（如list、lastUpdated等）
+                            existing_data = pool_data[stock_code]
+                            
+                            # 创建现有数据的副本，用于比较是否发生变化
+                            original_data = existing_data.copy()
+                            if 'list' in original_data:
+                                original_data['list'] = original_data['list'].copy()
+                            
+                            # 更新list字段（如果存在的话）
+                            if 'list' in existing_data:
+                                for key, value in stock_dict.items():
+                                    if value is not None:  # 只更新非空值
+                                        existing_data['list'][key] = value
+                            else:
+                                # 如果list字段不存在，则创建它
+                                existing_data['list'] = stock_dict.copy()
+                            
+                            # 同时更新根级字段（保持数据一致性）
+                            for key, value in stock_dict.items():
+                                if value is not None:  # 只更新非空值
+                                    existing_data[key] = value
+                            
+                            # 比较数据是否发生变化，只有变化时才更新时间字段
+                            if existing_data != original_data:
+                                existing_data['lastUpdated'] = datetime.now().isoformat()
+                                pool_data[stock_code] = existing_data
+                                print(f"增量更新了 {stock_code} 的涨停股数据")
+                            else:
+                                print(f"{stock_code} 的涨停股数据未发生变化，不更新时间字段")
+                        else:
+                            # 添加新数据
+                            new_data = stock_dict.copy()
+                            new_data['code'] = stock_code  # 添加code字段
+                            # 创建list字段，排除lastUpdated以避免重复设置
+                            new_data['list'] = {k: v for k, v in stock_dict.items() if k != 'lastUpdated'}
+                            new_data['lastUpdated'] = datetime.now().isoformat()  # 添加更新时间
+                            
+                            pool_data[stock_code] = new_data
+                            print(f"添加了 {stock_code} 的涨停股数据")
+                    
+                    # 保存更新后的数据到文件
+                    with open(pool_file_path, 'w', encoding='utf-8') as f:
+                        json.dump(pool_data, f, ensure_ascii=False, indent=4)
+                    
+                    print(f"成功更新stockCompanyPool.json文件")
+                except Exception as e:
+                    print(f"更新stockCompanyPool.json文件失败: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    # 不影响正常返回，只记录错误
+            
+            # 构建并返回ZTStockPool对象
+            return ZTStockPool(
+                date=date,
+                total=len(stocks),
+                stocks=stocks
+            )
+            
+        except requests.exceptions.RequestException as e:
+            print(f"API请求异常: {e}")
+            # 返回空的股票池，不阻拦输出
+            return ZTStockPool(date=date, total=0, stocks=[])
         except json.JSONDecodeError as e:
             print(f"API响应解析失败: {e}")
             # 返回空的股票池，不阻拦输出
-            return StrongStockPool(date=date, total=0, stocks=[])
+            return ZTStockPool(date=date, total=0, stocks=[])
         except Exception as e:
-            print(f"获取强势股池数据失败: {e}")
+            print(f"获取涨停股池数据失败: {e}")
             import traceback
             traceback.print_exc()
             # 返回空的股票池，不阻拦输出
-            return StrongStockPool(date=date, total=0, stocks=[])
+            return ZTStockPool(date=date, total=0, stocks=[])
+    
+    def get_dt_stock_pool(self, date: str) -> DTStockPool:
+        """
+        根据日期获取跌停股票池数据
+        
+        Args:
+            date: 日期（格式yyyy-MM-dd）
+            
+        Returns:
+            DTStockPool: 跌停股池数据
+        """
+        try:
+            # 构建API请求URL
+            api_url = f"http://api.biyingapi.com/hslt/dtgc/{date}/{settings.BIYING_API_TOKEN}"
+            print(f"请求URL: {api_url}")
+            
+            # 使用API客户端发送请求
+            data = api_client.get(api_url)
+            
+            # 使用API客户端的模型映射功能，确保单个模型错误不影响整体输出
+            stocks = api_client.map_to_model(data, DTStock)
+            
+            print(f"成功获取 {len(stocks)} 条跌停股数据")
+            
+            # 更新或添加数据到stockCompanyPool.json文件
+            if stocks:
+                try:
+                    # 读取stockCompanyPool.json文件
+                    pool_file_path = "/Users/zxl/Desktop/laicai/server/DataBase/stockCompanyPool.json"
+                    with open(pool_file_path, 'r', encoding='utf-8') as f:
+                        pool_data = json.load(f)
+                    
+                    # 遍历跌停股数据，更新或添加到stockCompanyPool.json
+                    for stock in stocks:
+                        # 将DTStock模型转换为字典
+                        stock_dict = stock.dict()
+                        
+                        # 从dm字段提取纯数字股票代码（去掉市场前缀如sz、sh）
+                        stock_code = stock_dict['dm'][2:] if stock_dict['dm'].startswith(('sz', 'sh')) else stock_dict['dm']
+                        
+                        if stock_code in pool_data:
+                            # 更新现有数据，保留原有字段（如list、lastUpdated等）
+                            existing_data = pool_data[stock_code]
+                            
+                            # 创建现有数据的副本，用于比较是否发生变化
+                            original_data = existing_data.copy()
+                            if 'list' in original_data:
+                                original_data['list'] = original_data['list'].copy()
+                            
+                            # 更新list字段（如果存在的话）
+                            if 'list' in existing_data:
+                                for key, value in stock_dict.items():
+                                    if value is not None:  # 只更新非空值
+                                        existing_data['list'][key] = value
+                            else:
+                                # 如果list字段不存在，则创建它
+                                existing_data['list'] = stock_dict.copy()
+                            
+                            # 同时更新根级字段（保持数据一致性）
+                            for key, value in stock_dict.items():
+                                if value is not None:  # 只更新非空值
+                                    existing_data[key] = value
+                            
+                            # 比较数据是否发生变化，只有变化时才更新时间字段
+                            if existing_data != original_data:
+                                existing_data['lastUpdated'] = datetime.now().isoformat()
+                                pool_data[stock_code] = existing_data
+                                print(f"增量更新了 {stock_code} 的跌停股数据")
+                            else:
+                                print(f"{stock_code} 的跌停股数据未发生变化，不更新时间字段")
+                        else:
+                            # 添加新数据
+                            new_data = stock_dict.copy()
+                            new_data['code'] = stock_code  # 添加code字段
+                            # 创建list字段，排除lastUpdated以避免重复设置
+                            new_data['list'] = {k: v for k, v in stock_dict.items() if k != 'lastUpdated'}
+                            new_data['lastUpdated'] = datetime.now().isoformat()  # 添加更新时间
+                            
+                            pool_data[stock_code] = new_data
+                            print(f"添加了 {stock_code} 的跌停股数据")
+                    
+                    # 保存更新后的数据到文件
+                    with open(pool_file_path, 'w', encoding='utf-8') as f:
+                        json.dump(pool_data, f, ensure_ascii=False, indent=4)
+                    
+                    print(f"成功更新stockCompanyPool.json文件")
+                except Exception as e:
+                    print(f"更新stockCompanyPool.json文件失败: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    # 不影响正常返回，只记录错误
+            
+            # 构建并返回DTStockPool对象
+            return DTStockPool(
+                date=date,
+                total=len(stocks),
+                stocks=stocks
+            )
+            
+        except requests.exceptions.RequestException as e:
+            print(f"API请求异常: {e}")
+            # 返回空的股票池，不阻拦输出
+            return DTStockPool(date=date, total=0, stocks=[])
+        except json.JSONDecodeError as e:
+            print(f"API响应解析失败: {e}")
+            # 返回空的股票池，不阻拦输出
+            return DTStockPool(date=date, total=0, stocks=[])
+        except Exception as e:
+            print(f"获取跌停股池数据失败: {e}")
+            import traceback
+            traceback.print_exc()
+            # 返回空的股票池，不阻拦输出
+            return DTStockPool(date=date, total=0, stocks=[])
