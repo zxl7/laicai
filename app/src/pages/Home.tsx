@@ -9,7 +9,7 @@ import { useMemo, useState } from "react"
 import type { MarketSentiment } from "../types"
 import { getStoredLicense, setStoredLicense } from "../api/utils"
 import { UNIFIED_DATE } from "../api/limitup"
-import { getCompanyCache } from "../services/companyStore"
+// 移除本地缓存兜底，首页仅展示接口最新数据
 
 export function Home() {
   const { loading, error } = useMarketSentiment()
@@ -18,23 +18,17 @@ export function Home() {
   const { data: limitDownList, loading: ldLoading, error: ldError, refresh: refreshDown } = useLimitDownList(selectedDate)
   const today = useMemo(() => UNIFIED_DATE, [])
   const [licenseInput, setLicenseInput] = useState<string>(getStoredLicense() || "")
-  const cachedLimitUpList = useMemo(() => {
-    const s = getCompanyCache()
-    return Object.values(s)
-      .map((rec) => rec.list)
-      .filter((x): x is NonNullable<typeof x> => !!x)
-  }, [])
-  const displayLimitUp = limitUpList && limitUpList.length > 0 ? limitUpList : cachedLimitUpList
-  const displayLoading = luLoading && displayLimitUp.length === 0
+  const displayLimitUp = limitUpList
+  const displayLoading = luLoading
 
   // 基于涨跌停数据生成真实图表数据（按时间累积）
   const normalizeTime = (val: string): string => {
-    if (!val && val !== '0') return '-'
+    if (!val && val !== "0") return "-"
     const v = String(val)
     const m = v.match(/(\d{1,2}):(\d{1,2}):(\d{1,2})/)
     if (m) {
       const [, h, mi, s] = m
-      return `${h.padStart(2, '0')}:${mi.padStart(2, '0')}:${s.padStart(2, '0')}`
+      return `${h.padStart(2, "0")}:${mi.padStart(2, "0")}:${s.padStart(2, "0")}`
     }
     if (/^\d{6}$/.test(v)) {
       const h = v.slice(0, 2)
@@ -44,9 +38,9 @@ export function Home() {
     }
     const d = new Date(v)
     if (!isNaN(d.getTime())) {
-      const h = `${d.getHours()}`.padStart(2, '0')
-      const mi = `${d.getMinutes()}`.padStart(2, '0')
-      const s = `${d.getSeconds()}`.padStart(2, '0')
+      const h = `${d.getHours()}`.padStart(2, "0")
+      const mi = `${d.getMinutes()}`.padStart(2, "0")
+      const s = `${d.getSeconds()}`.padStart(2, "0")
       return `${h}:${mi}:${s}`
     }
     return v
@@ -57,11 +51,11 @@ export function Home() {
     return Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3])
   }
   const chartData = useMemo(() => {
-    const basePoints = ['09:30:00','10:00:00','10:30:00','11:00:00','11:30:00','13:00:00','13:30:00','14:00:00','14:30:00','15:00:00']
-    return basePoints.map(ts => {
+    const basePoints = ["09:30:00", "10:00:00", "10:30:00", "11:00:00", "11:30:00", "13:00:00", "13:30:00", "14:00:00", "14:30:00", "15:00:00"]
+    return basePoints.map((ts) => {
       const tsSec = toSec(ts)
-      const upCount = displayLimitUp.filter(it => toSec(normalizeTime(it.lbt)) <= tsSec).length
-      const downCount = limitDownList.filter(it => toSec(normalizeTime(it.lbt)) <= tsSec).length
+      const upCount = displayLimitUp.filter((it) => toSec(normalizeTime(it.lbt)) <= tsSec).length
+      const downCount = limitDownList.filter((it) => toSec(normalizeTime(it.lbt)) <= tsSec).length
       return { timestamp: ts, limit_up_count: upCount, limit_down_count: downCount }
     })
   }, [displayLimitUp, limitDownList])
@@ -71,10 +65,10 @@ export function Home() {
     const down = limitDownList.length
     const total = up + down
     const score = Math.round((up / Math.max(total, 1)) * 100)
-    const trend_direction: MarketSentiment["trend_direction"] = up > down ? 'up' : up < down ? 'down' : 'sideways'
+    const trend_direction: MarketSentiment["trend_direction"] = up > down ? "up" : up < down ? "down" : "sideways"
     const now = new Date().toISOString()
     return {
-      id: 'derived',
+      id: "derived",
       timestamp: now,
       sentiment_score: score,
       trend_direction,
@@ -89,11 +83,6 @@ export function Home() {
   return (
     <div className="min-h-screen bg-[var(--bg-base)] text-white p-6">
       <div className="max-w-8xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">市场情绪监控面板</h1>
-          <p className="text-slate-400">实时监控A股市场情绪状态和板块变化</p>
-        </div>
-
         {error && <div className="mb-6 bg-red-900/20 border border-red-500/30 rounded-lg p-4 text-red-400">情绪数据加载异常：{error}</div>}
 
         <div className="mb-6 bg-[var(--bg-container-50)] backdrop-blur-sm rounded-xl p-4 border border-[var(--border)]">
@@ -103,7 +92,13 @@ export function Home() {
               <p className="text-xs text-slate-400">统一日期查询涨停/跌停</p>
             </div>
             <div className="flex items-center gap-3">
-              <input type="date" value={selectedDate} min="2019-11-28" max={today} onChange={(e) => setSelectedDate(e.target.value)} className="px-3 py-2 bg-[var(--bg-container-60)] border border-[var(--border)] rounded-lg text-white text-sm" />
+              <DateSelector
+                value={selectedDate}
+                min="2019-11-28"
+                max={today}
+                onChange={setSelectedDate}
+                className="px-3 py-2 bg-[var(--bg-container-60)] border border-[var(--border)] rounded-lg text-white text-sm"
+              />
               <input
                 type="text"
                 placeholder="输入API Token"
@@ -119,11 +114,18 @@ export function Home() {
                     refreshDown()
                   }
                 }}
-                className="px-3 py-2 rounded-md text-sm font-medium bg-[var(--bg-container-60)] hover:bg-slate-600 text-slate-200"
-              >
+                className="px-3 py-2 rounded-md text-sm font-medium bg-[var(--bg-container-60)] hover:bg-slate-600 text-slate-200">
                 保存Token
               </button>
-              <button onClick={() => { refresh(); refreshDown() }} disabled={luLoading || ldLoading} className="px-3 py-2 rounded-md text-sm font-medium bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white">查询</button>
+              <button
+                onClick={() => {
+                  refresh()
+                  refreshDown()
+                }}
+                disabled={luLoading || ldLoading}
+                className="px-3 py-2 rounded-md text-sm font-medium bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white">
+                查询
+              </button>
             </div>
           </div>
           {!licenseInput && <div className="mt-3 text-xs text-red-400">未设置Token：请通过URL参数 ?license=... 或在此输入并点击保存</div>}
@@ -164,16 +166,6 @@ export function Home() {
               {aggSentiment.sentiment_score >= 30 && aggSentiment.sentiment_score <= 80 && aggSentiment.limit_down_count <= 50 && <div className="text-green-400 text-sm">✅ 市场情绪正常</div>}
             </div>
           </div>
-
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-            <h3 className="text-lg font-semibold text-white mb-4">操作指南</h3>
-            <div className="space-y-2 text-sm text-slate-400">
-              <div>• 点击导航栏查看板块情绪矩阵</div>
-              <div>• 金色边框表示主升板块</div>
-              <div>• 红色闪烁表示退潮板块</div>
-              <div>• 数据每30秒自动更新</div>
-            </div>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -189,4 +181,16 @@ export function Home() {
       </div>
     </div>
   )
+}
+
+type DateSelectorProps = {
+  value: string
+  min?: string
+  max?: string
+  onChange: (value: string) => void
+  className?: string
+}
+
+function DateSelector({ value, min, max, onChange, className }: DateSelectorProps) {
+  return <input type="date" value={value} min={min} max={max} onChange={(e) => onChange(e.target.value)} className={className} />
 }

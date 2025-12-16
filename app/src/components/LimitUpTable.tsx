@@ -135,7 +135,14 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
       sorter: (a, b) => (a.lbc || 0) - (b.lbc || 0),
       sortDirections: ["ascend", "descend"],
     },
-    { title: "统计", key: "tj", render: (_: unknown, item: LimitUpItem) => <span className="text-red-400 text-xs">{`${item.lbc}天${item.lbc}板`}</span> },
+    { title: "统计", key: "tj", render: (_: unknown, item: LimitUpItem) => {
+      const s = typeof item.tj === 'string' && /^\d+\/\d+$/.test(item.tj)
+        ? (() => { const [d, b] = item.tj.split('/'); return `${d}天/${b}板` })()
+        : item.lbc != null
+          ? `${item.lbc}天/${item.lbc}板`
+          : '-'
+      return <span className="text-red-400 text-xs">{s}</span>
+    } },
 
     { title: "价格", dataIndex: "p", key: "p", render: (p?: number) => <span className="text-slate-200">{p != null ? p.toFixed(2) : "-"}</span> },
     {
