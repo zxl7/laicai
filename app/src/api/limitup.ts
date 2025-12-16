@@ -11,8 +11,13 @@ export const UNIFIED_DATE = `${yyyy}-${mm}-${dd}`
 export async function fetchLimitUpList(date: string): Promise<LimitUpItem[]> {
   const url = `/api/quote/zt-stock-pool/${date}`
   try {
+    // 确保请求的是当前选中的日期
+    console.log('Fetching limit-up list for date:', date)
     const result = await get<{ code: number; message: string; data: { date: string; total: number; stocks: LimitUpItem[] } }>(url)
-    const stocks = (result as any)?.data?.stocks
+    // 正确解析API响应结构 - get函数已经返回res.data
+    console.log('Limit-up list API result:', result)
+    const stocks = result?.data?.stocks
+    console.log('Limit-up stocks:', stocks)
     return Array.isArray(stocks) ? stocks : []
   } catch (error) {
     console.error('Failed to fetch limit-up list:', error)
