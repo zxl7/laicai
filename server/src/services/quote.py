@@ -4,9 +4,9 @@
 
 import json
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Any, List
-from src.schemas.quote import StockPool, CompanyProfile, StrongStock, StrongStockPool
+from src.schemas.quote import StockPool, CompanyProfile, StrongStock, StrongStockPool, ZTStock, DTStock, ZTStockPool, DTStockPool
 from src.config.config import settings
 from src.utils.api_client import api_client, ApiClient
 
@@ -326,6 +326,56 @@ class QuoteService:
                     traceback.print_exc()
                     # 不影响正常返回，只记录错误
             
+            # 保存数据到ZTGC.json文件（最近一周数据）
+            if stocks:
+                try:
+                    # 新的JSON文件路径
+                    ztgc_file_path = "/Users/zxl/Desktop/laicai/server/DataBase/ZTGC.json"
+                    
+                    # 读取现有数据（如果文件不存在则创建空字典）
+                    ztgc_data = {}
+                    try:
+                        with open(ztgc_file_path, 'r', encoding='utf-8') as f:
+                            ztgc_data = json.load(f)
+                    except FileNotFoundError:
+                        pass
+                    
+                    # 将当前日期的数据添加到ZTGC.json
+                    ztgc_data[date] = {
+                        "total": len(stocks),
+                        "stocks": [stock.dict() for stock in stocks],
+                        "updateTime": datetime.now().isoformat()
+                    }
+                    
+                    # 清理超过5天的数据
+                    today = datetime.strptime(date, "%Y-%m-%d")
+                    cutoff_date = today - timedelta(days=5)
+                    
+                    # 获取需要保留的日期列表
+                    dates_to_keep = []
+                    for data_date in ztgc_data.keys():
+                        try:
+                            date_obj = datetime.strptime(data_date, "%Y-%m-%d")
+                            if date_obj >= cutoff_date:
+                                dates_to_keep.append(data_date)
+                        except ValueError:
+                            # 跳过格式错误的日期
+                            continue
+                    
+                    # 创建只包含保留日期的新字典
+                    cleaned_ztgc_data = {date: ztgc_data[date] for date in dates_to_keep}
+                    
+                    # 保存清理后的数据到ZTGC.json
+                    with open(ztgc_file_path, 'w', encoding='utf-8') as f:
+                        json.dump(cleaned_ztgc_data, f, ensure_ascii=False, indent=4)
+                    
+                    print(f"成功更新ZTGC.json文件，保留了 {len(cleaned_ztgc_data)} 天的数据")
+                except Exception as e:
+                    print(f"更新ZTGC.json文件失败: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    # 不影响正常返回，只记录错误
+            
             # 构建并返回ZTStockPool对象
             return ZTStockPool(
                 date=date,
@@ -435,6 +485,56 @@ class QuoteService:
                     print(f"成功更新stockCompanyPool.json文件")
                 except Exception as e:
                     print(f"更新stockCompanyPool.json文件失败: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    # 不影响正常返回，只记录错误
+            
+            # 保存数据到DTGC.json文件（最近一周数据）
+            if stocks:
+                try:
+                    # 新的JSON文件路径
+                    dtgc_file_path = "/Users/zxl/Desktop/laicai/server/DataBase/DTGC.json"
+                    
+                    # 读取现有数据（如果文件不存在则创建空字典）
+                    dtgc_data = {}
+                    try:
+                        with open(dtgc_file_path, 'r', encoding='utf-8') as f:
+                            dtgc_data = json.load(f)
+                    except FileNotFoundError:
+                        pass
+                    
+                    # 将当前日期的数据添加到DTGC.json
+                    dtgc_data[date] = {
+                        "total": len(stocks),
+                        "stocks": [stock.dict() for stock in stocks],
+                        "updateTime": datetime.now().isoformat()
+                    }
+                    
+                    # 清理超过5天的数据
+                    today = datetime.strptime(date, "%Y-%m-%d")
+                    cutoff_date = today - timedelta(days=5)
+                    
+                    # 获取需要保留的日期列表
+                    dates_to_keep = []
+                    for data_date in dtgc_data.keys():
+                        try:
+                            date_obj = datetime.strptime(data_date, "%Y-%m-%d")
+                            if date_obj >= cutoff_date:
+                                dates_to_keep.append(data_date)
+                        except ValueError:
+                            # 跳过格式错误的日期
+                            continue
+                    
+                    # 创建只包含保留日期的新字典
+                    cleaned_dtgc_data = {date: dtgc_data[date] for date in dates_to_keep}
+                    
+                    # 保存清理后的数据到DTGC.json
+                    with open(dtgc_file_path, 'w', encoding='utf-8') as f:
+                        json.dump(cleaned_dtgc_data, f, ensure_ascii=False, indent=4)
+                    
+                    print(f"成功更新DTGC.json文件，保留了 {len(cleaned_dtgc_data)} 天的数据")
+                except Exception as e:
+                    print(f"更新DTGC.json文件失败: {e}")
                     import traceback
                     traceback.print_exc()
                     # 不影响正常返回，只记录错误
