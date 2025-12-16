@@ -35,8 +35,8 @@ export function Login() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-            <div className="space-y-4">
+          <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700">
+            <div className="space-y-2">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
                   邮箱地址
@@ -49,7 +49,7 @@ export function Login() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                     placeholder="请输入邮箱地址"
                   />
                 </div>
@@ -67,7 +67,7 @@ export function Login() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                     placeholder="请输入密码"
                   />
                 </div>
@@ -75,7 +75,7 @@ export function Login() {
             </div>
 
             {error && (
-              <div className="mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg text-red-400 text-sm">
+              <div className="mt-2 p-2 bg-red-900/20 border border-red-500/30 rounded-lg text-red-400 text-sm">
                 {error}
               </div>
             )}
@@ -83,7 +83,7 @@ export function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-6 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
+              className="w-full mt-4 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white font-medium py-2 px-2 rounded-lg transition-colors flex items-center justify-center"
             >
               {loading ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -111,7 +111,7 @@ export function Login() {
             <User className="w-4 h-4 mr-2" />
             访客访问
           </h3>
-          <p className="text-slate-400 text-sm mb-3">
+          <p className="text-slate-400 text-sm mb-2">
             无需注册即可查看基础市场情绪数据，但无法使用收藏和提醒功能。
           </p>
           <Link

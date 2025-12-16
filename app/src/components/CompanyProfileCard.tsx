@@ -12,13 +12,13 @@ export function CompanyProfileCard({ profile }: Props) {
     .map((s) => s.trim())
     .filter(Boolean)
   return (
-    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-      <div className="mb-4">
+    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700">
+      <div className="mb-2">
         <h2 className="text-xl font-semibold text-white">{profile.mc}</h2>
         <p className="text-slate-400 text-sm">{profile.ename}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div>
           <div className="text-slate-400 text-xs">当前价格</div>
           <div className="text-white">{profile.p}</div>
@@ -37,7 +37,7 @@ export function CompanyProfileCard({ profile }: Props) {
         </div>
         <div className="md:col-span-2">
           <div className="text-slate-400 text-xs">概念及板块</div>
-          <div className="flex flex-wrap gap-2 mt-1">
+          <div className="flex flex-wrap gap-2 mt-2">
             {tags.length === 0 ? (
               <span className="text-slate-500 text-xs">-</span>
             ) : (
@@ -51,7 +51,7 @@ export function CompanyProfileCard({ profile }: Props) {
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-2">
         <div>
           <div className="text-slate-400 text-xs">是否异动</div>
           {/* <div className="text-amber-400 break-all">{profile.yd === "1" ? "是" : "否"}</div> */}
@@ -70,7 +70,7 @@ export function CompanyProfileCard({ profile }: Props) {
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-4">
         <div className="text-slate-400 text-xs mb-2">公司简介</div>
         <div className="text-slate-200 text-sm leading-6 whitespace-pre-line">{profile.bscope}</div>
       </div>

@@ -46,7 +46,7 @@ export function Sectors() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white p-6">
+      <div className="min-h-screen bg-slate-900 text-white p-8">
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 text-red-400">
             错误: {error}
@@ -57,7 +57,7 @@ export function Sectors() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
+    <div className="min-h-screen bg-slate-900 text-white p-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 animate-fade-in">
           <h1 className="text-3xl font-bold text-white mb-2">板块情绪矩阵</h1>
@@ -65,7 +65,7 @@ export function Sectors() {
         </div>
 
         {/* 筛选器和日期选择器 */}
-        <div className="flex flex-wrap items-center gap-4 mb-6 animate-slide-up">
+        <div className="flex flex-wrap items-center gap-2 mb-4 animate-slide-up">
           <div className="flex items-center space-x-2">
             <Filter className="w-4 h-4 text-slate-400 transition-transform duration-300 hover:rotate-180" />
             <span className="text-slate-300 text-sm">筛选:</span>
@@ -79,7 +79,7 @@ export function Sectors() {
               <button
                 key={option.value}
                 onClick={() => setFilter(option.value as 'all' | 'rising' | 'falling')}
-                className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 hover:scale-105 hover:shadow-md ${filter === option.value
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:scale-105 hover:shadow-md ${filter === option.value
                   ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-amber-500/10'
                   : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
                 style={{ animationDelay: `${index * 50}ms` }}
@@ -100,14 +100,14 @@ export function Sectors() {
                 refresh() // 日期变化时刷新板块数据
               }}
               max={new Date().toISOString().split('T')[0]} // 限制最大日期为今天
-              className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-1 text-sm transition-all duration-300 hover:border-slate-600 hover:shadow-md"
+              className="bg-slate-800 text-white border border-slate-700 rounded px-4 py-2 text-sm transition-all duration-300 hover:border-slate-600 hover:shadow-md"
             />
             <button
               onClick={() => {
                 refresh()
                 refreshUp()
               }}
-              className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-1 text-sm hover:bg-slate-700 flex items-center space-x-1 transition-all duration-300 hover:border-slate-600 hover:shadow-md hover:scale-105"
+              className="bg-slate-800 text-white border border-slate-700 rounded px-4 py-2 text-sm hover:bg-slate-700 flex items-center space-x-2 transition-all duration-300 hover:border-slate-600 hover:shadow-md hover:scale-105"
               title="刷新数据"
             >
               <RefreshCcw className="w-3 h-3 transition-transform duration-300 hover:rotate-180" />
@@ -117,7 +117,7 @@ export function Sectors() {
         </div>
 
         {/* 统计信息 */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           {[
             { value: sectors.length, label: '总板块数', color: 'text-white', borderColor: 'border-slate-700' },
             { value: risingSectors.length, label: '主升板块', color: 'text-amber-400', borderColor: 'border-amber-500/30' },
@@ -126,7 +126,7 @@ export function Sectors() {
           ].map((stat, index) => (
             <div 
               key={stat.label} 
-              className={`bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border transition-all duration-500 hover:shadow-lg hover:-translate-y-1 animate-slide-up`}
+              className={`bg-slate-800/50 backdrop-blur-sm rounded-xl p-2 border transition-all duration-500 hover:shadow-lg hover:-translate-y-1 animate-slide-up`}
               style={{ borderColor: stat.borderColor, animationDelay: `${index * 100}ms` }}
             >
               <div className={`text-2xl font-bold ${stat.color} transition-all duration-300 hover:scale-105`}>{stat.value}</div>
@@ -138,36 +138,36 @@ export function Sectors() {
         {/* 热点板块识别 */}
         {hotSectors.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-amber-400 mb-4 flex items-center animate-fade-in">
-              <Flame className="w-5 h-5 text-amber-500 mr-2 animate-pulse" />
+            <h2 className="text-xl font-semibold text-amber-400 mb-2 flex items-center animate-fade-in">
+              <Flame className="w-6 h-6 text-amber-500 mr-2 animate-pulse" />
               今日热点板块
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               {hotSectors.map((sector, index) => (
                 <div 
                   key={sector.id} 
-                  className="bg-gradient-to-r from-amber-500/20 to-red-500/20 backdrop-blur-sm rounded-xl p-4 border border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300 hover:scale-105"
+                  className="bg-gradient-to-r from-amber-500/20 to-red-500/20 backdrop-blur-sm rounded-xl p-2 border border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300 hover:scale-105"
                   style={{ animationDelay: `${index * 100}ms`, animation: 'slide-up 0.5s ease-out forwards' }}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-white font-bold transition-colors duration-300 hover:text-amber-400">{sector.name}</h3>
                     <Flame className="w-4 h-4 text-amber-500 animate-pulse" />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2">
                     <div className="bg-slate-800/50 rounded p-2 transition-all duration-300 hover:bg-slate-700/50 hover:scale-105">
                       <div className="text-red-400 font-semibold text-xs">涨停</div>
                       <div className="text-white font-bold">{sector.limit_up_stocks}</div>
                     </div>
-                    <div className="bg-slate-800/50 rounded p-2 transition-all duration-300 hover:bg-slate-700/50 hover:scale-105">
+                    <div className="bg-slate-800/50 rounded p-4 transition-all duration-300 hover:bg-slate-700/50 hover:scale-105">
                       <div className="text-green-400 font-semibold text-xs">跌停</div>
                       <div className="text-white font-bold">{sector.limit_down_stocks}</div>
                     </div>
                   </div>
-                  <div className="mt-3 flex items-center text-xs text-amber-300">
+                  <div className="mt-2 flex items-center text-xs text-amber-300">
                     {sector.trend_direction === 'up' ? (
-                      <TrendingUp className="w-3 h-3 mr-1 animate-pulse" />
+                      <TrendingUp className="w-4 h-4 mr-2 animate-pulse" />
                     ) : sector.trend_direction === 'down' ? (
-                      <TrendingDown className="w-3 h-3 mr-1 animate-pulse" />
+                      <TrendingDown className="w-4 h-4 mr-2 animate-pulse" />
                     ) : null}
                     <span>
                       {sector.trend_direction === 'up' ? '强势上涨' : 
@@ -182,13 +182,13 @@ export function Sectors() {
         
         {/* 板块情绪变化分析 */}
         {sectors.length > 0 && (
-          <div className="mb-8 bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700 transition-all duration-500 hover:shadow-lg animate-fade-in">
-            <h2 className="text-xl font-semibold text-white mb-4 animate-slide-up">板块情绪变化分析</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mb-4 bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700 transition-all duration-500 hover:shadow-lg animate-fade-in">
+            <h2 className="text-xl font-semibold text-white mb-2 animate-slide-up">板块情绪变化分析</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
             {
               title: '上涨动力',
-              icon: <TrendingUp className="w-5 h-5 text-red-400 mr-2" />,
+              icon: <TrendingUp className="w-6 h-6 text-red-400 mr-2" />,
               color: 'text-red-400',
               content: (
                 <>
@@ -196,7 +196,7 @@ export function Sectors() {
                     主升板块: <span className="text-white font-bold">{risingSectors.length}</span> 个，
                     占比 <span className="text-white font-bold">{((risingSectors.length / sectors.length) * 100).toFixed(1)}%</span>
                   </p>
-                  <p className="text-slate-300 text-sm mt-2">
+                  <p className="text-slate-300 text-sm mt-1">
                     涨停个股主要集中在: 
                     {sectors
                       .filter(s => s.limit_up_stocks > 0)
@@ -211,7 +211,7 @@ export function Sectors() {
             },
             {
               title: '下跌压力',
-              icon: <TrendingDown className="w-5 h-5 text-green-400 mr-2" />,
+              icon: <TrendingDown className="w-6 h-6 text-green-400 mr-2" />,
               color: 'text-green-400',
               content: (
                 <>
@@ -234,7 +234,7 @@ export function Sectors() {
             },
                 {
                   title: '热点轮动',
-                  icon: <Flame className="w-5 h-5 text-amber-400 mr-2" />,
+                  icon: <Flame className="w-6 h-6 text-amber-400 mr-2" />,
                   color: 'text-amber-400',
                   content: (
                     <>
@@ -252,10 +252,10 @@ export function Sectors() {
               ].map((item, index) => (
                 <div 
                   key={item.title} 
-                  className="bg-slate-700/30 rounded-lg p-4 transition-all duration-300 hover:bg-slate-700/50 hover:-translate-y-1"
+                  className="bg-slate-700/30 rounded-lg p-2 transition-all duration-300 hover:bg-slate-700/50 hover:-translate-y-1"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="flex items-center mb-3">
+                  <div className="flex items-center mb-2">
                     {item.icon}
                     <h3 className={`${item.color} font-medium`}>{item.title}</h3>
                   </div>
@@ -270,10 +270,10 @@ export function Sectors() {
         {risingSectors.length > 0 && (
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-amber-400 mb-4 flex items-center animate-fade-in">
-              <div className="w-2 h-2 bg-amber-400 rounded-full mr-2 animate-pulse"></div>
+              <div className="w-3 h-3 bg-amber-400 rounded-full mr-2 animate-pulse"></div>
               主升板块
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {risingSectors.map((sector, index) => (
                 <div key={sector.id} style={{ animationDelay: `${index * 50}ms` }}>
                   <SectorCard
@@ -291,10 +291,10 @@ export function Sectors() {
         {fallingSectors.length > 0 && (
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-red-400 mb-4 flex items-center animate-fade-in">
-              <div className="w-2 h-2 bg-red-400 rounded-full mr-2 animate-pulse"></div>
+              <div className="w-3 h-3 bg-red-400 rounded-full mr-2 animate-pulse"></div>
               退潮板块
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {fallingSectors.map((sector, index) => (
                 <div key={sector.id} style={{ animationDelay: `${index * 50}ms` }}>
                   <SectorCard
@@ -312,7 +312,7 @@ export function Sectors() {
         {normalSectors.length > 0 && (
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-slate-400 mb-4 animate-fade-in">其他板块</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {normalSectors.map((sector, index) => (
                 <div key={sector.id} style={{ animationDelay: `${index * 50}ms` }}>
                   <SectorCard
@@ -327,15 +327,15 @@ export function Sectors() {
         )}
 
         {loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {[...Array(8)].map((_, i) => (
               <div 
                 key={i} 
                 className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700 animate-pulse"
                 style={{ animationDelay: `${i * 50}ms` }}
               >
-                <div className="h-6 bg-slate-700 rounded mb-3"></div>
-                <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="h-6 bg-slate-700 rounded mb-4"></div>
+                <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="h-8 bg-slate-700 rounded"></div>
                   <div className="h-8 bg-slate-700 rounded"></div>
                 </div>
@@ -346,7 +346,7 @@ export function Sectors() {
         )}
 
         {!loading && filteredSectors.length === 0 && (
-          <div className="text-center py-12">
+          <div className="text-center py-8">
             <div className="text-slate-400 text-lg mb-2">暂无符合条件的板块</div>
             <div className="text-slate-500 text-sm">尝试调整筛选条件或稍后再试</div>
           </div>
@@ -354,12 +354,12 @@ export function Sectors() {
         
         {/* 关注板块 */}
         {favorites.length > 0 && (
-          <div className="mt-12 animate-fade-in">
-            <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
-              <Star className="w-5 h-5 text-amber-400 mr-2 animate-pulse" />
+          <div className="mt-8 animate-fade-in">
+            <h2 className="text-xl font-semibold text-white mb-2 flex items-center">
+              <Star className="w-6 h-6 text-amber-400 mr-2 animate-pulse" />
               关注板块
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {sectors
                 .filter(sector => favorites.includes(sector.id))
                 .map((sector, index) => (

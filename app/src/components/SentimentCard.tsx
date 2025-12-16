@@ -22,9 +22,9 @@ interface SentimentCardProps {
 export function SentimentCard({ sentiment, loading }: SentimentCardProps) {
   if (loading) {
     return (
-      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700 animate-pulse">
-        <div className="h-8 bg-slate-700 rounded mb-4"></div>
-        <div className="h-12 bg-slate-700 rounded mb-4"></div>
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700 animate-pulse">
+        <div className="h-8 bg-slate-700 rounded mb-2"></div>
+        <div className="h-12 bg-slate-700 rounded mb-2"></div>
         <div className="h-6 bg-slate-700 rounded"></div>
       </div>
     )
@@ -32,7 +32,7 @@ export function SentimentCard({ sentiment, loading }: SentimentCardProps) {
 
   if (!sentiment) {
     return (
-      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700">
         <div className="text-slate-400 text-center">暂无数据</div>
       </div>
     )
@@ -65,31 +65,31 @@ export function SentimentCard({ sentiment, loading }: SentimentCardProps) {
   }
 
   return (
-    <div className={`bg-gradient-to-br ${getBackgroundGradient()} backdrop-blur-sm rounded-xl p-6 border border-slate-700 shadow-lg`}>
-      <div className="flex items-center justify-between mb-4">
+    <div className={`bg-gradient-to-br ${getBackgroundGradient()} backdrop-blur-sm rounded-xl p-4 border border-slate-700 shadow-lg`}>
+        <div className="flex items-center justify-between mb-2">
         <h3 className="text-slate-300 text-sm font-medium">市场情绪指数</h3>
         {getTrendIcon()}
       </div>
       
-      <div className="mb-4">
+      <div className="mb-2">
         <div className={`text-4xl font-bold ${getScoreColor()}`}>
           {sentiment.sentiment_score}
         </div>
-        <div className="text-slate-400 text-sm mt-1">/ 100</div>
+        <div className="text-slate-400 text-sm mt-0.5">/ 100</div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div className="bg-slate-800/30 rounded-lg p-3">
+      <div className="grid grid-cols-2 gap-2 text-sm">
+        <div className="bg-slate-800/30 rounded-lg p-2">
           <div className="text-red-500 font-semibold">{sentiment.limit_up_count}</div>
           <div className="text-slate-400 text-xs">涨停家数</div>
         </div>
-        <div className="bg-slate-800/30 rounded-lg p-3">
+        <div className="bg-slate-800/30 rounded-lg p-4">
           <div className="text-green-500 font-semibold">{sentiment.limit_down_count}</div>
           <div className="text-slate-400 text-xs">跌停家数</div>
         </div>
       </div>
 
-      <div className="mt-4 text-xs text-slate-500">
+      <div className="mt-2 text-xs text-slate-500">
         更新时间: {new Date(sentiment.timestamp).toLocaleString('zh-CN')}
       </div>
     </div>

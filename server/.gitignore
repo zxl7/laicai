@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 *$py.class
+server/__pycache__/
+server/DataBase/ZTGC.json
+
 
 # Distribution / packaging
 .Python

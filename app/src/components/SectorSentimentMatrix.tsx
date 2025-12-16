@@ -18,8 +18,8 @@ export function SectorSentimentMatrix({ sectors, loading }: SectorSentimentMatri
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {[...Array(8)].map((_, i) => (
           <div key={i} className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700 animate-pulse">
-            <div className="h-6 bg-slate-700 rounded mb-3"></div>
-            <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="h-6 bg-slate-700 rounded mb-2"></div>
+            <div className="grid grid-cols-2 gap-2 mb-2">
               <div className="h-8 bg-slate-700 rounded"></div>
               <div className="h-8 bg-slate-700 rounded"></div>
             </div>
@@ -36,27 +36,27 @@ export function SectorSentimentMatrix({ sectors, loading }: SectorSentimentMatri
   const normalSectors = sectors.filter(s => !s.is_rising && !s.is_falling)
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* 主升板块 */}
       {risingSectors.length > 0 && (
         <div>
-          <h2 className="text-xl font-semibold text-amber-400 mb-4 flex items-center">
-            <div className="w-2 h-2 bg-amber-400 rounded-full mr-2 animate-pulse"></div>
+          <h2 className="text-xl font-semibold text-amber-400 mb-2 flex items-center">
+            <div className="w-3 h-3 bg-amber-400 rounded-full mr-2 animate-pulse"></div>
             主升板块
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {risingSectors.map(sector => (
               <div key={sector.id} className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-amber-400/50 shadow-amber-400/20">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-2">
                   <h3 className="text-white font-semibold">{sector.name}</h3>
                   <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
                 </div>
-                <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="grid grid-cols-2 gap-2 mb-2">
                   <div className="bg-slate-700/30 rounded-lg p-2">
                   <div className="text-red-500 font-semibold text-sm">{sector.limit_up_stocks}</div>
                     <div className="text-slate-400 text-xs">涨停</div>
                   </div>
-                  <div className="bg-slate-700/30 rounded-lg p-2">
+                  <div className="bg-slate-700/30 rounded-lg p-4">
                   <div className="text-green-500 font-semibold text-sm">{sector.limit_down_stocks}</div>
                     <div className="text-slate-400 text-xs">跌停</div>
                   </div>
@@ -73,23 +73,23 @@ export function SectorSentimentMatrix({ sectors, loading }: SectorSentimentMatri
       {/* 退潮板块 */}
       {fallingSectors.length > 0 && (
         <div>
-          <h2 className="text-xl font-semibold text-red-400 mb-4 flex items-center">
-            <div className="w-2 h-2 bg-red-400 rounded-full mr-2 animate-pulse"></div>
+          <h2 className="text-xl font-semibold text-red-400 mb-2 flex items-center">
+            <div className="w-3 h-3 bg-red-400 rounded-full mr-2 animate-pulse"></div>
             退潮板块
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {fallingSectors.map(sector => (
               <div key={sector.id} className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-red-500/50 shadow-red-500/20">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-4">
                   <h3 className="text-white font-semibold">{sector.name}</h3>
                   <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
                 </div>
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div className="bg-slate-700/30 rounded-lg p-2">
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="bg-slate-700/30 rounded-lg p-4">
                     <div className="text-red-500 font-semibold text-sm">{sector.limit_up_stocks}</div>
                     <div className="text-slate-400 text-xs">涨停</div>
                   </div>
-                  <div className="bg-slate-700/30 rounded-lg p-2">
+                  <div className="bg-slate-700/30 rounded-lg p-4">
                     <div className="text-green-500 font-semibold text.sm">{sector.limit_down_stocks}</div>
                     <div className="text-slate-400 text-xs">跌停</div>
                   </div>
@@ -106,20 +106,20 @@ export function SectorSentimentMatrix({ sectors, loading }: SectorSentimentMatri
       {/* 普通板块 */}
       {normalSectors.length > 0 && (
         <div>
-          <h2 className="text-xl font-semibold text-slate-400 mb-4">其他板块</h2>
+          <h2 className="text-xl font-semibold text-slate-400 mb-2">其他板块</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {normalSectors.map(sector => (
               <div key={sector.id} className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-4">
                   <h3 className="text-white font-semibold">{sector.name}</h3>
                   <div className="w-2 h-2 bg-slate-500 rounded-full"></div>
                 </div>
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div className="bg-slate-700/30 rounded-lg p-2">
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="bg-slate-700/30 rounded-lg p-4">
                     <div className="text-red-500 font-semibold text-sm">{sector.limit_up_stocks}</div>
                     <div className="text-slate-400 text-xs">涨停</div>
                   </div>
-                  <div className="bg-slate-700/30 rounded-lg p-2">
+                  <div className="bg-slate-700/30 rounded-lg p-4">
                     <div className="text-green-500 font-semibold text-sm">{sector.limit_down_stocks}</div>
                     <div className="text-slate-400 text-xs">跌停</div>
                   </div>
@@ -134,7 +134,7 @@ export function SectorSentimentMatrix({ sectors, loading }: SectorSentimentMatri
       )}
 
       {!loading && sectors.length === 0 && (
-        <div className="text-center py-12">
+        <div className="text-center py-6">
           <div className="text-slate-400 text-lg mb-2">暂无板块数据</div>
           <div className="text-slate-500 text-sm">请稍后再试</div>
         </div>

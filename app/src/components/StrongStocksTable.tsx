@@ -233,7 +233,7 @@ export function StrongStocksTable({ data, loading, onRefresh, title, date }: Str
 
   return (
     <div className="bg-[var(--bg-container-50)] backdrop-blur-sm rounded-xl border border-[var(--border)] overflow-hidden">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--border)]">
         <div>
           <h3 className="text-lg font-semibold text-white">{title || "强势股池"}</h3>
           <p className="text-xs text-slate-400">{date ? `日期：${date}` : ""}</p>
@@ -273,7 +273,7 @@ export function StrongStocksTable({ data, loading, onRefresh, title, date }: Str
         footer={null}
         width={800}>
         {detailProfile && (
-          <div className="space-y-4">
+          <div className="space-y-2">
             <CompanyProfileCard profile={detailProfile} />
           </div>
         )}

@@ -55,7 +55,7 @@ export function SectorCard({ sector, onFavorite, isFavorite }: SectorCardProps) 
 
   /** 根据板块状态返回卡片样式（主升/退潮强调动效） */
   const getCardStyles = () => {
-    const baseClasses = 'bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border transition-all duration-300 hover:shadow-lg hover:scale-105 relative overflow-hidden'
+    const baseClasses = 'bg-slate-800/50 backdrop-blur-sm rounded-xl p-8 border transition-all duration-300 hover:shadow-lg hover:scale-105 relative overflow-hidden'
     
     if (sector.is_rising) {
       return `${baseClasses} border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent hover:bg-gradient-to-br from-amber-500/20 to-transparent hover:border-amber-500/50`
@@ -82,7 +82,7 @@ export function SectorCard({ sector, onFavorite, isFavorite }: SectorCardProps) 
       {/* 板块名称和趋势 */}
       <div className="flex items-center justify-between mb-2 relative z-10">
         <h3 className="text-white font-bold text-sm transition-all duration-300 hover:text-amber-400">{sector.name}</h3>
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-2">
           {getTrendIcon()}
           <button
             onClick={() => onFavorite(sector.id)}
@@ -95,30 +95,30 @@ export function SectorCard({ sector, onFavorite, isFavorite }: SectorCardProps) 
       </div>
 
       {/* 板块数据维度 */}
-      <div className="grid grid-cols-2 gap-3 mb-3 relative z-10">
+      <div className="grid grid-cols-2 gap-4 mb-4 relative z-10">
         <div 
-          className="bg-slate-700/50 rounded p-2 transition-all duration-300 hover:bg-red-500/20 hover:border-red-500/50 hover:scale-105 cursor-pointer border border-transparent"
+          className="bg-slate-700/50 rounded p-4 transition-all duration-300 hover:bg-red-500/20 hover:border-red-500/50 hover:scale-105 cursor-pointer border border-transparent"
           onClick={() => handleDimensionClick('limit_up')}
         >
           <div className="text-xs font-semibold text-red-400">涨停</div>
           <div className="text-white font-bold">{sector.limit_up_stocks}</div>
         </div>
         <div 
-          className="bg-slate-700/50 rounded p-2 transition-all duration-300 hover:bg-red-500/10 hover:border-red-500/30 hover:scale-105 cursor-pointer border border-transparent"
+          className="bg-slate-700/50 rounded p-4 transition-all duration-300 hover:bg-red-500/10 hover:border-red-500/30 hover:scale-105 cursor-pointer border border-transparent"
           onClick={() => handleDimensionClick('rising')}
         >
           <div className="text-xs font-semibold text-red-400">上涨</div>
           <div className="text-white font-bold">{sector.rising_stocks}</div>
         </div>
         <div 
-          className="bg-slate-700/50 rounded p-2 transition-all duration-300 hover:bg-green-500/10 hover:border-green-500/30 hover:scale-105 cursor-pointer border border-transparent"
+          className="bg-slate-700/50 rounded p-4 transition-all duration-300 hover:bg-green-500/10 hover:border-green-500/30 hover:scale-105 cursor-pointer border border-transparent"
           onClick={() => handleDimensionClick('falling')}
         >
           <div className="text-xs font-semibold text-green-400">下跌</div>
           <div className="text-white font-bold">{sector.falling_stocks}</div>
         </div>
         <div 
-          className="bg-slate-700/50 rounded p-2 transition-all duration-300 hover:bg-green-500/20 hover:border-green-500/50 hover:scale-105 cursor-pointer border border-transparent"
+          className="bg-slate-700/50 rounded p-4 transition-all duration-300 hover:bg-green-500/20 hover:border-green-500/50 hover:scale-105 cursor-pointer border border-transparent"
           onClick={() => handleDimensionClick('limit_down')}
         >
           <div className="text-xs font-semibold text-green-400">跌停</div>
@@ -143,7 +143,7 @@ export function SectorCard({ sector, onFavorite, isFavorite }: SectorCardProps) 
       </div>
 
       {/* 更新时间 */}
-      <div className="text-xs text-slate-500 mt-2 flex items-center relative z-10">
+      <div className="text-xs text-slate-500 mt-4 flex items-center relative z-10">
         <Clock className="w-3 h-3 mr-1" />
         {new Date(sector.updated_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
       </div>

@@ -17,8 +17,8 @@ export function MarketSentimentDashboard({ data, loading }: MarketSentimentDashb
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700 animate-pulse">
-            <div className="h-8 bg-slate-700 rounded mb-4"></div>
+          <div key={i} className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700 animate-pulse">
+            <div className="h-8 bg-slate-700 rounded mb-2"></div>
             <div className="h-12 bg-slate-700 rounded mb-2"></div>
             <div className="h-4 bg-slate-700 rounded"></div>
           </div>
@@ -57,36 +57,36 @@ export function MarketSentimentDashboard({ data, loading }: MarketSentimentDashb
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700">
         <div className="text-slate-400 text-sm mb-2">市场情绪</div>
         <div className={`text-2xl font-bold ${getSentimentColor(data.trend_direction)}`}>
           {getSentimentText(data.trend_direction)}
         </div>
-        <div className="text-xs text-slate-500 mt-1">当前状态</div>
+        <div className="text-xs text-slate-500 mt-2">当前状态</div>
       </div>
       
-      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700">
         <div className="text-slate-400 text-sm mb-2">情绪强度</div>
         <div className="text-2xl font-bold text-amber-400">
           {data.sentiment_score}
         </div>
-        <div className="text-xs text-slate-500 mt-1">满分100</div>
+        <div className="text-xs text-slate-500 mt-2">满分100</div>
       </div>
       
-      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700">
         <div className="text-slate-400 text-sm mb-2">涨停家数</div>
         <div className="text-2xl font-bold text-red-500">
           {data.limit_up_count}
         </div>
-        <div className="text-xs text-slate-500 mt-1">只个股</div>
+        <div className="text-xs text-slate-500 mt-2">只个股</div>
       </div>
       
-      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700">
         <div className="text-slate-400 text-sm mb-2">跌停家数</div>
         <div className="text-2xl font-bold text-green-500">
           {data.limit_down_count}
         </div>
-        <div className="text-xs text-slate-500 mt-1">只个股</div>
+        <div className="text-xs text-slate-500 mt-2">只个股</div>
       </div>
     </div>
   )

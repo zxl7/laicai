@@ -66,7 +66,7 @@ interface SentimentTrendChartProps {
 export function SentimentTrendChart({ data, loading }: SentimentTrendChartProps) {
   if (loading) {
     return (
-      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-8 border border-slate-700">
         <div className="h-64 bg-slate-700 rounded animate-pulse"></div>
       </div>
     )
@@ -150,7 +150,7 @@ export function SentimentTrendChart({ data, loading }: SentimentTrendChartProps)
   }
 
   return (
-    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-8 border border-slate-700">
       <div className="h-64">
         <Line data={chartData} options={options} />
       </div>

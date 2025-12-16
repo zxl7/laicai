@@ -27,9 +27,8 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
   const [detailOpen, setDetailOpen] = useState(false)
   const [detailProfile, setDetailProfile] = useState<CompanyProfile | null>(null)
 
-  // 打印当前股票池（不进行任何更新）
   useEffect(() => {
-    console.log("股票池", getCompanyCache())
+    // console.log("股票池", getCompanyCache())
   }, [data])
 
   const handleFetchDetail = async (item: LimitUpItem) => {
@@ -55,7 +54,6 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
     setDetailProfile(profile)
     setDetailOpen(true)
     setCachingCode(null)
-    console.log("股票池", getCompanyCache())
   }
   const toHHMMSS = (val: string) => {
     if (!val && val !== "0") return "-"
@@ -135,14 +133,22 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
       sorter: (a, b) => (a.lbc || 0) - (b.lbc || 0),
       sortDirections: ["ascend", "descend"],
     },
-    { title: "统计", key: "tj", render: (_: unknown, item: LimitUpItem) => {
-      const s = typeof item.tj === 'string' && /^\d+\/\d+$/.test(item.tj)
-        ? (() => { const [d, b] = item.tj.split('/'); return `${d}天/${b}板` })()
-        : item.lbc != null
-          ? `${item.lbc}天/${item.lbc}板`
-          : '-'
-      return <span className="text-red-400 text-xs">{s}</span>
-    } },
+    {
+      title: "统计",
+      key: "tj",
+      render: (_: unknown, item: LimitUpItem) => {
+        const s =
+          typeof item.tj === "string" && /^\d+\/\d+$/.test(item.tj)
+            ? (() => {
+                const [d, b] = item.tj.split("/")
+                return `${d}天/${b}板`
+              })()
+            : item.lbc != null
+            ? `${item.lbc}天/${item.lbc}板`
+            : "-"
+        return <span className="text-red-400 text-xs">{s}</span>
+      },
+    },
 
     { title: "价格", dataIndex: "p", key: "p", render: (p?: number) => <span className="text-slate-200">{p != null ? p.toFixed(2) : "-"}</span> },
     {
@@ -189,7 +195,7 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
 
   return (
     <div className="bg-[var(--bg-container-50)] backdrop-blur-sm rounded-xl border border-[var(--border)] overflow-hidden">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--border)]">
         <div>
           <h3 className="text-lg font-semibold text-white">涨停股池</h3>
           <p className="text-xs text-slate-400">{date ? `日期：${date}` : ""}（每10分钟更新）</p>
@@ -226,9 +232,9 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
         footer={null}
         width={800}>
         {detailProfile && (
-          <div className="space-y-4">
+          <div className="space-y-2">
             <CompanyProfileCard profile={detailProfile} />
-            {/* <pre className="bg-[var(--bg-container-60)] text-slate-200 text-xs rounded-lg p-3 overflow-auto max-h-[40vh]">{JSON.stringify(detailProfile, null, 2)}</pre> */}
+            {/* <pre className="bg-[var(--bg-container-60)] text-slate-200 text-xs rounded-lg p-4 overflow-auto max-h-[40vh]">{JSON.stringify(detailProfile, null, 2)}</pre> */}
           </div>
         )}
       </Modal>

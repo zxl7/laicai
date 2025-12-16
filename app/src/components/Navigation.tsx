@@ -32,7 +32,7 @@ export function Navigation() {
               <h1 className="text-xl font-bold text-amber-400">市场情绪面板</h1>
             </div>
             <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-4">
+              <div className="ml-10 flex items-baseline space-x-2">
                 {navItems.map((item) => {
                   const Icon = item.icon
                   const isActive = location.pathname === item.path
@@ -42,7 +42,7 @@ export function Navigation() {
                       key={item.path}
                       to={item.path}
                       className={cn(
-                        "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                        "flex items-center space-x-2 px-2 py-2 rounded-md text-sm font-medium transition-colors",
                         isActive ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       )}>
                       <Icon className="w-4 h-4" />
@@ -55,14 +55,14 @@ export function Navigation() {
           </div>
 
           {/* 用户菜单 */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
             {user ? (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
                 <div className="text-slate-300 text-sm">{user.email}</div>
                 <button
                   onClick={handleSignOut}
                   disabled={loading}
-                  className="flex items-center space-x-1 px-3 py-1 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+                  className="flex items-center space-x-2 px-2 py-2 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
                   <LogOut className="w-4 h-4" />
                   <span>退出</span>
                 </button>
@@ -72,7 +72,7 @@ export function Navigation() {
                 <Link
                   to="/login"
                   className={cn(
-                    "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                    "flex items-center space-x-4 px-4 py-3 rounded-md text-sm font-medium transition-colors",
                     location.pathname === "/login" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "text-slate-300 hover:bg-slate-800 hover:text-white"
                   )}>
                   <User className="w-4 h-4" />
@@ -86,7 +86,7 @@ export function Navigation() {
 
       {/* 移动端导航 */}
       <div className="md:hidden border-t border-slate-700">
-        <div className="px-2 pt-2 pb-3 space-y-1">
+        <div className="px-4 pt-4 pb-4 space-y-4">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = location.pathname === item.path
@@ -96,7 +96,7 @@ export function Navigation() {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors",
+                  "flex items-center space-x-2 px-2 py-2 rounded-md text-base font-medium transition-colors",
                   isActive ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "text-slate-300 hover:bg-slate-800 hover:text-white"
                 )}>
                 <Icon className="w-5 h-5" />
@@ -109,7 +109,7 @@ export function Navigation() {
             <button
               onClick={handleSignOut}
               disabled={loading}
-              className="flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors w-full">
+              className="flex items-center space-x-2 px-2 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors w-full">
               <LogOut className="w-5 h-5" />
               <span>退出登录</span>
             </button>
@@ -117,7 +117,7 @@ export function Navigation() {
             <Link
               to="/login"
               className={cn(
-                "flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors",
+                "flex items-center space-x-2 px-2 py-2 rounded-md text-base font-medium transition-colors",
                 location.pathname === "/login" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "text-slate-300 hover:bg-slate-800 hover:text-white"
               )}>
               <User className="w-5 h-5" />

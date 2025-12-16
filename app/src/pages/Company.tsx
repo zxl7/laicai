@@ -141,7 +141,7 @@ export function Company() {
   const dataSource = entries.map(([code, rec]) => ({ code, rec }))
 
   return (
-    <div className="min-h-screen bg-[var(--bg-base)] text-white p-6">
+    <div className="min-h-screen bg-[var(--bg-base)] text-white p-4">
       <div className="max-w-7xl mx-auto">
         <div>
           <h1 className="text-3xl font-bold">股票总池</h1>
@@ -149,7 +149,7 @@ export function Company() {
         </div>
 
         <Card className="bg-[var(--bg-container-50)] backdrop-blur-sm rounded-xl border border-[var(--border)] overflow-hidden">
-          <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">
+          <div className="px-4 py-2 border-b border-[var(--border)] flex items-center justify-between">
             <div className="text-sm text-slate-400">共 {entries.length} 条</div>
             <Button 
               type="primary" 
@@ -248,7 +248,7 @@ export function Company() {
           footer={null}
           width={800}>
           {detailRec && (
-            <div className="space-y-4">
+            <div className="space-y-2">
               <Spin spinning={loading} tip="加载详情中...">
                 {detailProfile ? (
                   <CompanyProfileCard profile={detailProfile} />

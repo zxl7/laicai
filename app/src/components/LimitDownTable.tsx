@@ -114,7 +114,7 @@ export function LimitDownTable({ data, loading, onRefresh, date }: Props) {
 
   return (
     <div className="bg-[var(--bg-container-50)] backdrop-blur-sm rounded-xl border border-[var(--border)] overflow-hidden">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--border)]">
         <div>
           <h3 className="text-lg font-semibold text-white">跌停股池</h3>
           <p className="text-xs text-slate-400">{date ? `日期：${date}` : ''}（每10分钟更新）</p>
@@ -139,9 +139,9 @@ export function LimitDownTable({ data, loading, onRefresh, date }: Props) {
 
       <Modal title="公司详情" open={detailOpen && !!detailProfile} onCancel={() => { setDetailOpen(false); setDetailProfile(null) }} footer={null} width={800}>
         {detailProfile && (
-          <div className="space-y-4">
+          <div className="space-y-2">
             <CompanyProfileCard profile={detailProfile} />
-            <pre className="bg-[var(--bg-container-60)] text-slate-200 text-xs rounded-lg p-3 overflow-auto max-h-[40vh]">{JSON.stringify(detailProfile, null, 2)}</pre>
+            <pre className="bg-[var(--bg-container-60)] text-slate-200 text-xs rounded-lg p-2 overflow-auto max-h-[40vh]">{JSON.stringify(detailProfile, null, 2)}</pre>
           </div>
         )}
       </Modal>
