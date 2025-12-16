@@ -243,6 +243,62 @@ class QuoteService:
                     traceback.print_exc()
                     # 不影响正常返回，只记录错误
             
+            # 保存数据到QSGC.json文件（最近3天数据）
+            if stocks:
+                try:
+                    # 新的JSON文件路径
+                    qsgc_file_path = "/Users/zxl/Desktop/laicai/server/DataBase/QSGC.json"
+                    
+                    # 读取现有数据（如果文件不存在则创建空字典）
+                    qsgc_data = {}
+                    try:
+                        with open(qsgc_file_path, 'r', encoding='utf-8') as f:
+                            qsgc_data = json.load(f)
+                    except FileNotFoundError:
+                        pass
+                    
+                    # 将当前日期的数据添加到QSGC.json
+                    qsgc_data[date] = {
+                        "total": len(stocks),
+                        "stocks": [stock.dict() for stock in stocks],
+                        "updateTime": datetime.now().isoformat()
+                    }
+                    
+                    # 清理超过3天的数据
+                    try:
+                        today = datetime.strptime(date, "%Y-%m-%d")
+                        
+                        # 获取需要保留的日期列表
+                        dates_to_keep = []
+                        for data_date in qsgc_data.keys():
+                            try:
+                                date_obj = datetime.strptime(data_date, "%Y-%m-%d")
+                                # 保留最近3天的数据（包括今天）
+                                if 0 <= (today - date_obj).days < 3:
+                                    dates_to_keep.append(data_date)
+                            except ValueError:
+                                # 跳过格式错误的日期
+                                continue
+                        
+                        # 创建只包含保留日期的新字典
+                        cleaned_qsgc_data = {d: qsgc_data[d] for d in dates_to_keep}
+                        
+                        # 保存清理后的数据到QSGC.json
+                        with open(qsgc_file_path, 'w', encoding='utf-8') as f:
+                            json.dump(cleaned_qsgc_data, f, ensure_ascii=False, indent=4)
+                        
+                        print(f"成功更新QSGC.json文件，保留了 {len(cleaned_qsgc_data)} 天的数据")
+                    except Exception as e:
+                        print(f"清理过期数据失败: {e}")
+                        # 如果清理失败，至少保存当前数据
+                        with open(qsgc_file_path, 'w', encoding='utf-8') as f:
+                            json.dump(qsgc_data, f, ensure_ascii=False, indent=4)
+                        
+                except Exception as e:
+                    print(f"更新QSGC.json文件失败: {e}")
+                    import traceback
+                    traceback.print_exc()
+            
             # 构建并返回StrongStockPool对象
             return StrongStockPool(
                 date=date,

@@ -2,7 +2,7 @@ import type { LimitUpItem, CompanyProfile } from "../api/types"
 import { formatCurrency, formatPercent } from "../api/utils"
 import { useEffect, useState } from "react"
 import { fetchCompanyProfile } from "../api/company"
-import { getCompanyCache, updateCompanyCache, getCompanyRecord } from "../services/companyStore"
+import { updateCompanyCache, getCompanyRecord } from "../services/companyStore"
 import { CompanyProfileCard } from "./CompanyProfileCard"
 import { Tag, Table, Modal, Button, Tooltip } from "antd"
 import type { TableColumnsType } from "antd"
@@ -28,7 +28,7 @@ export function LimitUpTable({ data, loading, onRefresh, date }: Props) {
   const [detailProfile, setDetailProfile] = useState<CompanyProfile | null>(null)
 
   useEffect(() => {
-    // console.log("股票池", getCompanyCache())
+    // 缩减无关日志
   }, [data])
 
   const handleFetchDetail = async (item: LimitUpItem) => {

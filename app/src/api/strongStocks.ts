@@ -21,10 +21,11 @@ export async function fetchStrongStocks(date: string = new Date().toISOString().
   console.log('API URL:', url)
   
   try {
-    const result = await get<StrongStockItem[]>(url, { bypassCache })
+    // API响应格式：{ code: 200, message: "", data: { date: "", total: 0, stocks: [] } }
+    const result = await get<{ code: number; message: string; data: { date: string; total: number; stocks: StrongStockItem[] } }>(url, { bypassCache })
     console.log('API response received:', result)
-    // 确保返回的是数组，避免antd组件处理时出错
-    return Array.isArray(result) ? result : []
+    // 处理完整的API响应格式，数据包含在data.stocks字段中
+    return Array.isArray(result?.data?.stocks) ? result.data.stocks : []
   } catch (error) {
     console.error('API request failed:', error)
     return []
