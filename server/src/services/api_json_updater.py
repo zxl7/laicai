@@ -162,12 +162,29 @@ class ApiJsonUpdater:
                 print("数据转换失败")
                 return False
             
+            # 过滤出成交额≥5亿的股票数据
+            print("正在过滤成交额≥5亿的股票数据...")
+            filtered_data = {}
+            deleted_count = 0
+            for code, stock_data in transformed_data.items():
+                # 获取成交额，优先直接获取，其次从list.cje获取
+                cje = stock_data.get('cje', 0)
+                if cje == 0:
+                    cje = stock_data.get('list', {}).get('cje', 0)
+                
+                if cje >= 500000000:  # 5亿
+                    filtered_data[code] = stock_data
+                else:
+                    deleted_count += 1
+                    print(f"删除股票 {code}({stock_data.get('mc', '')}): 成交额 {cje} < 5亿")
+            
             # 更新本地JSON文件
             print("正在更新本地JSON文件...")
-            success = self.json_handler.update(transformed_data)
+            success = self.json_handler.update(filtered_data)
             
             if success:
-                print(f"成功更新 {len(transformed_data)} 条数据到本地JSON文件")
+                print(f"成功更新 {len(filtered_data)} 条数据到本地JSON文件")
+                print(f"共删除 {deleted_count} 条成交额小于5亿的股票数据")
             else:
                 print("更新本地JSON文件失败")
             

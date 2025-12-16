@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 启动开发服务器脚本
-
+source /Users/zxl/Desktop/laicai/server/venv/bin/activate
 # 设置环境变量
 export PYTHONPATH=$(pwd)/src
 export APP_ENV=development

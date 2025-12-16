@@ -110,9 +110,19 @@ class QuoteService:
                             pool_data[clean_stock_code]['code'] = clean_stock_code
                             print(f"添加了 {clean_stock_code} 的公司简介数据")
                     
-                    # 保存更新后的数据到文件
+                    # 删除成交额小于5亿的数据
+                    filtered_data = {}
+                    for code, stock in pool_data.items():
+                        # 检查股票数据中是否有成交额字段，且是否大于等于5亿
+                        cje = stock.get('cje', 0) or stock.get('list', {}).get('cje', 0)
+                        if cje >= 500000000:  # 5亿 = 500,000,000
+                            filtered_data[code] = stock
+                        else:
+                            print(f"删除 {code} ({stock.get('mc', '')})：成交额 {cje} 小于5亿")
+                    
+                    # 保存过滤后的数据到文件
                     with open(pool_file_path, 'w', encoding='utf-8') as f:
-                        json.dump(pool_data, f, ensure_ascii=False, indent=4)
+                        json.dump(filtered_data, f, ensure_ascii=False, indent=4)
                     
                     print(f"成功更新stockCompanyPool.json文件")
                 except Exception as e:
@@ -212,9 +222,19 @@ class QuoteService:
                             pool_data[stock_code] = new_data
                             print(f"添加了 {stock_code} 的强势股数据")
                     
-                    # 保存更新后的数据到文件
+                    # 删除成交额小于5亿的数据
+                    filtered_data = {}
+                    for code, stock in pool_data.items():
+                        # 检查股票数据中是否有成交额字段，且是否大于等于5亿
+                        cje = stock.get('cje', 0) or stock.get('list', {}).get('cje', 0)
+                        if cje >= 500000000:  # 5亿 = 500,000,000
+                            filtered_data[code] = stock
+                        else:
+                            print(f"删除 {code} ({stock.get('mc', '')})：成交额 {cje} 小于5亿")
+                    
+                    # 保存过滤后的数据到文件
                     with open(pool_file_path, 'w', encoding='utf-8') as f:
-                        json.dump(pool_data, f, ensure_ascii=False, indent=4)
+                        json.dump(filtered_data, f, ensure_ascii=False, indent=4)
                     
                     print(f"成功更新stockCompanyPool.json文件")
                 except Exception as e:
@@ -315,9 +335,19 @@ class QuoteService:
                             pool_data[stock_code] = new_data
                             print(f"添加了 {stock_code} 的涨停股数据")
                     
-                    # 保存更新后的数据到文件
+                    # 删除成交额小于5亿的数据
+                    filtered_data = {}
+                    for code, stock in pool_data.items():
+                        # 检查股票数据中是否有成交额字段，且是否大于等于5亿
+                        cje = stock.get('cje', 0) or stock.get('list', {}).get('cje', 0)
+                        if cje >= 500000000:  # 5亿 = 500,000,000
+                            filtered_data[code] = stock
+                        else:
+                            print(f"删除 {code} ({stock.get('mc', '')})：成交额 {cje} 小于5亿")
+                    
+                    # 保存过滤后的数据到文件
                     with open(pool_file_path, 'w', encoding='utf-8') as f:
-                        json.dump(pool_data, f, ensure_ascii=False, indent=4)
+                        json.dump(filtered_data, f, ensure_ascii=False, indent=4)
                     
                     print(f"成功更新stockCompanyPool.json文件")
                 except Exception as e:
@@ -478,9 +508,19 @@ class QuoteService:
                             pool_data[stock_code] = new_data
                             print(f"添加了 {stock_code} 的跌停股数据")
                     
-                    # 保存更新后的数据到文件
+                    # 删除成交额小于5亿的数据
+                    filtered_data = {}
+                    for code, stock in pool_data.items():
+                        # 检查股票数据中是否有成交额字段，且是否大于等于5亿
+                        cje = stock.get('cje', 0) or stock.get('list', {}).get('cje', 0)
+                        if cje >= 500000000:  # 5亿 = 500,000,000
+                            filtered_data[code] = stock
+                        else:
+                            print(f"删除 {code} ({stock.get('mc', '')})：成交额 {cje} 小于5亿")
+                    
+                    # 保存过滤后的数据到文件
                     with open(pool_file_path, 'w', encoding='utf-8') as f:
-                        json.dump(pool_data, f, ensure_ascii=False, indent=4)
+                        json.dump(filtered_data, f, ensure_ascii=False, indent=4)
                     
                     print(f"成功更新stockCompanyPool.json文件")
                 except Exception as e:
