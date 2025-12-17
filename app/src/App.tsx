@@ -8,6 +8,7 @@ import { Home } from "./pages/Home"
 import { Sectors } from "./pages/Sectors"
 import { Login } from "./pages/Login"
 import { Company } from "./pages/Company"
+import { BoardLadder } from "./pages/BoardLadder"
 import { initCompanyCache, registerCompanyCacheEvent } from "./services/companyStore"
 
 export default function App() {
@@ -29,6 +30,7 @@ export default function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/sectors" element={<Sectors />} />
                   <Route path="/company" element={<Company />} />
+                  <Route path="/ladder" element={<BoardLadder />} />
                 </Routes>
               </>
             } />

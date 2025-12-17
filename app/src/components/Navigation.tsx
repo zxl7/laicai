@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom"
-import { Activity, Grid3X3, User, LogOut } from "lucide-react"
+import { Activity, Grid3X3, User, LogOut, Trophy } from "lucide-react"
 import { cn } from "../lib/utils"
 import { useAuth } from "../hooks/useAuth"
 
@@ -16,6 +16,7 @@ export function Navigation() {
     { path: "/", label: "市场情绪", icon: Activity },
     { path: "/sectors", label: "板块矩阵", icon: Grid3X3 },
     { path: "/company", label: "股票总池", icon: User },
+    { path: "/ladder", label: "连板天梯", icon: Trophy },
   ]
 
   /** 退出登录 */
