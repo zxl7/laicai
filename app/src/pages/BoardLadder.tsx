@@ -1,31 +1,42 @@
-import { useState, useEffect } from 'react'
-import { fetchLimitUpList, UNIFIED_DATE } from '../api/limitup'
-import type { LimitUpItem } from '../api/types'
-import { formatCurrency, formatPercent } from '../api/utils'
-import { Card, Tag, Spin, Empty } from 'antd'
-import { Trophy } from 'lucide-react'
-import { resolveTagColor } from '../lib/tagColors'
-import { getCompanyRecord } from '../services/companyStore'
+import { useState, useEffect } from "react"
+import { fetchLimitUpList, UNIFIED_DATE } from "../api/limitup"
+import type { LimitUpItem } from "../api/types"
+import { formatCurrency, formatPercent } from "../api/utils"
+import { Card, Tag, Spin, Empty, DatePicker } from "antd"
+import dayjs from "dayjs"
+import type { Dayjs } from "dayjs"
+import { Trophy } from "lucide-react"
+import { resolveTagColor } from "../lib/tagColors"
+import { getCompanyRecord } from "../services/companyStore"
 
 /**
  * 连板天梯页面
  * 用途：展示按连板数分组的涨停股票，形成天梯效果
  */
 export function BoardLadder() {
+  // 日期状态管理
+  const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs(UNIFIED_DATE))
+
+  // 根据选择的日期从本地存储加载数据
   const [stocks, setStocks] = useState<LimitUpItem[]>(() => {
-    // 从本地存储加载数据
-    const savedData = localStorage.getItem('boardLadderStocks')
+    const savedData = localStorage.getItem(`boardLadderStocks_${UNIFIED_DATE}`)
     if (savedData) {
       try {
         return JSON.parse(savedData)
       } catch (error) {
-        console.error('解析本地存储数据失败:', error)
+        console.error("解析本地存储数据失败:", error)
       }
     }
     return []
   })
   const [loading, setLoading] = useState(stocks.length === 0)
-  const [date] = useState(UNIFIED_DATE)
+
+  // 日期变化处理函数
+  const handleDateChange = (date: Dayjs | null) => {
+    if (date) {
+      setSelectedDate(date)
+    }
+  }
 
   useEffect(() => {
     /**
@@ -34,34 +45,39 @@ export function BoardLadder() {
     const fetchData = async () => {
       setLoading(true)
       try {
-        const data = await fetchLimitUpList(date)
+        const data = await fetchLimitUpList(selectedDate.format("YYYY-MM-DD"))
         // 确保数据格式正确
         if (Array.isArray(data) && data.length > 0) {
           setStocks(data)
-          // 保存到本地存储
-          localStorage.setItem('boardLadderStocks', JSON.stringify(data))
+          // 按日期保存到本地存储
+          localStorage.setItem(`boardLadderStocks_${selectedDate.format("YYYY-MM-DD")}`, JSON.stringify(data))
         } else {
-          console.warn('涨停股数据为空:', data)
+          console.warn("涨停股数据为空:", data)
           // 如果API返回空数据，尝试使用本地存储的数据
-          const savedData = localStorage.getItem('boardLadderStocks')
+          const savedData = localStorage.getItem(`boardLadderStocks_${selectedDate.format("YYYY-MM-DD")}`)
           if (savedData) {
             try {
               setStocks(JSON.parse(savedData))
             } catch (error) {
-              console.error('解析本地存储数据失败:', error)
+              console.error("解析本地存储数据失败:", error)
             }
+          } else {
+            setStocks([])
           }
         }
       } catch (error) {
-        console.error('获取涨停股数据失败:', error)
+        console.error("获取涨停股数据失败:", error)
         // 错误情况下也尝试使用本地存储的数据
-        const savedData = localStorage.getItem('boardLadderStocks')
+        const savedData = localStorage.getItem(`boardLadderStocks_${selectedDate.format("YYYY-MM-DD")}`)
         if (savedData) {
           try {
             setStocks(JSON.parse(savedData))
           } catch (error) {
-            console.error('解析本地存储数据失败:', error)
+            console.error("解析本地存储数据失败:", error)
+            setStocks([])
           }
+        } else {
+          setStocks([])
         }
       } finally {
         setLoading(false)
@@ -69,42 +85,35 @@ export function BoardLadder() {
     }
 
     fetchData()
-  }, [date])
+  }, [selectedDate])
 
   /**
-   * 从股票数据中解析连板数
-   * 优先从tj字段解析（格式：X天/Y板），失败则使用lbc字段
+   * 从股票数据中解析连板天数和板数
+   * 数据格式固定为tj: "X/Y"，其中X为天数，Y为板数
+   * 优先从tj字段解析，失败则使用lbc字段（默认1天X板）
    */
-  const getBoardCount = (stock: LimitUpItem): number => {
+  const getBoardInfo = (stock: LimitUpItem): { days: number; boards: number } => {
     try {
-      // 首先检查tj字段
-      if (typeof stock.tj === 'string' && stock.tj.trim()) {
-        // 解析tj字段：支持 "X天/Y板" 或直接 "X/Y"
-        const tjMatch = stock.tj.match(/^(\d+)\/?(天)?\/(\d+)\/?(板)?$/)
-        if (tjMatch && tjMatch[3]) {
-          const boardCount = parseInt(tjMatch[3], 10)
-          if (!isNaN(boardCount)) {
-            return boardCount
-          }
-        }
-        // 尝试直接按斜线分割
-        const parts = stock.tj.split('/')
-        if (parts.length >= 2) {
-          const boardCount = parseInt(parts[1], 10)
-          if (!isNaN(boardCount)) {
-            return boardCount
+      // 首先检查tj字段，格式固定为 "X/Y"
+      if (typeof stock.tj === "string" && stock.tj.trim()) {
+        const parts = stock.tj.split("/")
+        if (parts.length === 2) {
+          const days = parseInt(parts[0], 10)
+          const boards = parseInt(parts[1], 10)
+          if (!isNaN(days) && !isNaN(boards)) {
+            return { days, boards }
           }
         }
       }
-      // 回退使用lbc字段
-      if (typeof stock.lbc === 'number' && !isNaN(stock.lbc)) {
-        return stock.lbc
+      // 回退使用lbc字段，默认1天
+      if (typeof stock.lbc === "number" && !isNaN(stock.lbc)) {
+        return { days: 1, boards: stock.lbc }
       }
     } catch (error) {
-      console.error('解析连板数失败:', error, '股票数据:', stock)
+      console.error("解析连板信息失败:", error, "股票数据:", stock)
     }
-    // 默认返回0
-    return 0
+    // 默认返回0天0板
+    return { days: 0, boards: 0 }
   }
 
   /**
@@ -112,15 +121,15 @@ export function BoardLadder() {
    */
   const groupByBoardCount = () => {
     const groups: Record<number, LimitUpItem[]> = {}
-    
-    stocks.forEach(stock => {
-      const boardCount = getBoardCount(stock)
+
+    stocks.forEach((stock) => {
+      const boardCount = getBoardInfo(stock).boards
       if (!groups[boardCount]) {
         groups[boardCount] = []
       }
       groups[boardCount].push(stock)
     })
-    
+
     // 按连板数降序排序
     return Object.entries(groups)
       .sort(([a], [b]) => Number(b) - Number(a))
@@ -129,7 +138,7 @@ export function BoardLadder() {
         stocks: stocks.sort((a, b) => {
           // 同一连板数内按涨幅降序排序
           return (b.zf || 0) - (a.zf || 0)
-        })
+        }),
       }))
   }
 
@@ -139,10 +148,10 @@ export function BoardLadder() {
    * 获取连板数对应的样式类名
    */
   const getBoardCountClassName = (count: number) => {
-    if (count >= 5) return 'bg-red-500/20 border-red-500 text-red-400'
-    if (count >= 3) return 'bg-amber-500/20 border-amber-500 text-amber-400'
-    if (count >= 2) return 'bg-green-500/20 border-green-500 text-green-400'
-    return 'bg-blue-500/20 border-blue-500 text-blue-400'
+    if (count >= 5) return "bg-red-500/20 border-red-500 text-red-400"
+    if (count >= 3) return "bg-amber-500/20 border-amber-500 text-amber-400"
+    if (count >= 2) return "bg-green-500/20 border-green-500 text-green-400"
+    return "bg-blue-500/20 border-blue-500 text-blue-400"
   }
 
   return (
@@ -155,8 +164,12 @@ export function BoardLadder() {
             <h1 className="text-3xl font-bold text-white">连板天梯</h1>
           </div>
           <p className="text-slate-400 mt-2">按连板数展示涨停股票，连板数越高排名越靠前</p>
-          <div className="text-sm text-slate-500 mt-1">
-            数据日期：{date} | 每10分钟更新
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 mt-1">
+            <div className="flex items-center space-x-2">
+              <span>数据日期：</span>
+              <DatePicker value={selectedDate} onChange={handleDateChange} format="YYYY-MM-DD" className="w-[150px]" />
+            </div>
+            <span>每10分钟更新</span>
           </div>
         </div>
 
@@ -177,9 +190,7 @@ export function BoardLadder() {
                 {/* 连板数标题 - 左侧固定宽度 */}
                 <div className={`flex flex-col items-center justify-center px-3 py-2 rounded-lg border text-sm min-w-[80px] ${getBoardCountClassName(group.boardCount)}`}>
                   <div className="text-lg font-bold">{group.boardCount}板</div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    共 {group.stocks.length} 只
-                  </div>
+                  <div className="text-xs text-slate-400 mt-1">共 {group.stocks.length} 只</div>
                 </div>
 
                 {/* 股票列表 - 调整宽度布局 - 右侧占据剩余空间 */}
@@ -194,11 +205,7 @@ export function BoardLadder() {
                       .slice(0, 2)
 
                     return (
-                      <Card
-                        key={stock.dm}
-                        className="bg-slate-800/50 border-slate-700 hover:border-amber-500/50 transition-all duration-300"
-                        bodyStyle={{ padding: 8 }}
-                      >
+                      <Card key={stock.dm} className="bg-slate-800/50 border-slate-700 hover:border-amber-500/50 transition-all duration-300" bodyStyle={{ padding: 8 }}>
                         <div className="space-y-2">
                           {/* 股票基本信息 */}
                           <div className="flex items-start justify-between">
@@ -212,16 +219,14 @@ export function BoardLadder() {
                                 <span className="text-slate-300 text-xs">{stock.p?.toFixed(2)}元</span>
                               </div>
                             </div>
-                            <Tag color={getBoardCount(stock) >= 5 ? 'red' : getBoardCount(stock) >= 3 ? 'orange' : 'green'}>
-                              {getBoardCount(stock)}板
-                            </Tag>
+                            <Tag color={getBoardInfo(stock).boards >= 5 ? "red" : getBoardInfo(stock).boards >= 3 ? "orange" : "green"}>{getBoardInfo(stock).days}天{getBoardInfo(stock).boards}板</Tag>
                           </div>
 
                           {/* 股票概念标签 */}
                           {tags.length > 0 && (
                             <div className="flex flex-wrap gap-1">
                               {tags.map((tag) => (
-                                <Tag key={tag} color={resolveTagColor(tag)} style={{ fontSize: '12px', padding: '0 4px' }}>
+                                <Tag key={tag} color={resolveTagColor(tag)} style={{ fontSize: "12px", padding: "0 4px" }}>
                                   {tag}
                                 </Tag>
                               ))}
@@ -254,7 +259,7 @@ export function BoardLadder() {
 
                           {/* 封板信息 */}
                           <div className="text-xs text-slate-500 flex items-center space-x-2 mt-1">
-                            <div>首封: {stock.fbt ? stock.fbt.slice(0, 5) : '-'}</div>
+                            <div>首封: {stock.fbt ? stock.fbt.slice(0, 5) : "-"}</div>
                             <div>炸板: {stock.zbc || 0}次</div>
                           </div>
                         </div>

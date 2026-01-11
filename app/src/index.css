@@ -18,3 +18,8 @@
   --border: #1a2130;
   --tooltip-bg: var(--bg-container);
 }
+
+body {
+  overflow: scroll;
+  height: 100%;
+}
