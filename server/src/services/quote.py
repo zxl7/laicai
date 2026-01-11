@@ -154,13 +154,15 @@ class QuoteService:
         """
         try:
             today = datetime.now().strftime("%Y-%m-%d")
-            api_url = f"http://api.biyingapi.com/hslt/qsgc/{today}/{settings.BIYING_API_TOKEN}"
+            api_url = f"http://api.biyingapi.com/hslt/qsgc/{date}/{settings.BIYING_API_TOKEN}"
             print(f"请求URL: {api_url}")
             data = api_client.get(api_url)
             stocks = api_client.map_to_model(data, StrongStock)
             print(f"成功获取 {len(stocks)} 条强势股数据")
             if stocks:
-                try:
+                # 仅当请求当天数据时更新stockCompanyPool.json，避免历史数据污染
+                if date == today:
+                    try:
                         pool_file_path = "/Users/zxl/Desktop/laicai/server/DataBase/stockCompanyPool.json"
                         with open(pool_file_path, 'r', encoding='utf-8') as f:
                             pool_data = json.load(f)
@@ -204,10 +206,11 @@ class QuoteService:
                         with open(pool_file_path, 'w', encoding='utf-8') as f:
                             json.dump(filtered_data, f, ensure_ascii=False, indent=4)
                         print(f"成功更新stockCompanyPool.json文件")
-                except Exception as e:
-                    print(f"更新stockCompanyPool.json文件失败: {e}")
-                    import traceback
-                    traceback.print_exc()
+                    except Exception as e:
+                        print(f"更新stockCompanyPool.json文件失败: {e}")
+                        import traceback
+                        traceback.print_exc()
+            
             if stocks:
                 try:
                         qsgc_file_path = "/Users/zxl/Desktop/laicai/server/DataBase/QSGC.json"
@@ -217,34 +220,47 @@ class QuoteService:
                                 qsgc_data = json.load(f)
                         except FileNotFoundError:
                             pass
-                        qsgc_data[today] = {
+                        
+                        # 使用请求的日期作为key保存数据
+                        qsgc_data[date] = {
                             "total": len(stocks),
                             "stocks": [stock.dict() for stock in stocks],
                             "updateTime": datetime.now().isoformat()
                         }
-                        try:
-                            today_dt = datetime.strptime(today, "%Y-%m-%d")
-                            dates_to_keep = []
-                            for data_date in qsgc_data.keys():
-                                try:
-                                    date_obj = datetime.strptime(data_date, "%Y-%m-%d")
-                                    if 0 <= (today_dt - date_obj).days < 3:
-                                        dates_to_keep.append(data_date)
-                                except ValueError:
-                                    continue
-                            cleaned_qsgc_data = {d: qsgc_data[d] for d in dates_to_keep}
-                            with open(qsgc_file_path, 'w', encoding='utf-8') as f:
-                                json.dump(cleaned_qsgc_data, f, ensure_ascii=False, indent=4)
-                            print(f"成功更新QSGC.json文件，保留了 {len(cleaned_qsgc_data)} 天的数据")
-                        except Exception as e:
-                            print(f"清理过期数据失败: {e}")
+                        
+                        # 仅当请求当天数据时清理过期数据
+                        if date == today:
+                            try:
+                                today_dt = datetime.strptime(today, "%Y-%m-%d")
+                                dates_to_keep = []
+                                for data_date in qsgc_data.keys():
+                                    try:
+                                        date_obj = datetime.strptime(data_date, "%Y-%m-%d")
+                                        if 0 <= (today_dt - date_obj).days < 3:
+                                            dates_to_keep.append(data_date)
+                                    except ValueError:
+                                        continue
+                                cleaned_qsgc_data = {d: qsgc_data[d] for d in dates_to_keep}
+                                with open(qsgc_file_path, 'w', encoding='utf-8') as f:
+                                    json.dump(cleaned_qsgc_data, f, ensure_ascii=False, indent=4)
+                                print(f"成功更新QSGC.json文件，保留了 {len(cleaned_qsgc_data)} 天的数据")
+                            except Exception as e:
+                                print(f"清理过期数据失败: {e}")
+                                with open(qsgc_file_path, 'w', encoding='utf-8') as f:
+                                    json.dump(qsgc_data, f, ensure_ascii=False, indent=4)
+                        else:
+                            # 非当天数据，直接保存，不清理
                             with open(qsgc_file_path, 'w', encoding='utf-8') as f:
                                 json.dump(qsgc_data, f, ensure_ascii=False, indent=4)
+                            print(f"成功更新QSGC.json文件，保存了 {date} 的数据")
+                            
                 except Exception as e:
                     print(f"更新QSGC.json文件失败: {e}")
                     import traceback
                     traceback.print_exc()
-                return StrongStockPool(date=today, total=len(stocks), stocks=stocks)
+                return StrongStockPool(date=date, total=len(stocks), stocks=stocks)
+            
+            # API失败，降级逻辑
             file_path = "/Users/zxl/Desktop/laicai/server/DataBase/QSGC.json"
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
@@ -287,13 +303,15 @@ class QuoteService:
         """
         try:
             today = datetime.now().strftime("%Y-%m-%d")
-            api_url = f"http://api.biyingapi.com/hslt/ztgc/{today}/{settings.BIYING_API_TOKEN}"
+            api_url = f"http://api.biyingapi.com/hslt/ztgc/{date}/{settings.BIYING_API_TOKEN}"
             print(f"请求URL: {api_url}")
             data = api_client.get(api_url)
             stocks = api_client.map_to_model(data, ZTStock)
             print(f"成功获取 {len(stocks)} 条涨停股数据")
             if stocks:
-                try:
+                # 仅当请求当天数据时更新stockCompanyPool.json
+                if date == today:
+                    try:
                         pool_file_path = "/Users/zxl/Desktop/laicai/server/DataBase/stockCompanyPool.json"
                         with open(pool_file_path, 'r', encoding='utf-8') as f:
                             pool_data = json.load(f)
@@ -337,10 +355,11 @@ class QuoteService:
                         with open(pool_file_path, 'w', encoding='utf-8') as f:
                             json.dump(filtered_data, f, ensure_ascii=False, indent=4)
                         print(f"成功更新stockCompanyPool.json文件")
-                except Exception as e:
-                    print(f"更新stockCompanyPool.json文件失败: {e}")
-                    import traceback
-                    traceback.print_exc()
+                    except Exception as e:
+                        print(f"更新stockCompanyPool.json文件失败: {e}")
+                        import traceback
+                        traceback.print_exc()
+            
             if stocks:
                 try:
                         ztgc_file_path = "/Users/zxl/Desktop/laicai/server/DataBase/ZTGC.json"
@@ -350,30 +369,42 @@ class QuoteService:
                                 ztgc_data = json.load(f)
                         except FileNotFoundError:
                             pass
-                        ztgc_data[today] = {
+                        
+                        # 使用请求的日期作为key
+                        ztgc_data[date] = {
                             "total": len(stocks),
                             "stocks": [stock.dict() for stock in stocks],
                             "updateTime": datetime.now().isoformat()
                         }
-                        today_dt = datetime.strptime(today, "%Y-%m-%d")
-                        cutoff_date = today_dt - timedelta(days=5)
-                        dates_to_keep = []
-                        for data_date in ztgc_data.keys():
-                            try:
-                                date_obj = datetime.strptime(data_date, "%Y-%m-%d")
-                                if date_obj >= cutoff_date:
-                                    dates_to_keep.append(data_date)
-                            except ValueError:
-                                continue
-                        cleaned_ztgc_data = {d: ztgc_data[d] for d in dates_to_keep}
-                        with open(ztgc_file_path, 'w', encoding='utf-8') as f:
-                            json.dump(cleaned_ztgc_data, f, ensure_ascii=False, indent=4)
-                        print(f"成功更新ZTGC.json文件，保留了 {len(cleaned_ztgc_data)} 天的数据")
+                        
+                        # 仅当请求当天数据时清理过期数据
+                        if date == today:
+                            today_dt = datetime.strptime(today, "%Y-%m-%d")
+                            cutoff_date = today_dt - timedelta(days=5)
+                            dates_to_keep = []
+                            for data_date in ztgc_data.keys():
+                                try:
+                                    date_obj = datetime.strptime(data_date, "%Y-%m-%d")
+                                    if date_obj >= cutoff_date:
+                                        dates_to_keep.append(data_date)
+                                except ValueError:
+                                    continue
+                            cleaned_ztgc_data = {d: ztgc_data[d] for d in dates_to_keep}
+                            with open(ztgc_file_path, 'w', encoding='utf-8') as f:
+                                json.dump(cleaned_ztgc_data, f, ensure_ascii=False, indent=4)
+                            print(f"成功更新ZTGC.json文件，保留了 {len(cleaned_ztgc_data)} 天的数据")
+                        else:
+                            with open(ztgc_file_path, 'w', encoding='utf-8') as f:
+                                json.dump(ztgc_data, f, ensure_ascii=False, indent=4)
+                            print(f"成功更新ZTGC.json文件，保存了 {date} 的数据")
+                            
                 except Exception as e:
                     print(f"更新ZTGC.json文件失败: {e}")
                     import traceback
                     traceback.print_exc()
-                return ZTStockPool(date=today, total=len(stocks), stocks=stocks)
+                return ZTStockPool(date=date, total=len(stocks), stocks=stocks)
+            
+            # API失败，降级逻辑
             file_path = "/Users/zxl/Desktop/laicai/server/DataBase/ZTGC.json"
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
@@ -422,13 +453,14 @@ class QuoteService:
         """
         try:
             today = datetime.now().strftime("%Y-%m-%d")
-            if self.is_trading_time() and date == today:
-                api_url = f"http://api.biyingapi.com/hslt/dtgc/{today}/{settings.BIYING_API_TOKEN}"
-                print(f"请求URL: {api_url}")
-                data = api_client.get(api_url)
-                stocks = api_client.map_to_model(data, DTStock)
-                print(f"成功获取 {len(stocks)} 条跌停股数据")
-                if stocks:
+            api_url = f"http://api.biyingapi.com/hslt/dtgc/{date}/{settings.BIYING_API_TOKEN}"
+            print(f"请求URL: {api_url}")
+            data = api_client.get(api_url)
+            stocks = api_client.map_to_model(data, DTStock)
+            print(f"成功获取 {len(stocks)} 条跌停股数据")
+            if stocks:
+                # 仅当请求当天数据时更新stockCompanyPool.json
+                if date == today:
                     try:
                         pool_file_path = "/Users/zxl/Desktop/laicai/server/DataBase/stockCompanyPool.json"
                         with open(pool_file_path, 'r', encoding='utf-8') as f:
@@ -477,8 +509,9 @@ class QuoteService:
                         print(f"更新stockCompanyPool.json文件失败: {e}")
                         import traceback
                         traceback.print_exc()
-                if stocks:
-                    try:
+            
+            if stocks:
+                try:
                         dtgc_file_path = "/Users/zxl/Desktop/laicai/server/DataBase/DTGC.json"
                         dtgc_data = {}
                         try:
@@ -486,55 +519,67 @@ class QuoteService:
                                 dtgc_data = json.load(f)
                         except FileNotFoundError:
                             pass
-                        dtgc_data[today] = {
+                        
+                        # 使用请求的日期作为key
+                        dtgc_data[date] = {
                             "total": len(stocks),
                             "stocks": [stock.dict() for stock in stocks],
                             "updateTime": datetime.now().isoformat()
                         }
-                        today_dt = datetime.strptime(today, "%Y-%m-%d")
-                        cutoff_date = today_dt - timedelta(days=5)
-                        dates_to_keep = []
-                        for data_date in dtgc_data.keys():
-                            try:
-                                date_obj = datetime.strptime(data_date, "%Y-%m-%d")
-                                if date_obj >= cutoff_date:
-                                    dates_to_keep.append(data_date)
-                            except ValueError:
-                                continue
-                        cleaned_dtgc_data = {d: dtgc_data[d] for d in dates_to_keep}
-                        with open(dtgc_file_path, 'w', encoding='utf-8') as f:
-                            json.dump(cleaned_dtgc_data, f, ensure_ascii=False, indent=4)
-                        print(f"成功更新DTGC.json文件，保留了 {len(cleaned_dtgc_data)} 天的数据")
-                    except Exception as e:
-                        print(f"更新DTGC.json文件失败: {e}")
-                        import traceback
-                        traceback.print_exc()
-                return DTStockPool(date=today, total=len(stocks), stocks=stocks)
-            else:
-                file_path = "/Users/zxl/Desktop/laicai/server/DataBase/DTGC.json"
-                try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        dtgc_data = json.load(f)
-                    if date in dtgc_data:
-                        entry = dtgc_data[date]
-                        stocks = [DTStock(**s) for s in entry.get("stocks", [])]
-                        return DTStockPool(date=date, total=entry.get("total", len(stocks)), stocks=stocks)
-                    else:
-                        keys = []
-                        for d in dtgc_data.keys():
-                            try:
-                                keys.append(datetime.strptime(d, "%Y-%m-%d"))
-                            except ValueError:
-                                continue
-                        if not keys:
-                            return DTStockPool(date=date, total=0, stocks=[])
-                        latest = max(keys).strftime("%Y-%m-%d")
-                        entry = dtgc_data.get(latest, {"stocks": [], "total": 0})
-                        stocks = [DTStock(**s) for s in entry.get("stocks", [])]
-                        return DTStockPool(date=latest, total=entry.get("total", len(stocks)), stocks=stocks)
-                except FileNotFoundError:
-                    print(f"文件不存在: {file_path}")
-                    return DTStockPool(date=date, total=0, stocks=[])
+                        
+                        # 仅当请求当天数据时清理过期数据
+                        if date == today:
+                            today_dt = datetime.strptime(today, "%Y-%m-%d")
+                            cutoff_date = today_dt - timedelta(days=5)
+                            dates_to_keep = []
+                            for data_date in dtgc_data.keys():
+                                try:
+                                    date_obj = datetime.strptime(data_date, "%Y-%m-%d")
+                                    if date_obj >= cutoff_date:
+                                        dates_to_keep.append(data_date)
+                                except ValueError:
+                                    continue
+                            cleaned_dtgc_data = {d: dtgc_data[d] for d in dates_to_keep}
+                            with open(dtgc_file_path, 'w', encoding='utf-8') as f:
+                                json.dump(cleaned_dtgc_data, f, ensure_ascii=False, indent=4)
+                            print(f"成功更新DTGC.json文件，保留了 {len(cleaned_dtgc_data)} 天的数据")
+                        else:
+                            with open(dtgc_file_path, 'w', encoding='utf-8') as f:
+                                json.dump(dtgc_data, f, ensure_ascii=False, indent=4)
+                            print(f"成功更新DTGC.json文件，保存了 {date} 的数据")
+                            
+                except Exception as e:
+                    print(f"更新DTGC.json文件失败: {e}")
+                    import traceback
+                    traceback.print_exc()
+                return DTStockPool(date=date, total=len(stocks), stocks=stocks)
+            
+            # API失败或无数据，降级逻辑
+            file_path = "/Users/zxl/Desktop/laicai/server/DataBase/DTGC.json"
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    dtgc_data = json.load(f)
+                if date in dtgc_data:
+                    entry = dtgc_data[date]
+                    stocks = [DTStock(**s) for s in entry.get("stocks", [])]
+                    return DTStockPool(date=date, total=entry.get("total", len(stocks)), stocks=stocks)
+                else:
+                    keys = []
+                    for d in dtgc_data.keys():
+                        try:
+                            keys.append(datetime.strptime(d, "%Y-%m-%d"))
+                        except ValueError:
+                            continue
+                    if not keys:
+                        return DTStockPool(date=date, total=0, stocks=[])
+                    latest = max(keys).strftime("%Y-%m-%d")
+                    entry = dtgc_data.get(latest, {"stocks": [], "total": 0})
+                    stocks = [DTStock(**s) for s in entry.get("stocks", [])]
+                    return DTStockPool(date=latest, total=entry.get("total", len(stocks)), stocks=stocks)
+            except FileNotFoundError:
+                print(f"文件不存在: {file_path}")
+                return DTStockPool(date=date, total=0, stocks=[])
+                
         except requests.exceptions.RequestException as e:
             print(f"API请求异常: {e}")
             return DTStockPool(date=date, total=0, stocks=[])
