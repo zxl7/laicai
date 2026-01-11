@@ -43,42 +43,34 @@ export function BoardLadder() {
      * 获取涨停股票数据
      */
     const fetchData = async () => {
-      setLoading(true)
+      const dateString = selectedDate.format("YYYY-MM-DD")
+      
+      // 优先从本地存储加载数据
+      const savedData = localStorage.getItem(`boardLadderStocks_${dateString}`)
+      if (savedData) {
+        try {
+          setStocks(JSON.parse(savedData))
+          setLoading(false) // 如果有本地数据，立即停止加载状态
+        } catch (error) {
+          console.error("解析本地存储数据失败:", error)
+        }
+      } else {
+        setLoading(true) // 没有本地数据时才显示加载状态
+      }
+
+      // 在后台请求最新数据
       try {
-        const data = await fetchLimitUpList(selectedDate.format("YYYY-MM-DD"))
+        const data = await fetchLimitUpList(dateString)
         // 确保数据格式正确
         if (Array.isArray(data) && data.length > 0) {
           setStocks(data)
           // 按日期保存到本地存储
-          localStorage.setItem(`boardLadderStocks_${selectedDate.format("YYYY-MM-DD")}`, JSON.stringify(data))
+          localStorage.setItem(`boardLadderStocks_${dateString}`, JSON.stringify(data))
         } else {
           console.warn("涨停股数据为空:", data)
-          // 如果API返回空数据，尝试使用本地存储的数据
-          const savedData = localStorage.getItem(`boardLadderStocks_${selectedDate.format("YYYY-MM-DD")}`)
-          if (savedData) {
-            try {
-              setStocks(JSON.parse(savedData))
-            } catch (error) {
-              console.error("解析本地存储数据失败:", error)
-            }
-          } else {
-            setStocks([])
-          }
         }
       } catch (error) {
         console.error("获取涨停股数据失败:", error)
-        // 错误情况下也尝试使用本地存储的数据
-        const savedData = localStorage.getItem(`boardLadderStocks_${selectedDate.format("YYYY-MM-DD")}`)
-        if (savedData) {
-          try {
-            setStocks(JSON.parse(savedData))
-          } catch (error) {
-            console.error("解析本地存储数据失败:", error)
-            setStocks([])
-          }
-        } else {
-          setStocks([])
-        }
       } finally {
         setLoading(false)
       }
@@ -136,6 +128,13 @@ export function BoardLadder() {
       .map(([boardCount, stocks]) => ({
         boardCount: Number(boardCount),
         stocks: stocks.sort((a, b) => {
+          // 优先显示连续涨停（天数=板数）的数据
+          const aIsContinuous = getBoardInfo(a).days === getBoardInfo(a).boards
+          const bIsContinuous = getBoardInfo(b).days === getBoardInfo(b).boards
+          
+          if (aIsContinuous && !bIsContinuous) return -1
+          if (!aIsContinuous && bIsContinuous) return 1
+          
           // 同一连板数内按涨幅降序排序
           return (b.zf || 0) - (a.zf || 0)
         }),
