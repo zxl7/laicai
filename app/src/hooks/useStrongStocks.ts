@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { fetchStrongStocks } from '../api/strongStocks'
 import { StrongStockItem } from '../api/types'
+import { getLatestTradingDay } from '../utils/date'
 
 /**
  * 使用强势股数据的Hook
@@ -10,7 +11,7 @@ export const useStrongStocks = (initialDate?: string) => {
   const [data, setData] = useState<StrongStockItem[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
-  const [date, setDate] = useState<string>(initialDate || new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState<string>(initialDate || getLatestTradingDay())
 
   /**
    * 获取强势股数据

@@ -2,6 +2,7 @@ import { } from 'react'
 import { RefreshCcw } from 'lucide-react'
 import { StrongStocksTable } from '../components/StrongStocksTable'
 import { useStrongStocks } from '../hooks/useStrongStocks'
+import { DateSelector } from '../components/DateSelector'
 
 export function Sectors() {
   const { data: strongStocks, loading: luLoading, refresh: refreshUp, date, changeDate } = useStrongStocks()
@@ -21,14 +22,11 @@ export function Sectors() {
         {/* 日期选择器和刷新按钮 */}
         <div className="flex items-center gap-2 mb-4 animate-slide-up">
             <span className="text-slate-300 text-sm">日期:</span>
-            <input
-              type="date"
+            <DateSelector
               value={date}
-              onChange={(e) => {
-                changeDate(e.target.value)
-              }}
+              onChange={changeDate}
               max={new Date().toISOString().split('T')[0]} // 限制最大日期为今天
-              className="bg-slate-800 text-white border border-slate-700 rounded px-4 py-2 text-sm transition-all duration-300 hover:border-slate-600 hover:shadow-md"
+              className="w-[150px]"
             />
             <button
               onClick={() => {

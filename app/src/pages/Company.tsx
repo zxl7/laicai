@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Store, CompanyRecord } from "../services/companyStore"
 import { formatCurrency, formatPercent } from "../api/utils"
 import { CompanyProfileCard } from "../components/CompanyProfileCard"
@@ -18,14 +18,10 @@ export function Company() {
   const [poolLoading, setPoolLoading] = useState(true)
   const [isFetching, setIsFetching] = useState(false)
 
-  useEffect(() => {
-    fetchAllStockPoolData()
-  }, [])
-
   /**
    * 从接口获取全部股票总池数据
    */
-  const fetchAllStockPoolData = async () => {
+  const fetchAllStockPoolData = useCallback(async () => {
     // 防止重复请求
     if (isFetching) return
     
@@ -86,7 +82,11 @@ export function Company() {
       setPoolLoading(false)
       setIsFetching(false)
     }
-  }
+  }, [isFetching])
+
+  useEffect(() => {
+    fetchAllStockPoolData()
+  }, [fetchAllStockPoolData])
 
   /**
    * 处理查看详情按钮点击事件

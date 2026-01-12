@@ -2,12 +2,11 @@ import { useState, useEffect } from "react"
 import { fetchLimitUpList, UNIFIED_DATE } from "../api/limitup"
 import type { LimitUpItem } from "../api/types"
 import { formatCurrency, formatPercent } from "../api/utils"
-import { Card, Tag, Spin, Empty, DatePicker } from "antd"
-import dayjs from "dayjs"
-import type { Dayjs } from "dayjs"
+import { Card, Tag, Spin, Empty } from "antd"
 import { Trophy } from "lucide-react"
 import { resolveTagColor } from "../lib/tagColors"
 import { getCompanyRecord } from "../services/companyStore"
+import { DateSelector } from "../components/DateSelector"
 
 /**
  * 连板天梯页面
@@ -15,7 +14,7 @@ import { getCompanyRecord } from "../services/companyStore"
  */
 export function BoardLadder() {
   // 日期状态管理
-  const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs(UNIFIED_DATE))
+  const [selectedDate, setSelectedDate] = useState<string>(UNIFIED_DATE)
 
   // 根据选择的日期从本地存储加载数据
   const [stocks, setStocks] = useState<LimitUpItem[]>(() => {
@@ -32,7 +31,7 @@ export function BoardLadder() {
   const [loading, setLoading] = useState(stocks.length === 0)
 
   // 日期变化处理函数
-  const handleDateChange = (date: Dayjs | null) => {
+  const handleDateChange = (date: string) => {
     if (date) {
       setSelectedDate(date)
     }
@@ -43,7 +42,7 @@ export function BoardLadder() {
      * 获取涨停股票数据
      */
     const fetchData = async () => {
-      const dateString = selectedDate.format("YYYY-MM-DD")
+      const dateString = selectedDate
       
       // 优先从本地存储加载数据
       const savedData = localStorage.getItem(`boardLadderStocks_${dateString}`)
@@ -166,7 +165,7 @@ export function BoardLadder() {
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 mt-1">
             <div className="flex items-center space-x-2">
               <span>数据日期：</span>
-              <DatePicker value={selectedDate} onChange={handleDateChange} format="YYYY-MM-DD" className="w-[150px]" />
+              <DateSelector value={selectedDate} onChange={handleDateChange} className="w-[150px]" />
             </div>
             <span>每10分钟更新</span>
           </div>

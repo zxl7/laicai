@@ -5,8 +5,8 @@ import { useLimitUpList } from "../hooks/useLimitUp"
 import { useLimitDownList } from "../hooks/useLimitDown"
 import { LimitUpTable } from "../components/LimitUpTable"
 import { LimitDownTable } from "../components/LimitDownTable"
-import { useMemo, useState, useEffect } from "react"
-import { DatePicker } from "antd"
+import { useMemo, useState } from "react"
+import { DateSelector } from "../components/DateSelector"
 import type { MarketSentiment } from "../types"
 import { getStoredLicense, setStoredLicense } from "../api/utils"
 import { UNIFIED_DATE } from "../api/limitup"
@@ -79,11 +79,6 @@ export function Home() {
   }, [displayLimitUp, limitDownList])
 
   // 避免因情绪数据错误阻断页面，其它模块继续渲染
-
-  useEffect(() => {
-    refresh()
-    refreshDown()
-  }, [refresh, refreshDown])
 
   return (
     <div className="min-h-screen bg-[var(--bg-base)] text-white p-8">
@@ -185,33 +180,5 @@ export function Home() {
         </div>
       </div>
     </div>
-  )
-}
-
-type DateSelectorProps = {
-  value: string
-  min?: string
-  max?: string
-  onChange: (value: string) => void
-  className?: string
-}
-
-function DateSelector({ value, min, max, onChange, className }: DateSelectorProps) {
-  const disabledDate = (current: any) => {
-    const cur = current?.format?.("YYYY-MM-DD")
-    if (!cur) return false
-    if (min && cur < min) return true
-    if (max && cur > max) return true
-    return false
-  }
-  return (
-    <DatePicker
-      format="YYYY-MM-DD"
-      allowClear={false}
-      placeholder={value}
-      disabledDate={disabledDate}
-      onChange={(d: any) => onChange(d?.format?.("YYYY-MM-DD") ?? value)}
-      className={className}
-    />
   )
 }
