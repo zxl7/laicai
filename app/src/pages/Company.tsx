@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { Store, CompanyRecord } from "../services/companyStore"
 import { formatCurrency, formatPercent } from "../api/utils"
 import { CompanyProfileCard } from "../components/CompanyProfileCard"
@@ -18,13 +18,17 @@ export function Company() {
   const [poolLoading, setPoolLoading] = useState(true)
   const [isFetching, setIsFetching] = useState(false)
 
+  // 使用 ref 来追踪是否已经发起了请求，避免 React Strict Mode 下的双重渲染或 useEffect 依赖变化导致的循环
+  const hasFetched = useRef(false)
+
   /**
    * 从接口获取全部股票总池数据
    */
   const fetchAllStockPoolData = useCallback(async () => {
     // 防止重复请求
-    if (isFetching) return
+    if (isFetching || hasFetched.current) return
     
+    hasFetched.current = true
     setIsFetching(true)
     setPoolLoading(true)
 
@@ -81,6 +85,8 @@ export function Company() {
     } finally {
       setPoolLoading(false)
       setIsFetching(false)
+      // 请求完成后，允许再次手动刷新（如果未来需要），但在当前挂载周期内保持 hasFetched 为 true 防止自动循环
+      // 如果希望允许失败重试，可以在 catch 中重置 hasFetched.current = false
     }
   }, [isFetching])
 
