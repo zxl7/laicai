@@ -14,7 +14,7 @@ import { UNIFIED_DATE } from "../api/limitup"
 export function Home() {
   const { loading, error } = useMarketSentiment()
   const [selectedDate, setSelectedDate] = useState<string>(UNIFIED_DATE)
-  const { data: limitUpList, loading: luLoading, error: luError, refresh } = useLimitUpList(selectedDate)
+  const { data: limitUpList, loading: luLoading, error: luError, refresh } = useLimitUpList (selectedDate)
   const { data: limitDownList, loading: ldLoading, error: ldError, refresh: refreshDown } = useLimitDownList(selectedDate)
   const today = useMemo(() => UNIFIED_DATE, [])
   const [licenseInput, setLicenseInput] = useState<string>(getStoredLicense() || "")
@@ -94,7 +94,6 @@ export function Home() {
             <div className="flex items-center gap-4">
               <DateSelector
                 value={selectedDate}
-                min="2019-11-28"
                 max={today}
                 onChange={setSelectedDate}
                 className="px-4 py-3 bg-[var(--bg-container-60)] border border-[var(--border)] rounded-lg text-white text-sm"
